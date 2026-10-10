@@ -1,18 +1,10 @@
-/* ============================================================
-   CANLI PAYLAŞIM AYARLARI
-   Bu dosyayı yalnızca bir kez, Firebase kurulumunu bitirince doldurun.
-   Kurulum adımları: PAYLASIM_KURULUM.md dosyasında.
-   Doldurmazsanız uygulama yine tek cihazda çalışır; sadece canlı paylaşım kapalı kalır.
-   ============================================================ */
-
 window.FIREBASE_CONFIG = {
-  apiKey: "BURAYA_YAZIN",
-  authDomain: "BURAYA_YAZIN.firebaseapp.com",
-  projectId: "BURAYA_YAZIN",
-  storageBucket: "BURAYA_YAZIN.firebasestorage.app",
-  messagingSenderId: "BURAYA_YAZIN",
-  appId: "BURAYA_YAZIN"
+  apiKey: "AIzaSy....",
+  authDomain: "odeme-defteri-504583028289.firebaseapp.com",
+  projectId: "odeme-defteri-504583028289",
+  storageBucket: "odeme-defteri-504583028289.firebasestorage.app",
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:abcdef"
 };
 
-/* Defteri yönetecek kişinin e-postası (Firebase'de oluşturduğunuz kullanıcı) */
-window.OWNER_EMAIL = "sahip@ornek.com";
+window.OWNER_EMAIL = "izmir@dunyaambalaj.com";
