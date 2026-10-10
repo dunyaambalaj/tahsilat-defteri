@@ -78,6 +78,12 @@ Uygulamada değişiklik yaptığınızda:
    `v1` yerine `v2` yazın, kaydedip yükleyin. Bu, telefondaki eski önbelleği yeniler.
 3. Telefonda uygulamayı kapatıp açın. Hâlâ eski görünüyorsa Safari veya Chrome'da adresi yenileyin.
 
+## 5b. Canlı paylaşım (isteğe bağlı)
+
+Verileri bağlantıyla salt okunur paylaşmak için **PAYLASIM_KURULUM.md** dosyasındaki Firebase adımlarını izleyin. Bu kurulum yapılmadan uygulama yalnızca tek cihazda çalışır; paylaşım bölümü kapalı kalır.
+
+Paylaşım için yüklemeniz gereken dosyalar: `index.html`, `firebase-config.js`, `manifest.json`, `sw.js`, `icon.svg`.
+
 ## 6. Veri güvenliği
 
 - Veriler cihaz bazında tutulur. Telefon ve bilgisayar kayıtları **otomatik eşitlenmez**. Cihazlar arasında taşımak için **Ayarlar → JSON indir** ile yedek alıp diğer cihazda **JSON yükle** kullanın.

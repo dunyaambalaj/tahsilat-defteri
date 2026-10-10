@@ -441,6 +441,10 @@
     @keyframes shk { 20%,60% { transform: translateX(-8px);} 40%,80% { transform: translateX(8px);} }
 
     .hidden { display: none !important; }
+    /* İzleyici (salt okunur) görünümde düzenleme öğeleri gizlenir */
+    .viewer .fab, .viewer .acts, .viewer [data-wa], .viewer .notify-wa,
+    .viewer #btnSettings, .viewer #dEdit, .viewer #dDel, .viewer #cAdd,
+    .viewer .owner { display: none !important; }
     h1,h2,h3 { margin: 0; }
 
     /* ---------- TABLET ---------- */
@@ -517,8 +521,13 @@
   <div id="toast" class="toast"></div>
   <div id="lock"></div>
 
+  <script src="firebase-config.js"></script>
   <script>
   const KEY = "kirtasiye_odeme_defteri_v1";
+  /* Bağlantıda #izle=... varsa bu cihaz SALT OKUNUR görünümdür (sahip değil, izleyici). */
+  const VIEW_TOKEN = (location.hash.match(/izle=([A-Za-z0-9_-]{16,})/) || [])[1] || null;
+  const VIEWER = !!VIEW_TOKEN;
+  const FB_URL = "https://www.gstatic.com/firebasejs/13.0.0/";
   const TYPES = [
     { id: "nakit", ad: "Nakit" },
     { id: "havale", ad: "Havale/EFT" },
@@ -630,9 +639,13 @@
     k.ertelemeSayisi ||= 0;
     k.durum ||= "bekliyor";
   }
-  function save() { localStorage.setItem(KEY, JSON.stringify(db)); }
+  function save() {
+    if (VIEWER) return; /* izleyici modunda yerel veriye dokunulmaz */
+    localStorage.setItem(KEY, JSON.stringify(db));
+    schedulePush();
+  }
 
-  let db = load();
+  let db = VIEWER ? defaultDB() : load();
   let view = "ozet";
   let selectedDate = todayISO();
   let calMonth = parseISO(selectedDate);
@@ -783,7 +796,7 @@
           <div class="brandrow">
             <div class="brand-mark">${logoHtml}</div>
             <div style="flex:1;min-width:0">
-              <div style="font-size:10px;letter-spacing:.18em;color:#c9a227;font-weight:700;">ÖDEME DEFTERİ</div>
+              <div style="font-size:10px;letter-spacing:.18em;color:#c9a227;font-weight:700;">${VIEWER ? "CANLI GÖRÜNÜM · " + esc(db.canliSaat || "") : "ÖDEME DEFTERİ"}</div>
               <div style="font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(db.magaza)}</div>
             </div>
             <div class="hbar">
@@ -857,6 +870,7 @@
     } catch(e) {}
   }
   function maybeAutoDigest() {
+    if (VIEWER) return;
     try {
       if (!db.ayar.bildirim) return;
       if (db.sonBildirim === todayISO()) return;
@@ -1280,6 +1294,7 @@
 
   /* ---------- KAYIT FORMU ---------- */
   function openForm(edit, prefill) {
+    if (VIEWER) return roMsg();
     const k = edit || {
       id: uid(), musteri: (prefill && prefill.musteri) || "", telefon: "", tutar: "", tur: "nakit", turKayit: "soz",
       taksitSayisi: 1,
@@ -1421,7 +1436,7 @@
           <button class="btn btn-tahsil" id="dTahsil">Tahsil</button>
           <button class="btn btn-erte" id="dErtele">Ertele</button>
         </div>
-        <a class="btn btn-wa" style="width:100%;margin-top:8px" href="${waLink(k)}" target="_blank" rel="noopener">${icon("msg")} WhatsApp hatırlat</a>` : ""}
+        <a class="btn btn-wa owner" style="width:100%;margin-top:8px" href="${waLink(k)}" target="_blank" rel="noopener">${icon("msg")} WhatsApp hatırlat</a>` : ""}
         <div class="g2" style="margin-top:8px">
           <button class="btn btn-ghost" id="dEdit">Düzenle</button>
           <button class="btn btn-ghost" id="dDel" style="color:#8b2e2e">Sil</button>
@@ -1442,6 +1457,7 @@
 
   /* ---------- TAHSİL ---------- */
   function openTahsil(k) {
+    if (VIEWER) return roMsg();
     const kalan = remaining(k);
     const mVal = liveMask(String(kalan).replace(".",","));
     openSheet(`
@@ -1508,6 +1524,7 @@
 
   /* ---------- ERTELE ---------- */
   function openErtele(k) {
+    if (VIEWER) return roMsg();
     openSheet(`
       <div class="sheet-card">
         <div class="grab"></div>
@@ -1560,7 +1577,7 @@
         </div>
         <div class="g2" style="margin-bottom:12px">
           <button class="btn btn-gold" id="cShare">Ekstre görseli</button>
-          ${bek.length ? `<a class="btn btn-wa" href="${waLink(bek[0])}" target="_blank" rel="noopener">${icon("msg")} WhatsApp</a>` : `<button class="btn btn-ghost" disabled>WhatsApp</button>`}
+          ${bek.length ? `<a class="btn btn-wa owner" href="${waLink(bek[0])}" target="_blank" rel="noopener">${icon("msg")} WhatsApp</a>` : `<button class="btn btn-ghost" disabled>WhatsApp</button>`}
         </div>
         ${cardsGrid(list)}
         <button class="btn btn-leather" id="cAdd" style="width:100%;margin-top:8px">Bu müşteriye kayıt ekle</button>
@@ -1657,6 +1674,7 @@
     r.readAsDataURL(file);
   }
   function openSettings() {
+    if (VIEWER) return roMsg();
     const temaHtml = TEMALAR.map(x => `
       <button class="type-opt ${db.tema===x.id?"on":""}" data-tema="${x.id}" style="padding:8px 6px">
         <span class="theme-dot" style="background:linear-gradient(90deg, ${x.c1} 58%, ${x.c2} 58%)"></span>
@@ -1697,6 +1715,9 @@
         <button class="btn ${db.ayar.sys?"btn-leather":"btn-ghost"}" id="sSys" style="width:100%;margin-top:8px">Sistem bildirimi: ${db.ayar.sys?"Açık":"Kapalı"}</button>
         <p class="meta" style="margin:6px 2px">Açılışta: dün alınmayan ödemeler “geciken” olarak, bugün ve yarın vadeli ödemeler de özet hâlinde gösterilir. Sistem bildirimi tarayıcı iznine bağlıdır.</p>
 
+        <label class="fld">Canlı paylaşım (bağlantıyla salt okunur izleme)</label>
+        <div id="shareHost"></div>
+
         <label class="fld">Koruma (PIN kilidi)</label>
         <div class="g2">
           <button class="btn btn-gold" id="sPinSet">${db.pin ? "PIN değiştir" : "PIN kur"}</button>
@@ -1730,6 +1751,7 @@
       db.firma.adres = document.getElementById("sAdres").value.trim();
       save(); closeSheet(); render(); toast("Ayarlar kaydedildi");
     };
+    renderShare();
     document.getElementById("sDark").onclick = () => {
       db.karanlik = !db.karanlik; save(); applyTheme(); render(); openSettings();
       toast(db.karanlik ? "Karanlık mod açık" : "Aydınlık mod açık");
@@ -2131,11 +2153,247 @@
     });
   }
 
+  /* ================= CANLI PAYLAŞIM (Firebase Firestore + Auth) ================= */
+  let fbm = null, fbAuth = null, fbDb = null, fbInitP = null;
+  let pushTimer = null, lastSync = "";
+
+  const cloudReady = () => !!(window.FIREBASE_CONFIG && !String(window.FIREBASE_CONFIG.apiKey || "").startsWith("BURAYA"));
+
+  function cloudInit() {
+    if (!cloudReady()) return Promise.resolve(false);
+    if (fbDb) return Promise.resolve(true);
+    if (!fbInitP) {
+      fbInitP = Promise.all([
+        import(FB_URL + "firebase-app.js"),
+        import(FB_URL + "firebase-auth.js"),
+        import(FB_URL + "firebase-firestore.js")
+      ]).then(([a, au, fs]) => {
+        fbm = { ...a, ...au, ...fs };
+        const app = fbm.initializeApp(window.FIREBASE_CONFIG);
+        fbAuth = fbm.getAuth(app);
+        fbDb = fbm.getFirestore(app);
+        fbm.onAuthStateChanged(fbAuth, () => { if (document.getElementById("shareHost")) renderShare(); });
+        return true;
+      }).catch(err => { console.warn(err); fbInitP = null; return false; });
+    }
+    return fbInitP;
+  }
+
+  function roMsg() { toast("Salt okunur görünümdesiniz; değişiklik yapılamaz"); }
+
+  function setSync(msg) {
+    lastSync = msg;
+    const el = document.getElementById("shareStatus");
+    if (el) el.textContent = msg;
+  }
+
+  function newToken() {
+    const a = new Uint8Array(18);
+    crypto.getRandomValues(a);
+    let s = "";
+    a.forEach(b => { s += String.fromCharCode(b); });
+    return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+  function shareLink(token) {
+    return `${location.origin}${location.pathname}#izle=${token}`;
+  }
+
+  /* Paylaşılacak veri: PIN, paylaşım ayarları ve silinmiş kayıtlar hariç tutulur */
+  function snapshotForShare() {
+    const hide = !(db.paylasim && db.paylasim.gizleTel === false);
+    return {
+      magaza: db.magaza,
+      firma: { tel: hide ? "" : db.firma.tel, vergi: db.firma.vergi, adres: db.firma.adres, logo: db.firma.logo },
+      tema: db.tema,
+      karanlik: db.karanlik,
+      kayitlar: kayitlar().map(k => {
+        const c = { ...k };
+        delete c.silindi;
+        if (hide) { c.telefon = ""; c.not = ""; }
+        return c;
+      }),
+      guncelleme: new Date().toISOString()
+    };
+  }
+
+  function schedulePush() {
+    if (VIEWER || !(db.paylasim && db.paylasim.aktif && db.paylasim.token)) return;
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(pushNow, 1500);
+  }
+
+  async function pushNow() {
+    clearTimeout(pushTimer);
+    const pl = db.paylasim;
+    if (VIEWER || !pl || !pl.aktif || !pl.token) return;
+    if (!(await cloudInit())) return setSync("Bulut ayarı yapılmamış (firebase-config.js)");
+    await fbAuth.authStateReady();
+    if (!fbAuth.currentUser) return setSync("Paylaşım için giriş yapın");
+    setSync("Eşitleniyor…");
+    try {
+      await fbm.setDoc(fbm.doc(fbDb, "paylasim", pl.token), {
+        data: JSON.stringify(snapshotForShare()),
+        guncelleme: fbm.serverTimestamp()
+      });
+      const t = new Date();
+      setSync(`Eşitlendi · ${z2(t.getHours())}:${z2(t.getMinutes())}`);
+    } catch (e) {
+      console.warn(e);
+      setSync("Eşitleme hatası: " + (e.code || "bilinmeyen"));
+    }
+  }
+
+  async function removeDoc(token) {
+    if (!token || !(await cloudInit())) return;
+    try { await fbm.deleteDoc(fbm.doc(fbDb, "paylasim", token)); }
+    catch (e) { console.warn(e); }
+  }
+
+  function shareSectionHtml(ok) {
+    if (!ok) return `<div class="panel meta" style="padding:12px">Canlı paylaşım henüz kurulmadı. <b>PAYLASIM_KURULUM.md</b> dosyasındaki adımları izleyip <b>firebase-config.js</b> dosyasını doldurun.</div>`;
+    const user = fbAuth && fbAuth.currentUser;
+    if (!user) return `
+      <div class="panel" style="padding:12px">
+        <div class="meta" style="margin-bottom:6px">Canlı paylaşımı yönetmek için sahip hesabıyla giriş yapın.</div>
+        <input class="inp" id="lEmail" type="email" autocomplete="username" value="${esc(window.OWNER_EMAIL || "")}" placeholder="E-posta" />
+        <input class="inp" id="lPass" type="password" autocomplete="current-password" placeholder="Şifre" style="margin-top:8px" />
+        <button class="btn btn-gold" id="lBtn" style="width:100%;margin-top:8px">Giriş yap</button>
+        <div class="meta" id="shareStatus" style="margin-top:6px">${esc(lastSync)}</div>
+      </div>`;
+    const pl = db.paylasim || {};
+    const link = pl.token ? shareLink(pl.token) : "";
+    const waHref = link ? "https://wa.me/?text=" + encodeURIComponent("Ödeme defteri canlı görünüm (salt okunur):\n" + link) : "#";
+    return `
+      <div class="panel" style="padding:12px">
+        <div class="meta" style="margin-bottom:8px">Giriş: <b>${esc(user.email)}</b></div>
+        <div class="g2">
+          <button class="btn ${pl.aktif ? "btn-erte" : "btn-leather"}" id="pToggle">${pl.aktif ? "Paylaşımı durdur" : "Paylaşımı aç"}</button>
+          <button class="btn btn-ghost" id="pSync" ${pl.aktif ? "" : "disabled"}>Şimdi eşitle</button>
+        </div>
+        <label class="fld">İzleyici bağlantısı</label>
+        <input class="inp" id="pLink" readonly value="${esc(link)}" placeholder="Paylaşımı açınca oluşur" onclick="this.select()" />
+        <div class="g2" style="margin-top:8px">
+          <button class="btn btn-gold" id="pCopy" ${link ? "" : "disabled"}>Bağlantıyı kopyala</button>
+          <a class="btn btn-wa" href="${waHref}" target="_blank" rel="noopener" style="${link ? "" : "pointer-events:none;opacity:.5"}">${icon("msg")} WhatsApp</a>
+        </div>
+        <button class="btn btn-ghost" id="pRenew" style="width:100%;margin-top:8px" ${link ? "" : "disabled"}>Bağlantıyı yenile (eskisi çalışmaz)</button>
+        <label class="fld" style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:13px;color:var(--ink)">
+          <input type="checkbox" id="pGizle" ${pl.gizleTel === false ? "" : "checked"} /> Telefon ve notları izleyicilerden gizle
+        </label>
+        <div class="meta" id="shareStatus" style="margin-top:6px">${esc(lastSync)}</div>
+        <button class="btn btn-ghost" id="lOut" style="width:100%;margin-top:8px">Çıkış yap</button>
+        <p class="meta" style="margin-top:8px">Bağlantıyı bilen herkes verileri salt okunur görür, değişiklik yapamaz. Bağlantıyı yalnızca güvendiğiniz kişilere verin.</p>
+      </div>`;
+  }
+
+  async function renderShare() {
+    const host = document.getElementById("shareHost");
+    if (!host) return;
+    host.innerHTML = `<div class="meta">Bağlantı kontrol ediliyor…</div>`;
+    const ok = await cloudInit();
+    const h = document.getElementById("shareHost");
+    if (!h) return;
+    h.innerHTML = shareSectionHtml(ok);
+    bindShare();
+  }
+
+  function bindShare() {
+    const on = (id, fn) => { const el = document.getElementById(id); if (el) el.onclick = fn; };
+    on("lBtn", async () => {
+      const email = document.getElementById("lEmail").value.trim();
+      const pass = document.getElementById("lPass").value;
+      if (!email || !pass) return setSync("E-posta ve şifre girin");
+      setSync("Giriş yapılıyor…");
+      try {
+        await fbm.signInWithEmailAndPassword(fbAuth, email, pass);
+        toast("Giriş yapıldı");
+      } catch (e) {
+        console.warn(e);
+        setSync("Giriş başarısız. E-posta veya şifreyi kontrol edin.");
+      }
+    });
+    on("lOut", () => fbm.signOut(fbAuth).then(() => toast("Çıkış yapıldı")));
+    on("pToggle", async () => {
+      const pl = db.paylasim || { aktif: false, token: null, gizleTel: true };
+      if (pl.aktif) {
+        db.paylasim = { ...pl, aktif: false };
+        save();
+        await removeDoc(pl.token);
+        setSync("Paylaşım durduruldu");
+      } else {
+        db.paylasim = { ...pl, aktif: true, token: pl.token || newToken(), gizleTel: pl.gizleTel !== false };
+        save();
+        await pushNow();
+        toast("Paylaşım açıldı");
+      }
+      renderShare();
+    });
+    on("pSync", async () => { await pushNow(); toast("Eşitlendi"); });
+    on("pCopy", async () => {
+      const link = shareLink(db.paylasim.token);
+      try { await navigator.clipboard.writeText(link); toast("Bağlantı kopyalandı"); }
+      catch (e) { prompt("Bağlantıyı kopyalayın:", link); }
+    });
+    on("pRenew", async () => {
+      const old = db.paylasim.token;
+      db.paylasim = { ...db.paylasim, aktif: true, token: newToken() };
+      save();
+      await removeDoc(old);
+      await pushNow();
+      toast("Yeni bağlantı oluşturuldu");
+      renderShare();
+    });
+    const g = document.getElementById("pGizle");
+    if (g) g.onchange = () => {
+      db.paylasim = { ...db.paylasim, gizleTel: g.checked };
+      save();
+      pushNow();
+      toast(g.checked ? "Telefon ve notlar gizlenecek" : "Telefon ve notlar gösterilecek");
+    };
+  }
+
+  /* ================= İZLEYİCİ (SALT OKUNUR) GÖRÜNÜM ================= */
+  function viewerCard(html) {
+    return `<div style="min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px">
+      <div class="panel" style="max-width:420px;text-align:center;padding:24px">${html}</div></div>`;
+  }
+  function viewerStart() {
+    document.documentElement.classList.add("viewer");
+    const app = document.getElementById("app");
+    app.innerHTML = viewerCard(`<div style="font-size:11px;letter-spacing:.18em;color:var(--mute);font-weight:700">CANLI GÖRÜNÜM</div><div class="meta" style="margin-top:8px">Veriler yükleniyor…</div>`);
+    cloudInit().then(ok => {
+      if (!ok) { app.innerHTML = viewerCard(`<b>Bağlantı kurulamadı</b><div class="meta" style="margin-top:8px">Bulut ayarları yapılmamış ya da internet yok.</div>`); return; }
+      fbm.onSnapshot(fbm.doc(fbDb, "paylasim", VIEW_TOKEN), snap => {
+        if (!snap.exists()) {
+          app.innerHTML = viewerCard(`<b>Bu bağlantı geçersiz</b><div class="meta" style="margin-top:8px">Paylaşım kapatılmış ya da bağlantı yenilenmiş olabilir.</div>`);
+          return;
+        }
+        const d = snap.data();
+        let p = {};
+        try { p = JSON.parse(d.data || "{}"); } catch (e) { p = {}; }
+        db = { ...defaultDB(), ...p, pin: null, paylasim: null };
+        db.kayitlar = Array.isArray(p.kayitlar) ? p.kayitlar : [];
+        db.kayitlar.forEach(normalizeRec);
+        const t = d.guncelleme && d.guncelleme.toDate ? d.guncelleme.toDate() : new Date();
+        db.canliSaat = `${z2(t.getDate())}.${z2(t.getMonth()+1)}.${t.getFullYear()} ${z2(t.getHours())}:${z2(t.getMinutes())}`;
+        applyTheme();
+        render();
+      }, err => {
+        console.warn(err);
+        app.innerHTML = viewerCard(`<b>Veriler okunamadı</b><div class="meta" style="margin-top:8px">İnternet bağlantınızı kontrol edip sayfayı yenileyin.</div>`);
+      });
+    });
+  }
+
   /* ---------- BAŞLAT ---------- */
   applyTheme();
-  render();
-  if (db.pin) showLock();
-  else setTimeout(maybeAutoDigest, 500);
+  if (VIEWER) {
+    viewerStart();
+  } else {
+    render();
+    if (db.pin) showLock();
+    else setTimeout(maybeAutoDigest, 500);
+  }
 
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
     window.addEventListener("load", () => {
