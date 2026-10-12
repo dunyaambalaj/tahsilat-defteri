@@ -442,9 +442,6 @@
 
     .hidden { display: none !important; }
     /* İzleyici (salt okunur) görünümde düzenleme öğeleri gizlenir */
-    .viewer .fab, .viewer .acts, .viewer [data-wa], .viewer .notify-wa,
-    .viewer #btnSettings, .viewer #dEdit, .viewer #dDel, .viewer #cAdd,
-    .viewer .owner { display: none !important; }
     h1,h2,h3 { margin: 0; }
 
     /* ---------- TABLET ---------- */
@@ -524,9 +521,16 @@
   <script src="firebase-config.js"></script>
   <script>
   const KEY = "kirtasiye_odeme_defteri_v1";
-  /* Bağlantıda #izle=... varsa bu cihaz SALT OKUNUR görünümdür (sahip değil, izleyici). */
-  const VIEW_TOKEN = (location.hash.match(/izle=([A-Za-z0-9_-]{16,})/) || [])[1] || null;
-  const VIEWER = !!VIEW_TOKEN;
+  const ID_KEY = "kirtasiye_ortak_defter_id";
+  /* Ortak defter kodu: bağlantıdaki #d=KOD ya da bu cihazda daha önce kaydedilen kod.
+     Bağlantıyı bilen HERKES okuyabilir ve düzenleyebilir. */
+  const ID_RE = /^[A-Za-z0-9_-]{16,}$/;
+  let DEFTER_ID = (() => {
+    const h = (location.hash.match(/[#&]d=([A-Za-z0-9_-]{16,})/) || [])[1];
+    if (h) { try { localStorage.setItem(ID_KEY, h); } catch (e) {} return h; }
+    try { const v = localStorage.getItem(ID_KEY); return ID_RE.test(v || "") ? v : null; } catch (e) { return null; }
+  })();
+  const cacheKey = () => DEFTER_ID ? KEY + ":" + DEFTER_ID : KEY;
   const FB_URL = "https://www.gstatic.com/firebasejs/13.0.0/";
   const TYPES = [
     { id: "nakit", ad: "Nakit" },
@@ -601,7 +605,7 @@
   }
   function load() {
     try {
-      const raw = localStorage.getItem(KEY);
+      const raw = localStorage.getItem(cacheKey());
       if (!raw) return defaultDB();
       const d = JSON.parse(raw);
       d.kayitlar = Array.isArray(d.kayitlar) ? d.kayitlar : [];
@@ -640,12 +644,12 @@
     k.durum ||= "bekliyor";
   }
   function save() {
-    if (VIEWER) return; /* izleyici modunda yerel veriye dokunulmaz */
-    localStorage.setItem(KEY, JSON.stringify(db));
+    try { localStorage.setItem(cacheKey(), JSON.stringify(db)); } catch (e) {}
+    finalizeUndo();
     schedulePush();
   }
 
-  let db = VIEWER ? defaultDB() : load();
+  let db = load();
   let view = "ozet";
   let selectedDate = todayISO();
   let calMonth = parseISO(selectedDate);
@@ -656,15 +660,30 @@
   let unlockDone = false;
 
   /* ---------- GERİ AL ---------- */
-  let undoStack = [];
-  function pushUndo(label) {
-    undoStack.push({ label, snap: JSON.stringify(db) });
-    if (undoStack.length > 40) undoStack.shift();
+  let undoStack = [], pendingUndo = null;
+  const recMap = () => new Map(db.kayitlar.map(k => [k.id, JSON.stringify(k)]));
+  function pushUndo(label) { pendingUndo = { label, before: recMap() }; }
+  /* save() sonrası: hangi kayıtların değiştiği bulunur, yalnızca onların eski hali saklanır */
+  function finalizeUndo() {
+    if (!pendingUndo) return;
+    const after = recMap(), before = pendingUndo.before, touched = [];
+    new Set([...before.keys(), ...after.keys()]).forEach(id => { if (before.get(id) !== after.get(id)) touched.push(id); });
+    if (touched.length) {
+      const keep = new Map(); touched.forEach(id => keep.set(id, before.get(id)));
+      undoStack.push({ label: pendingUndo.label, before: keep, touched });
+      if (undoStack.length > 40) undoStack.shift();
+    }
+    pendingUndo = null;
   }
   function undoLast() {
     const u = undoStack.pop();
     if (!u) return toast("Geri alınacak işlem yok");
-    db = JSON.parse(u.snap);
+    u.touched.forEach(id => {
+      const b = u.before.get(id);
+      const i = db.kayitlar.findIndex(k => k.id === id);
+      if (b === undefined) { if (i >= 0) db.kayitlar[i].silindi = true; }
+      else { const rec = JSON.parse(b); if (i >= 0) db.kayitlar[i] = rec; else db.kayitlar.push(rec); }
+    });
     save(); render();
     toast("Geri alındı: " + u.label);
   }
@@ -796,7 +815,7 @@
           <div class="brandrow">
             <div class="brand-mark">${logoHtml}</div>
             <div style="flex:1;min-width:0">
-              <div style="font-size:10px;letter-spacing:.18em;color:#c9a227;font-weight:700;">${VIEWER ? "CANLI GÖRÜNÜM · " + esc(db.canliSaat || "") : "ÖDEME DEFTERİ"}</div>
+              <div style="font-size:10px;letter-spacing:.18em;color:#c9a227;font-weight:700;">ÖDEME DEFTERİ${DEFTER_ID ? ` · <span id="syncDot" style="color:${syncColor()}">${esc(syncLabel())}</span>` : ""}</div>
               <div style="font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(db.magaza)}</div>
             </div>
             <div class="hbar">
@@ -870,7 +889,6 @@
     } catch(e) {}
   }
   function maybeAutoDigest() {
-    if (VIEWER) return;
     try {
       if (!db.ayar.bildirim) return;
       if (db.sonBildirim === todayISO()) return;
@@ -1294,7 +1312,6 @@
 
   /* ---------- KAYIT FORMU ---------- */
   function openForm(edit, prefill) {
-    if (VIEWER) return roMsg();
     const k = edit || {
       id: uid(), musteri: (prefill && prefill.musteri) || "", telefon: "", tutar: "", tur: "nakit", turKayit: "soz",
       taksitSayisi: 1,
@@ -1384,8 +1401,9 @@
       if (tutar <= 0) return toast("Geçerli bir tutar girin");
       pushUndo(isEdit ? "Düzenleme" : "Yeni kayıt");
       const taksitSel = document.getElementById("fTaksit");
+      const base = db.kayitlar.find(x => x.id === k.id) || k; /* canlı: en güncel hali */
       const rec = {
-        ...k,
+        ...base,
         musteri, tutar,
         telefon: document.getElementById("fTel").value.trim(),
         tur: form.tur || k.tur,
@@ -1395,14 +1413,14 @@
         kayitTarihi: document.getElementById("fKayit").value,
         belgeNo: document.getElementById("fBelge").value.trim(),
         not: document.getElementById("fNot").value.trim(),
-        durum: k.durum || "bekliyor",
-        tahsilTutar: k.tahsilTutar || 0,
-        ertelemeSayisi: k.ertelemeSayisi || 0,
-        ertelemeGecmisi: k.ertelemeGecmisi || [],
-        gecmis: k.gecmis || []
+        durum: base.durum || "bekliyor",
+        tahsilTutar: base.tahsilTutar || 0,
+        ertelemeSayisi: base.ertelemeSayisi || 0,
+        ertelemeGecmisi: base.ertelemeGecmisi || [],
+        gecmis: base.gecmis || []
       };
       if (!isEdit) rec.gecmis = [{ t: new Date().toISOString(), a: "olusturuldu", d: `${fmtTRY(tutar)} · ${fmtDate(rec.vade)}` }];
-      else rec.gecmis = [...(k.gecmis||[]), { t: new Date().toISOString(), a: "duzenlendi", d: `${fmtTRY(tutar)} · ${fmtDate(rec.vade)}` }];
+      else rec.gecmis = [...(base.gecmis||[]), { t: new Date().toISOString(), a: "duzenlendi", d: `${fmtTRY(tutar)} · ${fmtDate(rec.vade)}` }];
       const i = db.kayitlar.findIndex(x => x.id === rec.id);
       if (i >= 0) db.kayitlar[i] = rec; else db.kayitlar.push(rec);
       save(); buzz(); closeSheet(); selectedDate = rec.vade; view = "defter"; render();
@@ -1457,7 +1475,6 @@
 
   /* ---------- TAHSİL ---------- */
   function openTahsil(k) {
-    if (VIEWER) return roMsg();
     const kalan = remaining(k);
     const mVal = liveMask(String(kalan).replace(".",","));
     openSheet(`
@@ -1505,8 +1522,9 @@
     document.getElementById("tSave").onclick = () => {
       const amt = parseMoney(document.getElementById("tTutar").value);
       if (amt <= 0) return toast("Tutar girin");
-      pushUndo("Tahsilat");
       const rec = db.kayitlar.find(x => x.id === k.id);
+      if (!rec) { closeSheet(); return toast("Kayıt artık yok"); }
+      pushUndo("Tahsilat");
       rec.tahsilTutar = round2((rec.tahsilTutar || 0) + amt);
       rec.tahsilTarihi = document.getElementById("tTarih").value;
       rec.tur = tur;
@@ -1524,7 +1542,6 @@
 
   /* ---------- ERTELE ---------- */
   function openErtele(k) {
-    if (VIEWER) return roMsg();
     openSheet(`
       <div class="sheet-card">
         <div class="grab"></div>
@@ -1541,8 +1558,9 @@
     document.getElementById("eSave").onclick = () => {
       const yeni = document.getElementById("eTarih").value;
       if (!yeni) return toast("Tarih seçin");
-      pushUndo("Erteleme");
       const rec = db.kayitlar.find(x => x.id === k.id);
+      if (!rec) { closeSheet(); return toast("Kayıt artık yok"); }
+      pushUndo("Erteleme");
       const eski = rec.vade;
       rec.ertelemeGecmisi = rec.ertelemeGecmisi || [];
       rec.ertelemeGecmisi.push({ eski, yeni, neden: document.getElementById("eNeden").value.trim(), t: new Date().toISOString() });
@@ -1674,7 +1692,6 @@
     r.readAsDataURL(file);
   }
   function openSettings() {
-    if (VIEWER) return roMsg();
     const temaHtml = TEMALAR.map(x => `
       <button class="type-opt ${db.tema===x.id?"on":""}" data-tema="${x.id}" style="padding:8px 6px">
         <span class="theme-dot" style="background:linear-gradient(90deg, ${x.c1} 58%, ${x.c2} 58%)"></span>
@@ -1715,7 +1732,7 @@
         <button class="btn ${db.ayar.sys?"btn-leather":"btn-ghost"}" id="sSys" style="width:100%;margin-top:8px">Sistem bildirimi: ${db.ayar.sys?"Açık":"Kapalı"}</button>
         <p class="meta" style="margin:6px 2px">Açılışta: dün alınmayan ödemeler “geciken” olarak, bugün ve yarın vadeli ödemeler de özet hâlinde gösterilir. Sistem bildirimi tarayıcı iznine bağlıdır.</p>
 
-        <label class="fld">Canlı paylaşım (bağlantıyla salt okunur izleme)</label>
+        <label class="fld">Ortak defter (herkes ekleyip düzenleyebilir)</label>
         <div id="shareHost"></div>
 
         <label class="fld">Koruma (PIN kilidi)</label>
@@ -1741,7 +1758,7 @@
           <button class="btn btn-ghost" id="sUndo">${icon("undo")} Son işlemi geri al</button>
           <button class="btn btn-ghost" id="sWipe" style="color:#8b2e2e">Tüm defteri sil</button>
         </div>
-        <p class="meta" style="margin-top:12px">Tüm veriler yalnızca bu cihazın tarayıcısında saklanır; internet gerekmez. “Ana ekrana ekle” ile uygulama gibi kullanın. Cihaz değiştirmek için JSON yedeği yeterlidir. PIN temel koruma sağlar.</p>
+        <p class="meta" style="margin-top:12px">Kayıtlar ortak defterde (bulutta) saklanır; bağlantıya sahip herkes aynı anda görür ve düzenler. İnternet yokken yapılan işlemler bağlantı gelince otomatik gönderilir. Tema, karanlık mod, PIN ve bildirim ayarları yalnızca bu cihaza aittir. “Ana ekrana ekle” ile uygulama gibi kullanın.</p>
       </div>`, true);
     document.getElementById("sheetClose").onclick = closeSheet;
     document.getElementById("sSave").onclick = () => {
@@ -1830,9 +1847,11 @@
     document.getElementById("sCsvFile").onchange = e => { const f = e.target.files?.[0]; if (f) importCSV(f); };
     document.getElementById("sUndo").onclick = () => { closeSheet(); undoLast(); };
     document.getElementById("sWipe").onclick = () => {
-      if (!confirm("Tüm kayıtlar silinsin mi? (Geri al düğmesiyle döndürebilirsiniz)")) return;
+      const onay = prompt("DİKKAT: Bu ortak defterdir, tüm kayıtlar HERKES için silinir.\nDevam etmek için büyük harfle SIL yazın:");
+      if (!onay || onay.trim().toUpperCase().replace("İ", "I") !== "SIL") return toast("Vazgeçildi");
       pushUndo("Sıfırlama");
-      db = defaultDB(); save(); closeSheet(); render(); toast("Defter sıfırlandı", UNDO);
+      db.kayitlar.forEach(k => { k.silindi = true; });
+      save(); closeSheet(); render(); toast("Defter temizlendi", UNDO);
     };
   }
 
@@ -1857,9 +1876,12 @@
         const d = JSON.parse(r.result);
         if (!Array.isArray(d.kayitlar)) throw new Error("format");
         pushUndo("JSON içe aktarma");
-        db = d; db.pin = d.pin || null;
-        d.kayitlar.forEach(normalizeRec);
-        save(); closeSheet(); render(); toast("Yedek yüklendi", UNDO);
+        const map = new Map(db.kayitlar.map(k => [k.id, k]));
+        d.kayitlar.forEach(k => { if (!k.id) k.id = uid(); normalizeRec(k); map.set(k.id, k); });
+        db.kayitlar = [...map.values()];
+        if (d.magaza) db.magaza = d.magaza;
+        if (d.firma && typeof d.firma === "object") db.firma = { ...db.firma, ...d.firma };
+        save(); closeSheet(); render(); toast(`Yedek birleştirildi (${d.kayitlar.length} kayıt)`, UNDO);
       } catch(err) { toast("Geçersiz yedek dosyası"); }
     };
     r.readAsText(file);
@@ -2153,11 +2175,57 @@
     });
   }
 
-  /* ================= CANLI PAYLAŞIM (Firebase Firestore + Auth) ================= */
+  /* ================= ORTAK DEFTER (Firebase Firestore · canlı, herkes düzenler) =================
+     Yapı:  defterler/{DEFTER_ID}/kayitlar/{kayitId}  → her kayıt ayrı belge (aynı anda farklı kayıtlar çakışmaz)
+            defterler/{DEFTER_ID}/ayar/genel          → firma adı, telefon, adres, vergi no
+            defterler/{DEFTER_ID}/ayar/logo           → logo
+     Kayıtlar asla fiziksel silinmez (silindi:true işaretlenir). Tema, karanlık mod, PIN, bildirim: yalnızca bu cihazda. */
+  const SEED_PREFIX = "kirtasiye_aktar_";
   let fbm = null, fbAuth = null, fbDb = null, fbInitP = null;
-  let pushTimer = null, lastSync = "";
+  let syncState = "baglaniyor", syncDetail = "";
+  let remoteRec = new Map(), remoteSet = "", remoteLogo = null;
+  let cloudOn = false, cloudStarting = false;
+  let pushTimer = null, renderTimer = null;
 
   const cloudReady = () => !!(window.FIREBASE_CONFIG && !String(window.FIREBASE_CONFIG.apiKey || "").startsWith("BURAYA"));
+  const cacheSave = () => { try { localStorage.setItem(cacheKey(), JSON.stringify(db)); } catch (e) {} };
+
+  function syncLabel() {
+    return { baglaniyor: "● BAĞLANIYOR", canli: "● CANLI", cevrimdisi: "● ÇEVRİMDIŞI", hata: "● HATA" }[syncState] || "";
+  }
+  function syncColor() { return syncState === "canli" ? "#7fe0a0" : syncState === "hata" ? "#ff8a80" : "#f0c060"; }
+  function statusText() {
+    return {
+      baglaniyor: "Bağlanıyor…",
+      canli: "Canlı · tüm cihazlarla eşit",
+      cevrimdisi: "Çevrimdışı · internet gelince otomatik gönderilir",
+      hata: "Hata: " + (syncDetail || "bilinmeyen")
+    }[syncState] || "";
+  }
+  function setSyncState(st, detail) {
+    syncState = st; syncDetail = detail || "";
+    const el = document.getElementById("syncDot");
+    if (el) { el.textContent = syncLabel(); el.style.color = syncColor(); }
+    const el2 = document.getElementById("shareStatus");
+    if (el2) el2.textContent = statusText();
+  }
+  function fbErr(e) {
+    const c = (e && e.code) || "";
+    if (c.includes("permission-denied")) return "izin yok (Firestore güvenlik kurallarını kontrol edin)";
+    if (c.includes("operation-not-allowed") || c.includes("admin-restricted")) return "Firebase'de Anonim giriş açık değil";
+    if (c.includes("network")) return "internet yok";
+    return c || "bilinmeyen";
+  }
+
+  function newToken() {
+    const a = new Uint8Array(18);
+    crypto.getRandomValues(a);
+    let s = "";
+    a.forEach(b => { s += String.fromCharCode(b); });
+    return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+  const shareLink = () => `${location.origin}${location.pathname}#d=${DEFTER_ID}`;
+  const sharedSettingsJson = () => JSON.stringify({ magaza: db.magaza, firma: { tel: db.firma.tel, vergi: db.firma.vergi, adres: db.firma.adres } });
 
   function cloudInit() {
     if (!cloudReady()) return Promise.resolve(false);
@@ -2171,228 +2239,243 @@
         fbm = { ...a, ...au, ...fs };
         const app = fbm.initializeApp(window.FIREBASE_CONFIG);
         fbAuth = fbm.getAuth(app);
-        fbDb = fbm.getFirestore(app);
-        fbm.onAuthStateChanged(fbAuth, () => { if (document.getElementById("shareHost")) renderShare(); });
+        try {
+          /* Çevrimdışı çalışma: işlemler cihazda saklanır, internet gelince otomatik gönderilir */
+          fbDb = fbm.initializeFirestore(app, { localCache: fbm.persistentLocalCache({ tabManager: fbm.persistentMultipleTabManager() }) });
+        } catch (e) { console.warn(e); fbDb = fbm.getFirestore(app); }
         return true;
       }).catch(err => { console.warn(err); fbInitP = null; return false; });
     }
     return fbInitP;
   }
+  const colRef = name => fbm.collection(fbDb, "defterler", DEFTER_ID, name);
+  const docRef = (name, id) => fbm.doc(fbDb, "defterler", DEFTER_ID, name, id);
 
-  function roMsg() { toast("Salt okunur görünümdesiniz; değişiklik yapılamaz"); }
-
-  function setSync(msg) {
-    lastSync = msg;
-    const el = document.getElementById("shareStatus");
-    if (el) el.textContent = msg;
-  }
-
-  function newToken() {
-    const a = new Uint8Array(18);
-    crypto.getRandomValues(a);
-    let s = "";
-    a.forEach(b => { s += String.fromCharCode(b); });
-    return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-  }
-  function shareLink(token) {
-    return `${location.origin}${location.pathname}#izle=${token}`;
-  }
-
-  /* Paylaşılacak veri: PIN, paylaşım ayarları ve silinmiş kayıtlar hariç tutulur */
-  function snapshotForShare() {
-    const hide = !(db.paylasim && db.paylasim.gizleTel === false);
-    return {
-      magaza: db.magaza,
-      firma: { tel: hide ? "" : db.firma.tel, vergi: db.firma.vergi, adres: db.firma.adres, logo: db.firma.logo },
-      tema: db.tema,
-      karanlik: db.karanlik,
-      kayitlar: kayitlar().map(k => {
-        const c = { ...k };
-        delete c.silindi;
-        if (hide) { c.telefon = ""; c.not = ""; }
-        return c;
-      }),
-      guncelleme: new Date().toISOString()
+  /* Başkasından gelen değişiklikte ekranı yenile (yazı yazarken bozma, kaydırmayı koru) */
+  function scheduleRender() {
+    clearTimeout(renderTimer);
+    const attempt = () => {
+      const a = document.activeElement;
+      if (a && a.closest && a.closest("#app") && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) { renderTimer = setTimeout(attempt, 1200); return; }
+      const pg = document.querySelector(".page"), top = pg ? pg.scrollTop : 0;
+      render();
+      const pg2 = document.querySelector(".page");
+      if (pg2) pg2.scrollTop = top;
     };
+    renderTimer = setTimeout(attempt, 250);
+  }
+
+  async function startCloud() {
+    if (!DEFTER_ID || cloudOn || cloudStarting) return;
+    cloudStarting = true;
+    setSyncState("baglaniyor");
+    const ok = await cloudInit();
+    if (!ok) { cloudStarting = false; return setSyncState(navigator.onLine ? "hata" : "cevrimdisi", "bulut yüklenemedi"); }
+    try {
+      await fbAuth.authStateReady();
+      if (!fbAuth.currentUser) await fbm.signInAnonymously(fbAuth);
+    } catch (e) {
+      console.warn(e); cloudStarting = false;
+      return setSyncState(navigator.onLine ? "hata" : "cevrimdisi", fbErr(e));
+    }
+
+    const SEED_KEY = SEED_PREFIX + DEFTER_ID;
+    let seeded = false;
+    try { seeded = localStorage.getItem(SEED_KEY) === "1"; } catch (e) {}
+    if (!seeded) {
+      /* Önbellekteki hali "buluttakiyle aynı" kabul edilir; yalnızca yeni değişiklikler gönderilir */
+      db.kayitlar.forEach(k => remoteRec.set(k.id, JSON.stringify(k)));
+      remoteSet = sharedSettingsJson();
+      remoteLogo = db.firma.logo || "";
+    }
+
+    const onErr = e => { console.warn(e); setSyncState("hata", fbErr(e)); };
+
+    fbm.onSnapshot(colRef("kayitlar"), { includeMetadataChanges: true }, snap => {
+      let changed = false;
+      snap.docChanges().forEach(ch => {
+        const id = ch.doc.id;
+        const i = db.kayitlar.findIndex(k => k.id === id);
+        if (ch.type === "removed") {
+          if (i >= 0) { db.kayitlar.splice(i, 1); changed = true; }
+          remoteRec.delete(id);
+          return;
+        }
+        if (ch.doc.metadata.hasPendingWrites) return; /* bizim kendi yazdığımız */
+        let rec;
+        try { rec = JSON.parse(ch.doc.data().d); } catch (e) { return; }
+        if (!rec || typeof rec !== "object") return;
+        rec.id = id;
+        normalizeRec(rec);
+        const json = JSON.stringify(rec);
+        if (i >= 0) {
+          const localJson = JSON.stringify(db.kayitlar[i]);
+          if (localJson === json) { remoteRec.set(id, json); return; }
+          const base = remoteRec.get(id);
+          if (base !== undefined && localJson !== base) return; /* bu cihazda gönderilmemiş değişiklik var, o kazanır */
+          db.kayitlar[i] = rec;
+        } else {
+          db.kayitlar.push(rec);
+        }
+        remoteRec.set(id, json);
+        changed = true;
+      });
+      setSyncState(snap.metadata.fromCache ? (navigator.onLine ? "baglaniyor" : "cevrimdisi") : "canli");
+      if (changed) { cacheSave(); scheduleRender(); }
+    }, onErr);
+
+    fbm.onSnapshot(colRef("ayar"), snap => {
+      let changed = false;
+      snap.docChanges().forEach(ch => {
+        if (ch.type === "removed" || ch.doc.metadata.hasPendingWrites) return;
+        const raw = ch.doc.data().d;
+        if (ch.doc.id === "genel") {
+          let o; try { o = JSON.parse(raw); } catch (e) { return; }
+          if (remoteSet && sharedSettingsJson() !== remoteSet) return; /* yerelde bekleyen değişiklik */
+          if (o.magaza) db.magaza = o.magaza;
+          const f = o.firma || {};
+          db.firma = { ...db.firma, tel: f.tel || "", vergi: f.vergi || "", adres: f.adres || "" };
+          remoteSet = sharedSettingsJson();
+          changed = true;
+        } else if (ch.doc.id === "logo") {
+          if (remoteLogo !== null && (db.firma.logo || "") !== remoteLogo) return;
+          db.firma.logo = typeof raw === "string" ? raw : "";
+          remoteLogo = db.firma.logo;
+          changed = true;
+        }
+      });
+      if (changed) { cacheSave(); scheduleRender(); }
+    }, onErr);
+
+    cloudOn = true; cloudStarting = false;
+    /* İlk kurulumda bu cihazdaki eski kayıtlar buluta aktarılır */
+    pushNow().then(okk => { if (okk && seeded) { try { localStorage.removeItem(SEED_KEY); } catch (e) {} } });
   }
 
   function schedulePush() {
-    if (VIEWER || !(db.paylasim && db.paylasim.aktif && db.paylasim.token)) return;
+    if (!cloudOn) return;
     clearTimeout(pushTimer);
-    pushTimer = setTimeout(pushNow, 1500);
+    pushTimer = setTimeout(pushNow, 400);
   }
 
+  /* Yalnızca değişen kayıtlar gönderilir */
   async function pushNow() {
     clearTimeout(pushTimer);
-    const pl = db.paylasim;
-    if (VIEWER || !pl || !pl.aktif || !pl.token) return;
-    if (!(await cloudInit())) return setSync("Bulut ayarı yapılmamış (firebase-config.js)");
-    await fbAuth.authStateReady();
-    if (!fbAuth.currentUser) return setSync("Paylaşım için giriş yapın");
-    setSync("Eşitleniyor…");
-    try {
-      await fbm.setDoc(fbm.doc(fbDb, "paylasim", pl.token), {
-        data: JSON.stringify(snapshotForShare()),
-        guncelleme: fbm.serverTimestamp()
-      });
-      const t = new Date();
-      setSync(`Eşitlendi · ${z2(t.getHours())}:${z2(t.getMinutes())}`);
-    } catch (e) {
-      console.warn(e);
-      setSync("Eşitleme hatası: " + (e.code || "bilinmeyen"));
+    if (!cloudOn) return false;
+    const jobs = [];
+    const track = (p, undo) => jobs.push(p.catch(e => { undo(); throw e; }));
+    db.kayitlar.forEach(k => {
+      const json = JSON.stringify(k);
+      if (remoteRec.get(k.id) === json) return;
+      remoteRec.set(k.id, json);
+      track(fbm.setDoc(docRef("kayitlar", k.id), { d: json, u: fbm.serverTimestamp() }), () => remoteRec.delete(k.id));
+    });
+    const sj = sharedSettingsJson();
+    if (remoteSet !== sj) {
+      const old = remoteSet; remoteSet = sj;
+      track(fbm.setDoc(docRef("ayar", "genel"), { d: sj, u: fbm.serverTimestamp() }), () => { remoteSet = old; });
     }
+    const lg = db.firma.logo || "";
+    if (remoteLogo !== lg) {
+      const old = remoteLogo; remoteLogo = lg;
+      track(fbm.setDoc(docRef("ayar", "logo"), { d: lg, u: fbm.serverTimestamp() }), () => { remoteLogo = old; });
+    }
+    if (!jobs.length) return true;
+    try { await Promise.all(jobs); return true; }
+    catch (e) { console.warn(e); setSyncState("hata", fbErr(e)); toast("Buluta gönderilemedi: " + fbErr(e)); return false; }
   }
 
-  async function removeDoc(token) {
-    if (!token || !(await cloudInit())) return;
-    try { await fbm.deleteDoc(fbm.doc(fbDb, "paylasim", token)); }
-    catch (e) { console.warn(e); }
-  }
+  window.addEventListener("online", () => { if (DEFTER_ID && !cloudOn) startCloud(); else if (cloudOn) pushNow(); });
 
-  function shareSectionHtml(ok) {
-    if (!ok) return `<div class="panel meta" style="padding:12px">Canlı paylaşım henüz kurulmadı. <b>PAYLASIM_KURULUM.md</b> dosyasındaki adımları izleyip <b>firebase-config.js</b> dosyasını doldurun.</div>`;
-    const user = fbAuth && fbAuth.currentUser;
-    if (!user) return `
-      <div class="panel" style="padding:12px">
-        <div class="meta" style="margin-bottom:6px">Canlı paylaşımı yönetmek için sahip hesabıyla giriş yapın.</div>
-        <input class="inp" id="lEmail" type="email" autocomplete="username" value="${esc(window.OWNER_EMAIL || "")}" placeholder="E-posta" />
-        <input class="inp" id="lPass" type="password" autocomplete="current-password" placeholder="Şifre" style="margin-top:8px" />
-        <button class="btn btn-gold" id="lBtn" style="width:100%;margin-top:8px">Giriş yap</button>
-        <div class="meta" id="shareStatus" style="margin-top:6px">${esc(lastSync)}</div>
-      </div>`;
-    const pl = db.paylasim || {};
-    const link = pl.token ? shareLink(pl.token) : "";
-    const waHref = link ? "https://wa.me/?text=" + encodeURIComponent("Ödeme defteri canlı görünüm (salt okunur):\n" + link) : "#";
+  /* ---------- Ayarlar içindeki bölüm ---------- */
+  function shareSectionHtml() {
+    if (!cloudReady()) return `<div class="panel meta" style="padding:12px">Ortak defter henüz kurulmadı. <b>PAYLASIM_KURULUM.md</b> dosyasındaki adımları izleyip <b>firebase-config.js</b> dosyasını doldurun.</div>`;
+    if (!DEFTER_ID) return `<div class="panel meta" style="padding:12px">Bu cihaz bir ortak defterle bağlı değil. Sayfayı yenileyin.</div>`;
+    const link = shareLink();
+    const waHref = "https://wa.me/?text=" + encodeURIComponent("Ödeme defteri (ortak, canlı):\n" + link);
     return `
       <div class="panel" style="padding:12px">
-        <div class="meta" style="margin-bottom:8px">Giriş: <b>${esc(user.email)}</b></div>
-        <div class="g2">
-          <button class="btn ${pl.aktif ? "btn-erte" : "btn-leather"}" id="pToggle">${pl.aktif ? "Paylaşımı durdur" : "Paylaşımı aç"}</button>
-          <button class="btn btn-ghost" id="pSync" ${pl.aktif ? "" : "disabled"}>Şimdi eşitle</button>
-        </div>
-        <label class="fld">İzleyici bağlantısı</label>
-        <input class="inp" id="pLink" readonly value="${esc(link)}" placeholder="Paylaşımı açınca oluşur" onclick="this.select()" />
+        <div class="meta" style="margin-bottom:8px">Bu bağlantıya sahip <b>herkes</b> aynı defteri canlı görür; kayıt ekleyebilir, düzenleyebilir ve silebilir.</div>
+        <input class="inp" id="pLink" readonly value="${esc(link)}" onclick="this.select()" />
         <div class="g2" style="margin-top:8px">
-          <button class="btn btn-gold" id="pCopy" ${link ? "" : "disabled"}>Bağlantıyı kopyala</button>
-          <a class="btn btn-wa" href="${waHref}" target="_blank" rel="noopener" style="${link ? "" : "pointer-events:none;opacity:.5"}">${icon("msg")} WhatsApp</a>
+          <button class="btn btn-gold" id="pCopy">Bağlantıyı kopyala</button>
+          <a class="btn btn-wa" href="${waHref}" target="_blank" rel="noopener">${icon("msg")} WhatsApp</a>
         </div>
-        <button class="btn btn-ghost" id="pRenew" style="width:100%;margin-top:8px" ${link ? "" : "disabled"}>Bağlantıyı yenile (eskisi çalışmaz)</button>
-        <label class="fld" style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:13px;color:var(--ink)">
-          <input type="checkbox" id="pGizle" ${pl.gizleTel === false ? "" : "checked"} /> Telefon ve notları izleyicilerden gizle
-        </label>
-        <div class="meta" id="shareStatus" style="margin-top:6px">${esc(lastSync)}</div>
-        <button class="btn btn-ghost" id="lOut" style="width:100%;margin-top:8px">Çıkış yap</button>
-        <p class="meta" style="margin-top:8px">Bağlantıyı bilen herkes verileri salt okunur görür, değişiklik yapamaz. Bağlantıyı yalnızca güvendiğiniz kişilere verin.</p>
+        <div class="meta" id="shareStatus" style="margin-top:8px">${esc(statusText())}</div>
+        <button class="btn btn-ghost" id="pLeave" style="width:100%;margin-top:8px">Bu cihazı defterden ayır</button>
+        <p class="meta" style="margin-top:8px">Bağlantıyı yalnızca güvendiğiniz kişilere verin. Bağlantıyı bilen herkes defterin tamamına erişir.</p>
       </div>`;
   }
-
-  async function renderShare() {
+  function renderShare() {
     const host = document.getElementById("shareHost");
     if (!host) return;
-    host.innerHTML = `<div class="meta">Bağlantı kontrol ediliyor…</div>`;
-    const ok = await cloudInit();
-    const h = document.getElementById("shareHost");
-    if (!h) return;
-    h.innerHTML = shareSectionHtml(ok);
-    bindShare();
-  }
-
-  function bindShare() {
+    host.innerHTML = shareSectionHtml();
     const on = (id, fn) => { const el = document.getElementById(id); if (el) el.onclick = fn; };
-    on("lBtn", async () => {
-      const email = document.getElementById("lEmail").value.trim();
-      const pass = document.getElementById("lPass").value;
-      if (!email || !pass) return setSync("E-posta ve şifre girin");
-      setSync("Giriş yapılıyor…");
-      try {
-        await fbm.signInWithEmailAndPassword(fbAuth, email, pass);
-        toast("Giriş yapıldı");
-      } catch (e) {
-        console.warn(e);
-        setSync("Giriş başarısız. E-posta veya şifreyi kontrol edin.");
-      }
-    });
-    on("lOut", () => fbm.signOut(fbAuth).then(() => toast("Çıkış yapıldı")));
-    on("pToggle", async () => {
-      const pl = db.paylasim || { aktif: false, token: null, gizleTel: true };
-      if (pl.aktif) {
-        db.paylasim = { ...pl, aktif: false };
-        save();
-        await removeDoc(pl.token);
-        setSync("Paylaşım durduruldu");
-      } else {
-        db.paylasim = { ...pl, aktif: true, token: pl.token || newToken(), gizleTel: pl.gizleTel !== false };
-        save();
-        await pushNow();
-        toast("Paylaşım açıldı");
-      }
-      renderShare();
-    });
-    on("pSync", async () => { await pushNow(); toast("Eşitlendi"); });
     on("pCopy", async () => {
-      const link = shareLink(db.paylasim.token);
-      try { await navigator.clipboard.writeText(link); toast("Bağlantı kopyalandı"); }
-      catch (e) { prompt("Bağlantıyı kopyalayın:", link); }
+      try { await navigator.clipboard.writeText(shareLink()); toast("Bağlantı kopyalandı"); }
+      catch (e) { prompt("Bağlantıyı kopyalayın:", shareLink()); }
     });
-    on("pRenew", async () => {
-      const old = db.paylasim.token;
-      db.paylasim = { ...db.paylasim, aktif: true, token: newToken() };
-      save();
-      await removeDoc(old);
-      await pushNow();
-      toast("Yeni bağlantı oluşturuldu");
-      renderShare();
+    on("pLeave", () => {
+      if (!confirm("Bu cihaz defterden ayrılsın mı? Defter silinmez; bağlantıyla tekrar girebilirsiniz.")) return;
+      try { localStorage.removeItem(ID_KEY); } catch (e) {}
+      history.replaceState(null, "", location.pathname + location.search);
+      location.reload();
     });
-    const g = document.getElementById("pGizle");
-    if (g) g.onchange = () => {
-      db.paylasim = { ...db.paylasim, gizleTel: g.checked };
-      save();
-      pushNow();
-      toast(g.checked ? "Telefon ve notlar gizlenecek" : "Telefon ve notlar gösterilecek");
-    };
   }
 
-  /* ================= İZLEYİCİ (SALT OKUNUR) GÖRÜNÜM ================= */
-  function viewerCard(html) {
-    return `<div style="min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px">
-      <div class="panel" style="max-width:420px;text-align:center;padding:24px">${html}</div></div>`;
+  /* ---------- Karşılama ekranı (cihaz henüz bir defterle bağlı değilse) ---------- */
+  function createDefter() {
+    const id = newToken();
+    try {
+      const legacy = localStorage.getItem(KEY);
+      localStorage.setItem(ID_KEY, id);
+      localStorage.setItem(KEY + ":" + id, legacy || JSON.stringify(defaultDB()));
+      localStorage.setItem(SEED_PREFIX + id, "1");
+    } catch (e) { return toast("Tarayıcı kaydı engelliyor (gizli sekme olabilir)"); }
+    location.hash = "d=" + id;
+    location.reload();
   }
-  function viewerStart() {
-    document.documentElement.classList.add("viewer");
-    const app = document.getElementById("app");
-    app.innerHTML = viewerCard(`<div style="font-size:11px;letter-spacing:.18em;color:var(--mute);font-weight:700">CANLI GÖRÜNÜM</div><div class="meta" style="margin-top:8px">Veriler yükleniyor…</div>`);
-    cloudInit().then(ok => {
-      if (!ok) { app.innerHTML = viewerCard(`<b>Bağlantı kurulamadı</b><div class="meta" style="margin-top:8px">Bulut ayarları yapılmamış ya da internet yok.</div>`); return; }
-      fbm.onSnapshot(fbm.doc(fbDb, "paylasim", VIEW_TOKEN), snap => {
-        if (!snap.exists()) {
-          app.innerHTML = viewerCard(`<b>Bu bağlantı geçersiz</b><div class="meta" style="margin-top:8px">Paylaşım kapatılmış ya da bağlantı yenilenmiş olabilir.</div>`);
-          return;
-        }
-        const d = snap.data();
-        let p = {};
-        try { p = JSON.parse(d.data || "{}"); } catch (e) { p = {}; }
-        db = { ...defaultDB(), ...p, pin: null, paylasim: null };
-        db.kayitlar = Array.isArray(p.kayitlar) ? p.kayitlar : [];
-        db.kayitlar.forEach(normalizeRec);
-        const t = d.guncelleme && d.guncelleme.toDate ? d.guncelleme.toDate() : new Date();
-        db.canliSaat = `${z2(t.getDate())}.${z2(t.getMonth()+1)}.${t.getFullYear()} ${z2(t.getHours())}:${z2(t.getMinutes())}`;
-        applyTheme();
-        render();
-      }, err => {
-        console.warn(err);
-        app.innerHTML = viewerCard(`<b>Veriler okunamadı</b><div class="meta" style="margin-top:8px">İnternet bağlantınızı kontrol edip sayfayı yenileyin.</div>`);
-      });
-    });
+  function joinDefter(text) {
+    const t = String(text || "").trim();
+    const m = t.match(/[#&?]d=([A-Za-z0-9_-]{16,})/) || t.match(/^([A-Za-z0-9_-]{16,})$/);
+    if (!m) return toast("Geçerli bir defter bağlantısı değil");
+    try { localStorage.setItem(ID_KEY, m[1]); } catch (e) { return toast("Tarayıcı kaydı engelliyor"); }
+    location.hash = "d=" + m[1];
+    location.reload();
+  }
+  function welcomeStart() {
+    let n = 0;
+    try { const r = JSON.parse(localStorage.getItem(KEY) || "null"); n = r && Array.isArray(r.kayitlar) ? r.kayitlar.filter(k => !k.silindi).length : 0; } catch (e) {}
+    document.getElementById("app").innerHTML = `
+      <div style="min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px">
+        <div class="panel" style="max-width:440px;width:100%;padding:24px">
+          <div style="font-size:11px;letter-spacing:.18em;color:var(--mute);font-weight:700;text-align:center">ÖDEME DEFTERİ</div>
+          <h2 style="text-align:center;margin:8px 0 4px;font-size:20px">Ortak defter</h2>
+          <p class="meta" style="text-align:center;margin-bottom:14px">Bağlantıya sahip herkes aynı defteri canlı görür ve düzenler.</p>
+          <button class="btn btn-gold" id="wNew" style="width:100%">Yeni ortak defter oluştur</button>
+          ${n ? `<p class="meta" style="margin-top:6px;text-align:center">Bu cihazdaki <b>${n}</b> kayıt yeni defter içine aktarılacak.</p>` : ""}
+          <div class="meta" style="margin:16px 0 6px;text-align:center">— ya da size gönderilen bağlantıyla katılın —</div>
+          <input class="inp" id="wLink" placeholder="Defter bağlantısını buraya yapıştırın" />
+          <button class="btn btn-ghost" id="wJoin" style="width:100%;margin-top:8px">Bağlantıyla katıl</button>
+        </div>
+      </div>`;
+    document.getElementById("wNew").onclick = createDefter;
+    document.getElementById("wJoin").onclick = () => joinDefter(document.getElementById("wLink").value);
   }
 
   /* ---------- BAŞLAT ---------- */
   applyTheme();
-  if (VIEWER) {
-    viewerStart();
+  if (cloudReady() && !DEFTER_ID) {
+    welcomeStart();
   } else {
     render();
     if (db.pin) showLock();
     else setTimeout(maybeAutoDigest, 500);
+    if (DEFTER_ID) {
+      /* Adres çubuğunda kod kalsın: "Ana ekrana ekle" yapılınca defter bağlantısı korunur */
+      if (!location.hash.includes(DEFTER_ID)) history.replaceState(null, "", location.pathname + location.search + "#d=" + DEFTER_ID);
+      startCloud();
+    }
   }
 
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
