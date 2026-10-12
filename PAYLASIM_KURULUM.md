@@ -90,16 +90,31 @@ service cloud.firestore {
 
 ## ADIM 5 – Dosyaları GitHub'a yükleyin
 
-Bu rehberle birlikte **3 dosya** geldi: `index.html`, `firebase-config.js`, `PAYLASIM_KURULUM.md`.
+Bu rehberle birlikte **4 dosya** geldi: `index.html`, `sw.js`, `firebase-config.js`, `PAYLASIM_KURULUM.md`.
+
+> 🔑 **`sw.js` çok önemli.** Telefon ve tarayıcılar siteyi hızlı açmak için eski sürümü saklar. Yeni `sw.js` bunu düzeltir: artık her açılışta en güncel sürüm alınır, internet yoksa saklanan sürüm kullanılır.
 
 1. https://github.com/dunyaambalaj/tahsilat-defteri adresine gidin ve giriş yapın.
 2. Sağ üstteki **Add file** → **Upload files** seçin.
-3. Üç dosyayı sayfaya sürükleyin (aynı isimli dosyaların üzerine yazılır).
+3. **Dört dosyayı** sayfaya sürükleyin (aynı isimli dosyaların üzerine yazılır).
 4. Aşağıdaki **Commit changes** (yeşil buton) deyin.
 
-> ⚠️ Depoda `manifest.json`, `icon.svg` ve `sw.js` dosyaları **kalmalı**, onlara dokunmayın.
+> ⚠️ Depoda `manifest.json` ve `icon.svg` dosyaları **kalmalı**, onlara dokunmayın.
 
 GitHub'ın siteyi yenilemesi **1–2 dakika** sürer. Siteniz zaten yayında olduğu için **Settings → Pages** ayarına dokunmanız gerekmez.
+
+## ADIM 5b – Yeni sürümün açıldığından emin olun
+
+Yeni sürüm açılınca başlıkta **ÖDEME DEFTERİ · ● CANLI** (veya ● BAĞLANIYOR) yazısını ya da **"Ortak defter"** karşılama ekranını görürsünüz.
+**Bunları görmüyorsanız hâlâ eski sürüm açılıyor demektir.** Sırayla deneyin:
+
+1. **Önce yedek alın:** eski ekranda Ayarlar → **JSON indir.** (Kayıtlarınız tarayıcıda durur, aşağıdaki adımlar silmez ama yedek her zaman iyidir.)
+2. GitHub'a `sw.js` dosyasını yüklediğinizden emin olun, 2 dakika bekleyin.
+3. Siteyi açık tutan **tüm sekmeleri ve ana ekran uygulamasını tamamen kapatın** (telefonda uygulama ekranını yukarı kaydırıp kapatın).
+4. Siteyi yeniden açın. **Bir kez daha kapatıp açın** (ilk açılışta yeni dosya arka planda yüklenir, ikincisinde görünür).
+5. Bilgisayarda: `Ctrl + Shift + R` ile sert yenileme yapın.
+
+> ⛔ Tarayıcı ayarlarından "site verilerini temizle" **yapmayın**, kayıtlarınız silinir.
 
 ## ADIM 6 – İlk defteri oluşturun (sadece 1 kişi, 1 kez)
 
@@ -114,8 +129,12 @@ GitHub'ın siteyi yenilemesi **1–2 dakika** sürer. Siteniz zaten yayında old
 
 ## ADIM 7 – Bağlantıyı herkese gönderin
 
-1. Sağ üstten **Ayarlar** (dişli simgesi) açın.
-2. **"Ortak defter"** bölümünde **Bağlantıyı kopyala** ya da **WhatsApp** butonuna basın.
+Defter ilk oluşunca bağlantı penceresi **kendiliğinden açılır.** Sonradan bağlantıya ulaşmanın iki yolu var:
+
+- Başlıktaki **● CANLI** yazısına dokunun, ya da
+- Sağ üstten **Ayarlar** (dişli simgesi) → **"Ortak defter"** bölümü.
+
+Oradan **Bağlantıyı kopyala** ya da **WhatsApp** butonuna basın.
 3. Bağlantı şuna benzer: `https://dunyaambalaj.github.io/tahsilat-defteri/#d=AbCdEf...`
 4. Çalışanlarınıza gönderin. Onlar bağlantıya tıklayınca defter açılır. **Başka bir şey yapmaları gerekmez.**
 
@@ -151,7 +170,7 @@ GitHub'ın siteyi yenilemesi **1–2 dakika** sürer. Siteniz zaten yayında old
 | **● ÇEVRİMDIŞI** | İnternet yok. Bağlantı gelince otomatik düzelir. |
 | **● BAĞLANIYOR** uzun sürüyor | İnterneti kontrol edin, sayfayı yenileyin. |
 | Değişiklikler başkalarında görünmüyor | Başlıkta **● CANLI** yazıyor mu bakın. Değilse yukarıdaki satırlara bakın. |
-| Eski görünüm geliyor | `Ctrl + Shift + R` yapın, telefonda sekmeyi kapatıp açın. Hâlâ eskiyse bize bildirin (önbellek dosyası `sw.js` güncellenecek). |
+| Eski görünüm geliyor, "CANLI" yazısı yok | **ADIM 5b**'yi uygulayın (yeni `sw.js` yüklü olmalı, siteyi tamamen kapatıp 2 kez açın). |
 | Yeni katılan biri boş defter görüyor | Bağlantının **tamamını** (`#d=...` ile birlikte) açtığından emin olun. |
 
 Takıldığınız adımın **ekran görüntüsünü** ve ekranda yazan **hata mesajını** gönderirseniz birlikte çözeriz.

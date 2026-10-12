@@ -815,7 +815,7 @@
           <div class="brandrow">
             <div class="brand-mark">${logoHtml}</div>
             <div style="flex:1;min-width:0">
-              <div style="font-size:10px;letter-spacing:.18em;color:#c9a227;font-weight:700;">ÖDEME DEFTERİ${DEFTER_ID ? ` · <span id="syncDot" style="color:${syncColor()}">${esc(syncLabel())}</span>` : ""}</div>
+              <div style="font-size:10px;letter-spacing:.18em;color:#c9a227;font-weight:700;">ÖDEME DEFTERİ${DEFTER_ID ? ` · <span id="syncDot" style="color:${syncColor()};cursor:pointer;text-decoration:underline dotted" title="Defter bağlantısını göster">${esc(syncLabel())}</span>` : ""}</div>
               <div style="font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(db.magaza)}</div>
             </div>
             <div class="hbar">
@@ -2423,6 +2423,34 @@
     });
   }
 
+  /* ---------- Bağlantı penceresi (başlıktaki ● CANLI yazısına dokununca ya da defter ilk oluşunca) ---------- */
+  function openLinkSheet() {
+    if (!DEFTER_ID) return;
+    const link = shareLink();
+    const waHref = "https://wa.me/?text=" + encodeURIComponent("Ödeme defteri (ortak, canlı):\n" + link);
+    openSheet(`
+      <div class="sheet-card">
+        <div class="grab"></div>
+        <div style="display:flex;align-items:center">
+          <h2 style="flex:1;font-size:18px">Ortak defter bağlantısı</h2>
+          <button class="btn btn-ghost" id="sheetClose">Kapat</button>
+        </div>
+        <p class="meta" style="margin:8px 0">Bu bağlantıyı açan <b>herkes</b> aynı defteri canlı görür, kayıt ekleyip düzenleyebilir. Durum: <b id="shareStatus">${esc(statusText())}</b></p>
+        <input class="inp" id="pLink" readonly value="${esc(link)}" onclick="this.select()" />
+        <div class="g2" style="margin-top:8px">
+          <button class="btn btn-gold" id="pCopy">Bağlantıyı kopyala</button>
+          <a class="btn btn-wa" href="${waHref}" target="_blank" rel="noopener">${icon("msg")} WhatsApp</a>
+        </div>
+        <p class="meta" style="margin-top:10px">Bağlantıyı yalnızca güvendiğiniz kişilere verin. Bağlantıyı bilen herkes defterin tamamına erişir.</p>
+      </div>`);
+    document.getElementById("sheetClose").onclick = closeSheet;
+    document.getElementById("pCopy").onclick = async () => {
+      try { await navigator.clipboard.writeText(link); toast("Bağlantı kopyalandı"); }
+      catch (e) { prompt("Bağlantıyı kopyalayın:", link); }
+    };
+  }
+  document.addEventListener("click", e => { if (e.target.closest && e.target.closest("#syncDot")) openLinkSheet(); });
+
   /* ---------- Karşılama ekranı (cihaz henüz bir defterle bağlı değilse) ---------- */
   function createDefter() {
     const id = newToken();
@@ -2431,6 +2459,7 @@
       localStorage.setItem(ID_KEY, id);
       localStorage.setItem(KEY + ":" + id, legacy || JSON.stringify(defaultDB()));
       localStorage.setItem(SEED_PREFIX + id, "1");
+      localStorage.setItem("kirtasiye_ilk_baglanti", "1");
     } catch (e) { return toast("Tarayıcı kaydı engelliyor (gizli sekme olabilir)"); }
     location.hash = "d=" + id;
     location.reload();
@@ -2475,6 +2504,12 @@
       /* Adres çubuğunda kod kalsın: "Ana ekrana ekle" yapılınca defter bağlantısı korunur */
       if (!location.hash.includes(DEFTER_ID)) history.replaceState(null, "", location.pathname + location.search + "#d=" + DEFTER_ID);
       startCloud();
+      try {
+        if (localStorage.getItem("kirtasiye_ilk_baglanti") === "1") {
+          localStorage.removeItem("kirtasiye_ilk_baglanti");
+          setTimeout(openLinkSheet, 900);
+        }
+      } catch (e) {}
     }
   }
 
