@@ -531,7 +531,19 @@
     try { const v = localStorage.getItem(ID_KEY); return ID_RE.test(v || "") ? v : null; } catch (e) { return null; }
   })();
   const cacheKey = () => DEFTER_ID ? KEY + ":" + DEFTER_ID : KEY;
-  const FB_URL = "https://www.gstatic.com/firebasejs/13.0.0/";
+  const BUILD = "5";
+  const FB_VERSIONS = ["13.0.0", "12.8.0", "12.2.1"]; /* sırayla denenir */
+  /* Firebase web ayarları herkese açık bilgidir. firebase-config.js okunamazsa bu yedek kullanılır. */
+  const FB_DEFAULT = {
+    apiKey: "AIzaSyBwkqVrRnsITA4d4_SSYdqY8hUWzkMY4Vk",
+    authDomain: "tahsilat-defteri.firebaseapp.com",
+    projectId: "tahsilat-defteri",
+    storageBucket: "tahsilat-defteri.firebasestorage.app",
+    messagingSenderId: "504583028289",
+    appId: "1:504583028289:web:71b99f98eb0f471d2590c0",
+    measurementId: "G-PH6748HSPD"
+  };
+  if (!window.FIREBASE_CONFIG || String(window.FIREBASE_CONFIG.apiKey || "").startsWith("BURAYA")) window.FIREBASE_CONFIG = FB_DEFAULT;
   const TYPES = [
     { id: "nakit", ad: "Nakit" },
     { id: "havale", ad: "Havale/EFT" },
@@ -660,6 +672,23 @@
   let unlockDone = false;
 
   /* ---------- GERİ AL ---------- */
+  const NAME_KEY = "kirtasiye_kullanici";
+  const ME = () => { try { return (localStorage.getItem(NAME_KEY) || "").trim(); } catch (e) { return ""; } };
+  const DEV_ID = (() => {
+    try { let v = localStorage.getItem("kirtasiye_cihaz"); if (!v) { v = Math.random().toString(36).slice(2, 10); localStorage.setItem("kirtasiye_cihaz", v); } return v; }
+    catch (e) { return Math.random().toString(36).slice(2, 10); }
+  })();
+  let sheetRecId = null, myActive = null, activeTimer = null, activeByRec = new Map();
+
+  /* Kim yaptı: değişen kayıtlara ve yeni hareket satırlarına işlemi yapanın adı yazılır */
+  function stampRec(rec, bo, me, now) {
+    if (!bo) rec.olusturan = rec.olusturan || me;
+    rec.sonKim = me; rec.sonT = now;
+    const n1 = bo ? (bo.gecmis || []).length : 0;
+    (rec.gecmis || []).slice(n1).forEach(g => { if (!g.k) g.k = me; });
+    const n2 = bo ? (bo.ertelemeGecmisi || []).length : 0;
+    (rec.ertelemeGecmisi || []).slice(n2).forEach(g => { if (!g.k) g.k = me; });
+  }
   let undoStack = [], pendingUndo = null;
   const recMap = () => new Map(db.kayitlar.map(k => [k.id, JSON.stringify(k)]));
   function pushUndo(label) { pendingUndo = { label, before: recMap() }; }
@@ -669,6 +698,12 @@
     const after = recMap(), before = pendingUndo.before, touched = [];
     new Set([...before.keys(), ...after.keys()]).forEach(id => { if (before.get(id) !== after.get(id)) touched.push(id); });
     if (touched.length) {
+      const me = ME() || "Bilinmiyor", now = new Date().toISOString();
+      touched.forEach(id => {
+        const rec = db.kayitlar.find(k => k.id === id); if (!rec) return;
+        let bo = null; try { const bj = before.get(id); bo = bj ? JSON.parse(bj) : null; } catch (e) {}
+        stampRec(rec, bo, me, now);
+      });
       const keep = new Map(); touched.forEach(id => keep.set(id, before.get(id)));
       undoStack.push({ label: pendingUndo.label, before: keep, touched });
       if (undoStack.length > 40) undoStack.shift();
@@ -691,7 +726,7 @@
 
   /* ---------- TOAST ---------- */
   let toastTimer = null;
-  function toast(msg, action) {
+  function toast(msg, action, ms) {
     const el = document.getElementById("toast");
     el.innerHTML = `<span>${esc(msg)}</span>${action ? `<button id="toastBtn">${esc(action.label)}</button>` : ""}`;
     el.classList.add("show");
@@ -699,13 +734,14 @@
       clearTimeout(toastTimer); el.classList.remove("show"); action.fn();
     };
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove("show"), action ? 6500 : 2400);
+    toastTimer = setTimeout(() => el.classList.remove("show"), ms || (action ? 6500 : 2400));
   }
 
   function closeSheet() {
     const s = document.getElementById("sheet");
     s.classList.remove("show"); s.innerHTML = "";
-    form = null;
+    form = null; sheetRecId = null;
+    try { clearActive(); } catch (e) {}
   }
   function openSheet(html, full) {
     const s = document.getElementById("sheet");
@@ -815,7 +851,7 @@
           <div class="brandrow">
             <div class="brand-mark">${logoHtml}</div>
             <div style="flex:1;min-width:0">
-              <div style="font-size:10px;letter-spacing:.18em;color:#c9a227;font-weight:700;">ÖDEME DEFTERİ${DEFTER_ID ? ` · <span id="syncDot" style="color:${syncColor()};cursor:pointer;text-decoration:underline dotted" title="Defter bağlantısını göster">${esc(syncLabel())}</span>` : ""}</div>
+              <div style="font-size:10px;letter-spacing:.18em;color:#c9a227;font-weight:700;">ÖDEME DEFTERİ · <span id="syncDot" style="color:${syncColor()};cursor:pointer;text-decoration:underline dotted" title="Bağlantı durumu">${esc(syncLabel())}</span></div>
               <div style="font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(db.magaza)}</div>
             </div>
             <div class="hbar">
@@ -923,7 +959,7 @@
       <article class="card ${late?"late":""}" data-open="${k.id}">
         <div class="spine ${st}"></div>
         ${stamp}
-        <div class="name-row ${st==="bekliyor"?"no-stamp":""}">${esc(k.musteri)}${late?`<span class="late-tag">GECİKTİ</span>`:""}</div>
+        <div class="name-row ${st==="bekliyor"?"no-stamp":""}">${esc(k.musteri)}${late?`<span class="late-tag">GECİKTİ</span>`:""}${edTag(k)}</div>
         <div class="meta" style="margin-top:3px">
           <span class="type-pill">${esc(typeAd(k.tur, k))}</span>
           ${k.belgeNo ? ` · No: ${esc(k.belgeNo)}` : ""}
@@ -943,6 +979,7 @@
           <button class="btn btn-erte" data-act="ertele" data-id="${k.id}">Ertele</button>
           <a class="btn btn-wa btn-icon" href="${waLink(k)}" target="_blank" rel="noopener" data-wa="1" title="WhatsApp hatırlat">${icon("msg")}</a>
         </div>` : ""}
+        ${(k.olusturan || k.sonKim) ? `<div class="meta" style="font-size:11px;opacity:.75;margin-top:6px">${k.olusturan ? "Ekleyen: " + esc(k.olusturan) : ""}${k.sonKim && k.sonKim !== k.olusturan ? ` · Son işlem: ${esc(k.sonKim)}` : ""}</div>` : ""}
       </article>`;
   }
   const cardsGrid = list => `<div class="cards">${list.map(paymentCard).join("")}</div>`;
@@ -1448,8 +1485,9 @@
           ${k.telefon ? `Tel: ${esc(k.telefon)}<br/>` : ""}
           ${k.not ? `Not: ${esc(k.not)}` : ""}
         </div>
-        ${(k.ertelemeGecmisi||[]).length ? `<label class="fld">Erteleme geçmişi</label><ul class="hist">${k.ertelemeGecmisi.map(e => `<li>${fmtDate(e.eski)} → ${fmtDate(e.yeni)}${e.neden ? ` · ${esc(e.neden)}` : ""}</li>`).join("")}</ul>` : ""}
-        ${(k.gecmis||[]).length ? `<label class="fld">Hareket geçmişi</label><ul class="hist">${(k.gecmis||[]).slice().reverse().map(h => `<li>${esc(ACT_AD[h.a] || h.a)} · ${esc(h.d)}<br/><span>${new Date(h.t).toLocaleString("tr-TR")}</span></li>`).join("")}</ul>` : ""}
+        ${authorLine(k)}
+        ${(k.ertelemeGecmisi||[]).length ? `<label class="fld">Erteleme geçmişi</label><ul class="hist">${k.ertelemeGecmisi.map(e => `<li>${fmtDate(e.eski)} → ${fmtDate(e.yeni)}${e.neden ? ` · ${esc(e.neden)}` : ""}${e.k ? ` · ${esc(e.k)}` : ""}</li>`).join("")}</ul>` : ""}
+        ${(k.gecmis||[]).length ? `<label class="fld">Hareket geçmişi</label><ul class="hist">${(k.gecmis||[]).slice().reverse().map(h => `<li>${esc(ACT_AD[h.a] || h.a)} · ${esc(h.d)}<br/><span>${new Date(h.t).toLocaleString("tr-TR")}${h.k ? " · " + esc(h.k) : ""}</span></li>`).join("")}</ul>` : ""}
         ${st!=="tahsil" && st!=="iptal" ? `<div class="acts" style="margin-top:14px">
           <button class="btn btn-tahsil" id="dTahsil">Tahsil</button>
           <button class="btn btn-erte" id="dErtele">Ertele</button>
@@ -1464,8 +1502,9 @@
     document.getElementById("dTahsil")?.addEventListener("click", () => openTahsil(k));
     document.getElementById("dErtele")?.addEventListener("click", () => openErtele(k));
     document.getElementById("dEdit").onclick = () => openForm(k);
-    document.getElementById("dDel").onclick = () => {
+    document.getElementById("dDel").onclick = async () => {
       if (!confirm("Bu kayıt silinsin mi?")) return;
+      if (!(await guardDelete())) return;
       pushUndo("Silme");
       const i = db.kayitlar.findIndex(x => x.id === k.id);
       if (i>=0) db.kayitlar[i].silindi = true;
@@ -1519,23 +1558,29 @@
       if (tDiv) tDiv.classList.toggle("hidden", tur !== "kart_taksit");
     });
     document.getElementById("sheetClose").onclick = closeSheet;
-    document.getElementById("tSave").onclick = () => {
+    document.getElementById("tSave").onclick = async () => {
       const amt = parseMoney(document.getElementById("tTutar").value);
       if (amt <= 0) return toast("Tutar girin");
-      const rec = db.kayitlar.find(x => x.id === k.id);
-      if (!rec) { closeSheet(); return toast("Kayıt artık yok"); }
-      pushUndo("Tahsilat");
-      rec.tahsilTutar = round2((rec.tahsilTutar || 0) + amt);
-      rec.tahsilTarihi = document.getElementById("tTarih").value;
-      rec.tur = tur;
+      if (!db.kayitlar.find(x => x.id === k.id)) { closeSheet(); return toast("Kayıt artık yok"); }
+      const tarih = document.getElementById("tTarih").value;
       const tSel = document.getElementById("tTaksit");
-      if (tur === "kart_taksit" && tSel) rec.taksitSayisi = parseInt(tSel.value, 10);
-      const done = remaining(rec) <= 0.009;
-      rec.durum = done ? "tahsil" : "bekliyor";
-      if (done) rec.tahsilTutar = rec.tutar;
-      rec.gecmis = rec.gecmis || [];
-      rec.gecmis.push({ t: new Date().toISOString(), a: done ? "tahsil" : "kismi", d: `${fmtTRY(amt)} · ${typeAd(tur, rec)}` });
-      save(); buzz(); closeSheet(); render();
+      const taksit = tSel ? parseInt(tSel.value, 10) : null;
+      const btn = document.getElementById("tSave");
+      btn.disabled = true; btn.textContent = "İşleniyor…";
+      let done = false;
+      const ok = await mutateRecord(k.id, "Tahsilat", rec => {
+        rec.tahsilTutar = round2((rec.tahsilTutar || 0) + amt);
+        rec.tahsilTarihi = tarih;
+        rec.tur = tur;
+        if (tur === "kart_taksit" && taksit) rec.taksitSayisi = taksit;
+        done = remaining(rec) <= 0.009;
+        rec.durum = done ? "tahsil" : "bekliyor";
+        if (done) rec.tahsilTutar = rec.tutar;
+        rec.gecmis = rec.gecmis || [];
+        rec.gecmis.push({ t: new Date().toISOString(), a: done ? "tahsil" : "kismi", d: `${fmtTRY(amt)} · ${typeAd(tur, rec)}` });
+      });
+      if (!ok) { btn.disabled = false; btn.textContent = "Tahsil edildi"; return; }
+      buzz(); closeSheet(); render();
       toast(done ? "Tahsil kaydedildi" : "Kısmi tahsilat işlendi", UNDO);
     };
   }
@@ -1555,22 +1600,26 @@
         <button class="btn btn-ghost" id="sheetClose" style="width:100%;margin-top:8px">Vazgeç</button>
       </div>`);
     document.getElementById("sheetClose").onclick = closeSheet;
-    document.getElementById("eSave").onclick = () => {
+    document.getElementById("eSave").onclick = async () => {
       const yeni = document.getElementById("eTarih").value;
       if (!yeni) return toast("Tarih seçin");
-      const rec = db.kayitlar.find(x => x.id === k.id);
-      if (!rec) { closeSheet(); return toast("Kayıt artık yok"); }
-      pushUndo("Erteleme");
-      const eski = rec.vade;
-      rec.ertelemeGecmisi = rec.ertelemeGecmisi || [];
-      rec.ertelemeGecmisi.push({ eski, yeni, neden: document.getElementById("eNeden").value.trim(), t: new Date().toISOString() });
-      rec.orijinalVade = rec.orijinalVade || eski;
-      rec.vade = yeni;
-      rec.durum = "bekliyor";
-      rec.ertelemeSayisi = (rec.ertelemeSayisi || 0) + 1;
-      rec.gecmis = rec.gecmis || [];
-      rec.gecmis.push({ t: new Date().toISOString(), a: "ertelendi", d: `${fmtDate(eski)} → ${fmtDate(yeni)}` });
-      save(); buzz(); closeSheet(); selectedDate = yeni; view = "defter"; render();
+      if (!db.kayitlar.find(x => x.id === k.id)) { closeSheet(); return toast("Kayıt artık yok"); }
+      const neden = document.getElementById("eNeden").value.trim();
+      const btn = document.getElementById("eSave");
+      btn.disabled = true; btn.textContent = "İşleniyor…";
+      const ok = await mutateRecord(k.id, "Erteleme", rec => {
+        const eski = rec.vade;
+        rec.ertelemeGecmisi = rec.ertelemeGecmisi || [];
+        rec.ertelemeGecmisi.push({ eski, yeni, neden, t: new Date().toISOString() });
+        rec.orijinalVade = rec.orijinalVade || eski;
+        rec.vade = yeni;
+        rec.durum = "bekliyor";
+        rec.ertelemeSayisi = (rec.ertelemeSayisi || 0) + 1;
+        rec.gecmis = rec.gecmis || [];
+        rec.gecmis.push({ t: new Date().toISOString(), a: "ertelendi", d: `${fmtDate(eski)} → ${fmtDate(yeni)}` });
+      });
+      if (!ok) { btn.disabled = false; btn.textContent = "Yeni tarihe ertele"; return; }
+      buzz(); closeSheet(); selectedDate = yeni; view = "defter"; render();
       toast("Yeni vadeye alındı", UNDO);
     };
   }
@@ -1731,6 +1780,8 @@
         <button class="btn ${db.ayar.bildirim?"btn-leather":"btn-ghost"}" id="sBild" style="width:100%">${icon("bell")} Günlük hatırlatma: ${db.ayar.bildirim?"Açık":"Kapalı"}</button>
         <button class="btn ${db.ayar.sys?"btn-leather":"btn-ghost"}" id="sSys" style="width:100%;margin-top:8px">Sistem bildirimi: ${db.ayar.sys?"Açık":"Kapalı"}</button>
         <p class="meta" style="margin:6px 2px">Açılışta: dün alınmayan ödemeler “geciken” olarak, bugün ve yarın vadeli ödemeler de özet hâlinde gösterilir. Sistem bildirimi tarayıcı iznine bağlıdır.</p>
+        <button class="btn ${db.ayar.canli?"btn-leather":"btn-ghost"}" id="sCanli" style="width:100%;margin-top:8px">${icon("bell")} Canlı işlem bildirimi: ${db.ayar.canli?"Açık":"Kapalı"}</button>
+        <p class="meta" style="margin:6px 2px">Başkası kayıt ya da tahsilat girince, uygulama arka plandayken (küçültülmüş ya da başka sekmedeyken) bildirim gelir. Ekran açıkken köşede kısa bir uyarı görünür.</p>
 
         <label class="fld">Ortak defter (herkes ekleyip düzenleyebilir)</label>
         <div id="shareHost"></div>
@@ -1741,6 +1792,20 @@
           <button class="btn btn-ghost" id="sPinDel" ${db.pin ? "" : "disabled"}>PIN kaldır</button>
         </div>
         ${db.pin ? `<button class="btn btn-ghost" id="sLockNow" style="width:100%;margin-top:8px">${icon("lock")} Şimdi kilitle</button>` : ""}
+
+        <label class="fld">Kullanıcı adı (bu cihaz)</label>
+        <button class="btn btn-ghost" id="sName" style="width:100%">✎ ${ME() ? esc(ME()) : "Adınızı girin"} · değiştir</button>
+        <p class="meta" style="margin:6px 2px">Kayıtlarda “kim ekledi, kim tahsil etti” bilgisi bu adla tutulur.</p>
+
+        <label class="fld">Silinenler</label>
+        <button class="btn btn-ghost" id="sTrash" style="width:100%">Silinenler kutusu (${db.kayitlar.filter(k => k.silindi).length})</button>
+
+        <label class="fld">Silme PIN'i (tüm cihazlar için ortak)</label>
+        <div class="g2">
+          <button class="btn btn-gold" id="sDelPinSet">${db.silmePin ? "PIN değiştir" : "Silme PIN'i belirle"}</button>
+          <button class="btn btn-ghost" id="sDelPinDel" ${db.silmePin ? "" : "disabled"}>PIN kaldır</button>
+        </div>
+        <p class="meta" style="margin:6px 2px">Kayıt silmek ve tüm defteri silmek için bu PIN istenir. PIN tüm cihazlarda aynıdır; bağlantıyı bilen ama PIN'i bilmeyen kişi silemez.</p>
 
         <label class="fld">Yedekleme (bağlantı gerekmez)</label>
         <div class="g2">
@@ -1769,6 +1834,20 @@
       save(); closeSheet(); render(); toast("Ayarlar kaydedildi");
     };
     renderShare();
+    document.getElementById("sName").onclick = () => openNameSheet(false);
+    document.getElementById("sTrash").onclick = openTrash;
+    document.getElementById("sDelPinSet").onclick = delPinSet;
+    document.getElementById("sDelPinDel").onclick = delPinRemove;
+    document.getElementById("sCanli").onclick = async () => {
+      if (!db.ayar.canli) {
+        if (!("Notification" in window)) return toast("Bu tarayıcı bildirimi desteklemiyor");
+        let p = Notification.permission;
+        if (p !== "granted") p = await Notification.requestPermission();
+        if (p !== "granted") return toast("Bildirim izni verilmedi");
+        db.ayar.canli = true;
+      } else db.ayar.canli = false;
+      save(); openSettings();
+    };
     document.getElementById("sDark").onclick = () => {
       db.karanlik = !db.karanlik; save(); applyTheme(); render(); openSettings();
       toast(db.karanlik ? "Karanlık mod açık" : "Aydınlık mod açık");
@@ -1846,7 +1925,8 @@
     document.getElementById("sCsvImp").onclick = () => document.getElementById("sCsvFile").click();
     document.getElementById("sCsvFile").onchange = e => { const f = e.target.files?.[0]; if (f) importCSV(f); };
     document.getElementById("sUndo").onclick = () => { closeSheet(); undoLast(); };
-    document.getElementById("sWipe").onclick = () => {
+    document.getElementById("sWipe").onclick = async () => {
+      if (!(await guardDelete())) return;
       const onay = prompt("DİKKAT: Bu ortak defterdir, tüm kayıtlar HERKES için silinir.\nDevam etmek için büyük harfle SIL yazın:");
       if (!onay || onay.trim().toUpperCase().replace("İ", "I") !== "SIL") return toast("Vazgeçildi");
       pushUndo("Sıfırlama");
@@ -2186,14 +2266,22 @@
   let remoteRec = new Map(), remoteSet = "", remoteLogo = null;
   let cloudOn = false, cloudStarting = false;
   let pushTimer = null, renderTimer = null;
+  let liveReady = false, remoteNotes = [], noteTimer = null;
+  const aktifDocs = new Map();
 
   const cloudReady = () => !!(window.FIREBASE_CONFIG && !String(window.FIREBASE_CONFIG.apiKey || "").startsWith("BURAYA"));
   const cacheSave = () => { try { localStorage.setItem(cacheKey(), JSON.stringify(db)); } catch (e) {} };
 
+  const diag = { sdk: "", uid: "", snaps: 0, lastSnap: "", err: "" };
   function syncLabel() {
+    if (!cloudReady()) return "● YEREL (bulut ayarı yok)";
+    if (!DEFTER_ID) return "● BAĞLI DEĞİL";
     return { baglaniyor: "● BAĞLANIYOR", canli: "● CANLI", cevrimdisi: "● ÇEVRİMDIŞI", hata: "● HATA" }[syncState] || "";
   }
-  function syncColor() { return syncState === "canli" ? "#7fe0a0" : syncState === "hata" ? "#ff8a80" : "#f0c060"; }
+  function syncColor() {
+    if (!cloudReady() || !DEFTER_ID) return "#ff8a80";
+    return syncState === "canli" ? "#7fe0a0" : syncState === "hata" ? "#ff8a80" : "#f0c060";
+  }
   function statusText() {
     return {
       baglaniyor: "Bağlanıyor…",
@@ -2204,6 +2292,7 @@
   }
   function setSyncState(st, detail) {
     syncState = st; syncDetail = detail || "";
+    if (detail) diag.err = detail;
     const el = document.getElementById("syncDot");
     if (el) { el.textContent = syncLabel(); el.style.color = syncColor(); }
     const el2 = document.getElementById("shareStatus");
@@ -2225,18 +2314,28 @@
     return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   }
   const shareLink = () => `${location.origin}${location.pathname}#d=${DEFTER_ID}`;
-  const sharedSettingsJson = () => JSON.stringify({ magaza: db.magaza, firma: { tel: db.firma.tel, vergi: db.firma.vergi, adres: db.firma.adres } });
+  const sharedSettingsJson = () => JSON.stringify({ magaza: db.magaza, firma: { tel: db.firma.tel, vergi: db.firma.vergi, adres: db.firma.adres }, silmePin: db.silmePin || null });
 
+  async function loadSdk() {
+    let last;
+    for (const v of FB_VERSIONS) {
+      try {
+        const base = `https://www.gstatic.com/firebasejs/${v}/`;
+        const [a, au, fs] = await Promise.all([
+          import(base + "firebase-app.js"), import(base + "firebase-auth.js"), import(base + "firebase-firestore.js")
+        ]);
+        diag.sdk = v;
+        return { ...a, ...au, ...fs };
+      } catch (e) { last = e; console.warn("Firebase SDK yüklenemedi:", v, e); }
+    }
+    throw last;
+  }
   function cloudInit() {
     if (!cloudReady()) return Promise.resolve(false);
     if (fbDb) return Promise.resolve(true);
     if (!fbInitP) {
-      fbInitP = Promise.all([
-        import(FB_URL + "firebase-app.js"),
-        import(FB_URL + "firebase-auth.js"),
-        import(FB_URL + "firebase-firestore.js")
-      ]).then(([a, au, fs]) => {
-        fbm = { ...a, ...au, ...fs };
+      fbInitP = (window.__fbLoader || loadSdk)().then(mod => {
+        fbm = mod;
         const app = fbm.initializeApp(window.FIREBASE_CONFIG);
         fbAuth = fbm.getAuth(app);
         try {
@@ -2244,7 +2343,7 @@
           fbDb = fbm.initializeFirestore(app, { localCache: fbm.persistentLocalCache({ tabManager: fbm.persistentMultipleTabManager() }) });
         } catch (e) { console.warn(e); fbDb = fbm.getFirestore(app); }
         return true;
-      }).catch(err => { console.warn(err); fbInitP = null; return false; });
+      }).catch(err => { console.warn(err); diag.err = "Firebase kodu yüklenemedi (internet / engelleyici?)"; fbInitP = null; return false; });
     }
     return fbInitP;
   }
@@ -2270,10 +2369,11 @@
     cloudStarting = true;
     setSyncState("baglaniyor");
     const ok = await cloudInit();
-    if (!ok) { cloudStarting = false; return setSyncState(navigator.onLine ? "hata" : "cevrimdisi", "bulut yüklenemedi"); }
+    if (!ok) { cloudStarting = false; return setSyncState(navigator.onLine ? "hata" : "cevrimdisi", diag.err || "bulut yüklenemedi"); }
     try {
       await fbAuth.authStateReady();
       if (!fbAuth.currentUser) await fbm.signInAnonymously(fbAuth);
+      diag.uid = fbAuth.currentUser ? fbAuth.currentUser.uid : "";
     } catch (e) {
       console.warn(e); cloudStarting = false;
       return setSyncState(navigator.onLine ? "hata" : "cevrimdisi", fbErr(e));
@@ -2313,13 +2413,18 @@
           if (localJson === json) { remoteRec.set(id, json); return; }
           const base = remoteRec.get(id);
           if (base !== undefined && localJson !== base) return; /* bu cihazda gönderilmemiş değişiklik var, o kazanır */
+          if (liveReady && !isMine(rec)) remoteNotes.push(describeChange(db.kayitlar[i], rec));
           db.kayitlar[i] = rec;
         } else {
+          if (liveReady && !isMine(rec)) remoteNotes.push(describeChange(null, rec));
           db.kayitlar.push(rec);
         }
         remoteRec.set(id, json);
         changed = true;
       });
+      if (!snap.metadata.fromCache) liveReady = true;
+      flushNotes();
+      diag.snaps++; diag.lastSnap = (snap.metadata.fromCache ? "önbellek" : "sunucu") + " " + new Date().toLocaleTimeString("tr-TR");
       setSyncState(snap.metadata.fromCache ? (navigator.onLine ? "baglaniyor" : "cevrimdisi") : "canli");
       if (changed) { cacheSave(); scheduleRender(); }
     }, onErr);
@@ -2335,6 +2440,7 @@
           if (o.magaza) db.magaza = o.magaza;
           const f = o.firma || {};
           db.firma = { ...db.firma, tel: f.tel || "", vergi: f.vergi || "", adres: f.adres || "" };
+          db.silmePin = o.silmePin || null;
           remoteSet = sharedSettingsJson();
           changed = true;
         } else if (ch.doc.id === "logo") {
@@ -2346,6 +2452,16 @@
       });
       if (changed) { cacheSave(); scheduleRender(); }
     }, onErr);
+
+    fbm.onSnapshot(colRef("aktif"), snap => {
+      snap.docChanges().forEach(ch => {
+        if (ch.type === "removed") { aktifDocs.delete(ch.doc.id); return; }
+        try { aktifDocs.set(ch.doc.id, ch.doc.data()); } catch (e) {}
+      });
+      recomputeActive();
+    }, e => { diag.aktifErr = fbErr(e); });
+    setInterval(recomputeActive, 15000);
+    window.addEventListener("pagehide", () => { try { clearActive(); } catch (e) {} });
 
     cloudOn = true; cloudStarting = false;
     /* İlk kurulumda bu cihazdaki eski kayıtlar buluta aktarılır */
@@ -2389,8 +2505,9 @@
 
   /* ---------- Ayarlar içindeki bölüm ---------- */
   function shareSectionHtml() {
-    if (!cloudReady()) return `<div class="panel meta" style="padding:12px">Ortak defter henüz kurulmadı. <b>PAYLASIM_KURULUM.md</b> dosyasındaki adımları izleyip <b>firebase-config.js</b> dosyasını doldurun.</div>`;
-    if (!DEFTER_ID) return `<div class="panel meta" style="padding:12px">Bu cihaz bir ortak defterle bağlı değil. Sayfayı yenileyin.</div>`;
+    const diagBtn = `<button class="btn btn-ghost" id="pDiag" style="width:100%;margin-top:8px">Bağlantı durumu ve tanı</button>`;
+    if (!cloudReady()) return `<div class="panel meta" style="padding:12px">Ortak defter henüz kurulmadı (Firebase ayarı okunamadı). <b>PAYLASIM_KURULUM.md</b> dosyasındaki adımları izleyin.${diagBtn}</div>`;
+    if (!DEFTER_ID) return `<div class="panel meta" style="padding:12px">Bu cihaz bir ortak defterle bağlı değil. Sayfayı yenileyin.${diagBtn}</div>`;
     const link = shareLink();
     const waHref = "https://wa.me/?text=" + encodeURIComponent("Ödeme defteri (ortak, canlı):\n" + link);
     return `
@@ -2402,6 +2519,7 @@
           <a class="btn btn-wa" href="${waHref}" target="_blank" rel="noopener">${icon("msg")} WhatsApp</a>
         </div>
         <div class="meta" id="shareStatus" style="margin-top:8px">${esc(statusText())}</div>
+        <button class="btn btn-ghost" id="pDiag" style="width:100%;margin-top:8px">Bağlantı durumu ve tanı</button>
         <button class="btn btn-ghost" id="pLeave" style="width:100%;margin-top:8px">Bu cihazı defterden ayır</button>
         <p class="meta" style="margin-top:8px">Bağlantıyı yalnızca güvendiğiniz kişilere verin. Bağlantıyı bilen herkes defterin tamamına erişir.</p>
       </div>`;
@@ -2411,6 +2529,7 @@
     if (!host) return;
     host.innerHTML = shareSectionHtml();
     const on = (id, fn) => { const el = document.getElementById(id); if (el) el.onclick = fn; };
+    on("pDiag", () => { closeSheet(); openStatusSheet(); });
     on("pCopy", async () => {
       try { await navigator.clipboard.writeText(shareLink()); toast("Bağlantı kopyalandı"); }
       catch (e) { prompt("Bağlantıyı kopyalayın:", shareLink()); }
@@ -2423,33 +2542,63 @@
     });
   }
 
-  /* ---------- Bağlantı penceresi (başlıktaki ● CANLI yazısına dokununca ya da defter ilk oluşunca) ---------- */
-  function openLinkSheet() {
-    if (!DEFTER_ID) return;
-    const link = shareLink();
-    const waHref = "https://wa.me/?text=" + encodeURIComponent("Ödeme defteri (ortak, canlı):\n" + link);
+  /* ---------- Durum / bağlantı penceresi (başlıktaki ● yazısına dokununca) ---------- */
+  function diagLines() {
+    const c = window.FIREBASE_CONFIG || {};
+    return [
+      ["Sürüm", BUILD],
+      ["Firebase ayarı", cloudReady() ? "okundu (" + (c.projectId || "?") + ")" : "OKUNAMADI"],
+      ["Defter kodu", DEFTER_ID ? DEFTER_ID.slice(0, 6) + "…" : "YOK (cihaz bir defterle bağlı değil)"],
+      ["Firebase SDK", diag.sdk || "yüklenmedi"],
+      ["Anonim giriş", diag.uid ? "tamam" : "yok"],
+      ["Canlı dinleme", diag.snaps ? diag.snaps + " güncelleme · son: " + diag.lastSnap : "henüz veri gelmedi"],
+      ["Düzenleme göstergesi", diag.aktifErr ? "kapalı (" + diag.aktifErr + ")" : "açık"],
+      ["Bu cihazdaki kayıt", String(kayitlar().length)],
+      ["Son hata", diag.err || "yok"]
+    ];
+  }
+  const diagHtml = () => `<div class="meta" style="margin-top:12px;line-height:1.75;padding:10px;border:1px dashed var(--line);border-radius:12px"><b>Bağlantı tanısı</b>${diagLines().map(([k, v]) => `<div>${esc(k)}: <b>${esc(v)}</b></div>`).join("")}</div>`;
+  async function hardRefresh() {
+    try { const regs = await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map(r => r.unregister())); } catch (e) {}
+    try { for (const k of await caches.keys()) await caches.delete(k); } catch (e) {}
+    location.reload(); /* kayıtlarınıza (localStorage) dokunulmaz */
+  }
+  function openStatusSheet() {
+    const link = DEFTER_ID ? shareLink() : "";
+    const waHref = link ? "https://wa.me/?text=" + encodeURIComponent("Ödeme defteri (ortak, canlı):\n" + link) : "#";
     openSheet(`
       <div class="sheet-card">
         <div class="grab"></div>
         <div style="display:flex;align-items:center">
-          <h2 style="flex:1;font-size:18px">Ortak defter bağlantısı</h2>
+          <h2 style="flex:1;font-size:18px">Ortak defter</h2>
           <button class="btn btn-ghost" id="sheetClose">Kapat</button>
         </div>
-        <p class="meta" style="margin:8px 0">Bu bağlantıyı açan <b>herkes</b> aynı defteri canlı görür, kayıt ekleyip düzenleyebilir. Durum: <b id="shareStatus">${esc(statusText())}</b></p>
+        <p class="meta" style="margin:8px 0">Durum: <b id="shareStatus" style="color:${syncColor()}">${esc(syncLabel())}</b></p>
+        ${link ? `
+        <p class="meta" style="margin:0 0 8px">Bu bağlantıyı açan <b>herkes</b> aynı defteri canlı görür, kayıt ekleyip düzenleyebilir.</p>
         <input class="inp" id="pLink" readonly value="${esc(link)}" onclick="this.select()" />
         <div class="g2" style="margin-top:8px">
           <button class="btn btn-gold" id="pCopy">Bağlantıyı kopyala</button>
           <a class="btn btn-wa" href="${waHref}" target="_blank" rel="noopener">${icon("msg")} WhatsApp</a>
+        </div>` : `
+        <p class="meta" style="margin:0 0 8px">Bu cihaz henüz bir ortak defterle bağlı değil. ${cloudReady() ? "Sayfayı yenileyin; karşılama ekranından defter oluşturun ya da size gönderilen bağlantıyla katılın." : "Firebase ayarı okunamadı."}</p>`}
+        ${diagHtml()}
+        <div class="g2" style="margin-top:10px">
+          <button class="btn btn-ghost" id="pReload">Yeniden bağlan</button>
+          <button class="btn btn-ghost" id="pFix">Önbelleği temizle ve yenile</button>
         </div>
-        <p class="meta" style="margin-top:10px">Bağlantıyı yalnızca güvendiğiniz kişilere verin. Bağlantıyı bilen herkes defterin tamamına erişir.</p>
+        <p class="meta" style="margin-top:8px">Kayıtlarınız silinmez. "Önbelleği temizle" yalnızca eski uygulama dosyalarını atar.</p>
       </div>`);
     document.getElementById("sheetClose").onclick = closeSheet;
-    document.getElementById("pCopy").onclick = async () => {
+    document.getElementById("pReload").onclick = () => location.reload();
+    document.getElementById("pFix").onclick = hardRefresh;
+    const cp = document.getElementById("pCopy");
+    if (cp) cp.onclick = async () => {
       try { await navigator.clipboard.writeText(link); toast("Bağlantı kopyalandı"); }
       catch (e) { prompt("Bağlantıyı kopyalayın:", link); }
     };
   }
-  document.addEventListener("click", e => { if (e.target.closest && e.target.closest("#syncDot")) openLinkSheet(); });
+  document.addEventListener("click", e => { if (e.target.closest && e.target.closest("#syncDot")) openStatusSheet(); });
 
   /* ---------- Karşılama ekranı (cihaz henüz bir defterle bağlı değilse) ---------- */
   function createDefter() {
@@ -2492,6 +2641,265 @@
     document.getElementById("wJoin").onclick = () => joinDefter(document.getElementById("wLink").value);
   }
 
+  /* ================= KİM YAPTI · ÇAKIŞMASIZ İŞLEM · SİLİNENLER · SİLME PIN'İ · CANLI BİLDİRİM · DÜZENLEME GÖSTERGESİ ================= */
+
+  function authorLine(k) {
+    if (!k.olusturan && !k.sonKim) return "";
+    return `<div class="meta" style="margin-top:6px;font-size:12px">${k.olusturan ? `Ekleyen: <b>${esc(k.olusturan)}</b>` : ""}${k.sonKim ? ` · Son işlem: <b>${esc(k.sonKim)}</b>${k.sonT ? ", " + new Date(k.sonT).toLocaleString("tr-TR") : ""}` : ""}</div>`;
+  }
+
+  /* ---- Ad sorma ---- */
+  function openNameSheet(force) {
+    openSheet(`
+      <div class="sheet-card">
+        <div class="grab"></div>
+        <h2 style="font-size:18px">Adınız</h2>
+        <p class="meta" style="margin:6px 0 10px">Kayıtlarda “kim ekledi, kim tahsil etti” bilgisi için adınızı yazın (örn. Ahmet). Yalnızca ad yeterli, e-posta gerekmez.</p>
+        <input class="inp" id="nmIn" maxlength="24" placeholder="Adınız" value="${esc(ME())}" />
+        <button class="btn btn-gold" id="nmSave" style="width:100%;margin-top:12px">Kaydet</button>
+        ${force ? "" : `<button class="btn btn-ghost" id="sheetClose" style="width:100%;margin-top:8px">Vazgeç</button>`}
+      </div>`);
+    const inp = document.getElementById("nmIn");
+    const go = () => {
+      const v = inp.value.trim();
+      if (!v) return toast("Bir ad yazın");
+      try { localStorage.setItem(NAME_KEY, v); } catch (e) {}
+      closeSheet(); toast("Merhaba " + v);
+    };
+    document.getElementById("nmSave").onclick = go;
+    inp.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+    const c = document.getElementById("sheetClose"); if (c) c.onclick = closeSheet;
+    setTimeout(() => inp.focus(), 50);
+  }
+
+  /* ---- Çakışmasız tahsilat / erteleme ----
+     Bulut açıkken işlem Firestore'da "işlem (transaction)" olarak yapılır: aynı anda iki kişi aynı kayda
+     tahsilat girse bile tutarlar birbirinin üzerine yazılmaz, toplanır. İnternet yoksa yerelde yapılır. */
+  async function mutateRecord(id, label, fn) {
+    const local = db.kayitlar.find(x => x.id === id);
+    if (!local) { toast("Kayıt artık yok"); return false; }
+    const beforeJson = JSON.stringify(local);
+    const me = ME() || "Bilinmiyor";
+    if (cloudOn && navigator.onLine) {
+      try {
+        let result;
+        await fbm.runTransaction(fbDb, async tx => {
+          const ref = docRef("kayitlar", id);
+          const snap = await tx.get(ref);
+          let cur;
+          if (snap.exists()) { cur = JSON.parse(snap.data().d); cur.id = id; normalizeRec(cur); }
+          else cur = JSON.parse(beforeJson);
+          const bo = JSON.parse(JSON.stringify(cur));
+          fn(cur);
+          stampRec(cur, bo, me, new Date().toISOString());
+          tx.set(ref, { d: JSON.stringify(cur), u: fbm.serverTimestamp() });
+          result = cur;
+        });
+        const i = db.kayitlar.findIndex(x => x.id === id);
+        if (i >= 0) db.kayitlar[i] = result; else db.kayitlar.push(result);
+        remoteRec.set(id, JSON.stringify(result));
+        undoStack.push({ label, before: new Map([[id, beforeJson]]), touched: [id] });
+        if (undoStack.length > 40) undoStack.shift();
+        cacheSave();
+        return true;
+      } catch (e) {
+        console.warn("işlem başarısız", e);
+        if (!/unavailable|offline|network|deadline/i.test(String((e && e.code) || e))) {
+          toast("İşlem gönderilemedi: " + fbErr(e));
+          return false;
+        }
+        /* internet yok: aşağıda yerelde uygulanır, bağlantı gelince otomatik gönderilir */
+      }
+    }
+    pushUndo(label);
+    fn(local);
+    save();
+    return true;
+  }
+
+  /* ---- Silinenler kutusu ---- */
+  function openTrash() {
+    const list = db.kayitlar.filter(k => k.silindi).sort((a, b) => String(b.sonT || "").localeCompare(String(a.sonT || "")));
+    openSheet(`
+      <div class="sheet-card full">
+        <div class="grab"></div>
+        <div style="display:flex;align-items:center">
+          <h2 style="flex:1;font-size:18px">Silinenler (${list.length})</h2>
+          <button class="btn btn-ghost" id="sheetClose">Kapat</button>
+        </div>
+        ${list.length > 1 ? `<button class="btn btn-gold" id="trAll" style="width:100%;margin:10px 0">Tümünü geri getir (${list.length})</button>` : ""}
+        ${list.length ? list.map(k => `
+          <div class="panel" style="padding:10px;margin:8px 0;display:flex;gap:8px;align-items:center">
+            <div style="flex:1;min-width:0">
+              <b style="overflow-wrap:anywhere">${esc(k.musteri)}</b> · ${fmtTRY(k.tutar)}
+              <div class="meta">Vade ${fmtDate(k.vade)}${k.sonKim ? ` · Silen: ${esc(k.sonKim)}` : ""}${k.sonT ? ` · ${new Date(k.sonT).toLocaleString("tr-TR")}` : ""}</div>
+            </div>
+            <button class="btn btn-leather" data-restore="${k.id}">Geri getir</button>
+          </div>`).join("") : `<p class="meta" style="margin-top:14px">Silinen kayıt yok.</p>`}
+      </div>`, true);
+    document.getElementById("sheetClose").onclick = closeSheet;
+    document.querySelectorAll("[data-restore]").forEach(b => b.onclick = () => restoreRecs([b.dataset.restore]));
+    const all = document.getElementById("trAll");
+    if (all) all.onclick = () => { if (confirm(list.length + " kayıt geri getirilsin mi?")) restoreRecs(list.map(k => k.id)); };
+  }
+  function restoreRecs(ids) {
+    pushUndo("Geri getirme");
+    ids.forEach(id => { const r = db.kayitlar.find(x => x.id === id); if (r) r.silindi = false; });
+    save(); render(); openTrash();
+    toast(ids.length + " kayıt geri getirildi");
+  }
+
+  /* ---- Silme PIN'i (ortak, tüm cihazlar) ---- */
+  async function sha256(txt) {
+    try {
+      const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(txt));
+      return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join("");
+    } catch (e) { return "h" + hashPin(txt); }
+  }
+  function askPin(title, sub) {
+    return new Promise(resolve => {
+      const o = document.createElement("div");
+      o.id = "askPinBox";
+      o.style.cssText = "position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:20px";
+      o.innerHTML = `
+        <div style="background:var(--sheet);color:var(--ink);border-radius:16px;padding:18px;max-width:320px;width:100%;box-shadow:var(--shadow)">
+          <h3 style="font-size:17px;margin-bottom:4px">${esc(title)}</h3>
+          <p class="meta" style="margin-bottom:10px">${esc(sub || "")}</p>
+          <input class="inp" id="apIn" type="password" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="PIN" style="text-align:center;letter-spacing:.3em" />
+          <div class="g2" style="margin-top:12px"><button class="btn btn-ghost" id="apNo">Vazgeç</button><button class="btn btn-gold" id="apOk">Tamam</button></div>
+        </div>`;
+      document.body.appendChild(o);
+      const inp = o.querySelector("#apIn");
+      setTimeout(() => inp.focus(), 30);
+      const done = v => { o.remove(); resolve(v); };
+      o.querySelector("#apNo").onclick = () => done(null);
+      o.querySelector("#apOk").onclick = () => done(inp.value.trim());
+      inp.addEventListener("keydown", e => { if (e.key === "Enter") done(inp.value.trim()); });
+    });
+  }
+  async function guardDelete() {
+    if (!db.silmePin) return true;
+    const p = await askPin("Silme PIN'i", "Silmek için ortak silme PIN'ini girin");
+    if (p === null) return false;
+    if ((await sha256(db.silmePin.s + ":" + p)) !== db.silmePin.h) { toast("PIN yanlış"); return false; }
+    return true;
+  }
+  async function delPinSet() {
+    if (db.silmePin && !(await guardDelete())) return;
+    const a = await askPin("Yeni silme PIN'i", "4-8 rakam");
+    if (a === null) return;
+    if (!/^\d{4,8}$/.test(a)) return toast("PIN 4-8 rakam olmalı");
+    const b = await askPin("PIN'i tekrar girin", "");
+    if (b === null) return;
+    if (a !== b) return toast("PIN'ler uyuşmadı");
+    const sl = newToken().slice(0, 10);
+    db.silmePin = { s: sl, h: await sha256(sl + ":" + a) };
+    save(); openSettings(); toast("Silme PIN'i ayarlandı");
+  }
+  async function delPinRemove() {
+    if (!(await guardDelete())) return;
+    db.silmePin = null;
+    save(); openSettings(); toast("Silme PIN'i kaldırıldı");
+  }
+
+  /* ---- Canlı işlem bildirimi (ekranda uyarı + arka planda sistem bildirimi) ---- */
+  const isMine = rec => { const me = ME(); return !!me && rec.sonKim === me; };
+  function describeChange(old, rec) {
+    const kim = rec.sonKim || "Biri";
+    if (!old) return rec.silindi ? null : `${kim} yeni kayıt ekledi: ${rec.musteri} · ${fmtTRY(rec.tutar)}`;
+    if (rec.silindi && !old.silindi) return `${kim} kaydı sildi: ${rec.musteri}`;
+    if (!rec.silindi && old.silindi) return `${kim} kaydı geri getirdi: ${rec.musteri}`;
+    const dt = round2((rec.tahsilTutar || 0) - (old.tahsilTutar || 0));
+    if (dt > 0) return `${kim} tahsilat girdi: ${rec.musteri} · ${fmtTRY(dt)}`;
+    if ((rec.ertelemeSayisi || 0) > (old.ertelemeSayisi || 0)) return `${kim} erteledi: ${rec.musteri} → ${fmtDate(rec.vade)}`;
+    return `${kim} kaydı düzenledi: ${rec.musteri}`;
+  }
+  function flushNotes() {
+    clearTimeout(noteTimer);
+    noteTimer = setTimeout(() => {
+      const notes = remoteNotes.filter(Boolean); remoteNotes = [];
+      if (!notes.length) return;
+      const msg = notes.length === 1 ? notes[0] : `${notes.length} yeni işlem · son: ${notes[notes.length - 1]}`;
+      toast(msg, null, 4500);
+      sysNotifyLive(msg);
+    }, 700);
+  }
+  async function sysNotifyLive(body) {
+    try {
+      if (!db.ayar.canli || !document.hidden) return;
+      if (!("Notification" in window) || Notification.permission !== "granted") return;
+      const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration();
+      const opt = { body, tag: "defter-canli", renotify: true, icon: "icon.svg" };
+      if (reg && reg.showNotification) reg.showNotification("Ödeme Defteri · " + db.magaza, opt);
+      else new Notification("Ödeme Defteri · " + db.magaza, opt);
+    } catch (e) {}
+  }
+
+  /* ---- Kim düzenliyor göstergesi ---- */
+  const edNames = id => [...new Set(activeByRec.get(id) || [])];
+  function edTag(k) {
+    const n = edNames(k.id);
+    return n.length ? `<span class="late-tag" style="background:#e6c875;color:#4a3a00">✎ ${esc(n.join(", "))}</span>` : "";
+  }
+  function setActive(id) {
+    if (!cloudOn) return;
+    clearInterval(activeTimer);
+    myActive = id;
+    const put = () => fbm.setDoc(docRef("aktif", DEV_ID), {
+      d: JSON.stringify({ ad: ME() || "Biri", k: id, t: Date.now(), c: DEV_ID }), u: fbm.serverTimestamp()
+    }).catch(() => {});
+    put();
+    activeTimer = setInterval(put, 20000);
+  }
+  function clearActive() {
+    if (!myActive) return;
+    myActive = null;
+    clearInterval(activeTimer);
+    if (cloudOn) fbm.deleteDoc(docRef("aktif", DEV_ID)).catch(() => {});
+  }
+  function recomputeActive() {
+    const m = new Map(), now = Date.now();
+    aktifDocs.forEach(data => {
+      let o; try { o = JSON.parse(data.d); } catch (e) { return; }
+      if (!o || o.c === DEV_ID || !o.k) return;
+      const ts = data.u && data.u.toMillis ? data.u.toMillis() : o.t;
+      if (now - ts > 70000) return; /* 70 sn işaret yenilenmediyse düzenleme bitmiş sayılır */
+      if (!m.has(o.k)) m.set(o.k, []);
+      m.get(o.k).push(o.ad || "Biri");
+    });
+    const sig = x => JSON.stringify([...x.entries()].sort());
+    if (sig(m) === sig(activeByRec)) return;
+    activeByRec = m;
+    paintActive();
+    scheduleRender();
+  }
+  function paintActive() {
+    const el = document.getElementById("aktifUyari");
+    if (!el) return;
+    const n = sheetRecId ? edNames(sheetRecId) : [];
+    el.innerHTML = n.length
+      ? `<div class="meta" style="background:#fff3cd;color:#6b4e00;border:1px solid #e6c875;border-radius:10px;padding:8px 10px;margin:8px 0">✎ <b>${esc(n.join(", "))}</b> şu an bu kaydı düzenliyor. Aynı anda kaydederseniz sonradan kaydeden geçerli olur.</div>`
+      : "";
+  }
+  function trackSheet(id, editing) {
+    sheetRecId = id || null;
+    const card = document.querySelector("#sheet .sheet-card");
+    if (card && !document.getElementById("aktifUyari")) {
+      const d = document.createElement("div"); d.id = "aktifUyari";
+      const g = card.querySelector(".grab");
+      if (g) g.after(d); else card.prepend(d);
+    }
+    paintActive();
+    if (editing && id) setActive(id);
+  }
+  {
+    const _d = openDetail, _f = openForm, _t = openTahsil, _e = openErtele;
+    openDetail = k => { _d(k); trackSheet(k.id, false); };
+    openForm = (edit, pre) => { _f(edit, pre); trackSheet(edit ? edit.id : null, !!edit); };
+    openTahsil = k => { _t(k); trackSheet(k.id, true); };
+    openErtele = k => { _e(k); trackSheet(k.id, true); };
+  }
+
   /* ---------- BAŞLAT ---------- */
   applyTheme();
   if (cloudReady() && !DEFTER_ID) {
@@ -2504,17 +2912,31 @@
       /* Adres çubuğunda kod kalsın: "Ana ekrana ekle" yapılınca defter bağlantısı korunur */
       if (!location.hash.includes(DEFTER_ID)) history.replaceState(null, "", location.pathname + location.search + "#d=" + DEFTER_ID);
       startCloud();
+      let tries = 0;
+      const askName = setInterval(() => {
+        if (ME() || ++tries > 12) return clearInterval(askName);
+        if (!document.getElementById("sheet").classList.contains("show")) openNameSheet(true);
+      }, 2500);
       try {
         if (localStorage.getItem("kirtasiye_ilk_baglanti") === "1") {
           localStorage.removeItem("kirtasiye_ilk_baglanti");
-          setTimeout(openLinkSheet, 900);
+          setTimeout(openStatusSheet, 900);
         }
       } catch (e) {}
     }
   }
 
+  /* Eski sürümden kalan servis çalışanı/önbellek bir kez temizlenir, sonra yenisi kaydedilir */
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
-    window.addEventListener("load", () => {
+    window.addEventListener("load", async () => {
+      try {
+        if (localStorage.getItem("kirtasiye_build") !== BUILD) {
+          localStorage.setItem("kirtasiye_build", BUILD);
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map(r => r.unregister()));
+          if (window.caches) for (const k of await caches.keys()) await caches.delete(k);
+        }
+      } catch (e) {}
       navigator.serviceWorker.register("sw.js").catch(() => {});
     });
   }
