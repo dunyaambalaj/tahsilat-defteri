@@ -2,7 +2,7 @@
    Strateji: önce İNTERNETTEN en güncel dosya alınır (güncellemeler hemen görünür),
    internet yoksa önbellekteki kopya kullanılır (çevrimdışı çalışır).
    Firebase ve diğer dış adreslere dokunmaz. */
-const CACHE = "odeme-defteri-v3";
+const CACHE = "odeme-defteri-v5";
 const FILES = ["./", "index.html", "firebase-config.js", "manifest.json", "icon.svg"];
 
 self.addEventListener("install", e => {
