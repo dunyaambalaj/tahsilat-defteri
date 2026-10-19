@@ -603,6 +603,54 @@
     .dev-del { border: 0; background: var(--ghost); color: var(--mute); font-size: 12px; font-weight: 700; padding: 6px 10px; border-radius: 999px; cursor: pointer; }
     .look-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
+    /* Güvenilirlik puanı */
+    .stars { display: inline-block; font-size: 15px; letter-spacing: 2px; line-height: 1;
+      background: linear-gradient(90deg, var(--sc, var(--gold)) var(--p), color-mix(in srgb, var(--mute) 32%, transparent) var(--p));
+      -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+    .score-line { margin-top: 3px; font-size: 13px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .sc-chip { display: inline-block; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 999px; margin-left: 6px; vertical-align: middle;
+      background: color-mix(in srgb, var(--sc) 16%, transparent); color: var(--sc); }
+    .score-panel { padding: 12px 14px; margin: 0 0 12px; }
+    .sc-label { font-weight: 800; font-size: 13px; color: var(--sc); padding: 4px 11px; border-radius: 999px; background: color-mix(in srgb, var(--sc) 14%, transparent); white-space: nowrap; }
+    .score-facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+    .score-facts div { background: color-mix(in srgb, var(--leather) 6%, transparent); border-radius: 12px; padding: 8px 6px; text-align: center; min-width: 0; }
+    .score-facts b { display: block; font-size: 15px; font-weight: 800; }
+    .score-facts span { font-size: 11px; color: var(--mute); display: block; line-height: 1.25; }
+    /* Aylık hedef */
+    .goal { display: block; width: 100%; text-align: left; margin: 12px 0 0; padding: 14px 16px; border-radius: 18px; background: var(--sheet); border: 1px solid var(--line); cursor: pointer; color: var(--ink); font: inherit; }
+    .goal-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; }
+    .goal-top span { font-weight: 800; color: var(--gold-dim); font-size: 19px; }
+    .goal-num { font-size: clamp(18px, 5vw, 25px); margin: 4px 0 8px; font-variant-numeric: tabular-nums; }
+    .goal-num b { font-weight: 800; }
+    .goalbar { height: 10px; border-radius: 999px; background: color-mix(in srgb, var(--leather) 12%, transparent); overflow: hidden; }
+    .goalbar i { display: block; height: 100%; border-radius: 999px; transform-origin: left; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); animation: growX 1s cubic-bezier(.2,.9,.25,1) both; }
+    .goalbar i.ok { background: linear-gradient(90deg, var(--tahsil), #5fd37f); }
+    @keyframes growX { from { transform: scaleX(0); } }
+    .goal-meta { font-size: 12.5px; color: var(--mute); margin-top: 6px; line-height: 1.4; }
+    .goal-meta b { color: var(--ink); }
+    .goal-empty { border-style: dashed; text-align: center; color: var(--mute); font-weight: 700; padding: 12px; }
+
+    .row .t2.wrap { white-space: normal; overflow: visible; text-overflow: clip; }
+
+    /* form: tarih kutusu taşmasın */
+    .g2 > *, .row2 > * { min-width: 0; }
+    .row2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    input[type="date"], input[type="time"] { min-width: 0; width: 100%; box-sizing: border-box; }
+    /* mesai */
+    .off-chip { display: inline-block; margin-top: 8px; font-size: 12px; font-weight: 700; color: var(--erte); padding: 5px 11px; border-radius: 999px; background: color-mix(in srgb, var(--erte) 14%, transparent); }
+    .m-cell.off .n, .wk2 button.off b { opacity: .45; }
+    .m-cell.off, .wk2 button.off { background: color-mix(in srgb, var(--leather) 5%, transparent); }
+    /* WhatsApp şablonları */
+    .wa-tpls, .wa-vars { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tpl-row { padding: 12px 14px; margin: 0 0 10px; }
+    .tpl-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .tpl-prev { margin: 6px 0 8px; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .tpl-acts { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tpl-acts .btn { padding: 7px 12px; font-size: 13px; }
+    .tpl-prev-box { padding: 12px 14px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; }
+
+    #msDays { display: flex; flex-wrap: wrap; gap: 6px; overflow: visible; }
+
     /* ===== CAM (data-look=cam) ===== */
 html[data-look="cam"], html[data-look="cam"][data-theme] {
       --serif: "New York", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
@@ -652,16 +700,16 @@ html[data-look="cam"][data-mode="dark"] body::before, html[data-look="cam"][data
 html[data-look="cam"] #app { position: relative; z-index: 0; }
 html[data-look="cam"] #main { position: relative; }
 html[data-look="cam"] .page { background: transparent !important; border: 0 !important; box-shadow: none; }
-html[data-look="cam"] .hero, html[data-look="cam"] .panel, html[data-look="cam"] .sum, html[data-look="cam"] .kpi, html[data-look="cam"] .card, html[data-look="cam"] .group, html[data-look="cam"] .m-wrap, html[data-look="cam"] .mini-day, html[data-look="cam"] .hbtn, html[data-look="cam"] .brand-mark, html[data-look="cam"] .seg, html[data-look="cam"] .round-btn, html[data-look="cam"] .today-btn, html[data-look="cam"] .chip, html[data-look="cam"] .fab {
+html[data-look="cam"] .hero, html[data-look="cam"] .panel, html[data-look="cam"] .sum, html[data-look="cam"] .kpi, html[data-look="cam"] .card, html[data-look="cam"] .group, html[data-look="cam"] .m-wrap, html[data-look="cam"] .mini-day, html[data-look="cam"] .goal, html[data-look="cam"] .hbtn, html[data-look="cam"] .brand-mark, html[data-look="cam"] .seg, html[data-look="cam"] .round-btn, html[data-look="cam"] .today-btn, html[data-look="cam"] .chip {
       position: relative;
     }
-html[data-look="cam"] .hero, html[data-look="cam"] .panel, html[data-look="cam"] .card, html[data-look="cam"] .group, html[data-look="cam"] .m-wrap, html[data-look="cam"] .mini-day, html[data-look="cam"] .sum, html[data-look="cam"] .kpi {
+html[data-look="cam"] .hero, html[data-look="cam"] .panel, html[data-look="cam"] .card, html[data-look="cam"] .group, html[data-look="cam"] .m-wrap, html[data-look="cam"] .mini-day, html[data-look="cam"] .sum, html[data-look="cam"] .kpi, html[data-look="cam"] .goal {
       background: linear-gradient(158deg, var(--glass-a), var(--glass-b)) !important;
       -webkit-backdrop-filter: blur(20px) saturate(175%); backdrop-filter: blur(20px) saturate(175%);
       border: 0 !important;
       box-shadow: var(--glass-inset), var(--glass-shadow);
     }
-html[data-look="cam"] .hero::before, html[data-look="cam"] .panel::before, html[data-look="cam"] .card::before, html[data-look="cam"] .group::before, html[data-look="cam"] .m-wrap::before, html[data-look="cam"] .mini-day::before, html[data-look="cam"] .sum::before, html[data-look="cam"] .kpi::before, html[data-look="cam"] .nav::before, html[data-look="cam"] .hbtn::before, html[data-look="cam"] .brand-mark::before, html[data-look="cam"] .toast::before, html[data-look="cam"] .seg::before, html[data-look="cam"] .fab::before, html[data-look="cam"] .round-btn::before, html[data-look="cam"] .tb-nav::before {
+html[data-look="cam"] .hero::before, html[data-look="cam"] .panel::before, html[data-look="cam"] .card::before, html[data-look="cam"] .group::before, html[data-look="cam"] .m-wrap::before, html[data-look="cam"] .mini-day::before, html[data-look="cam"] .sum::before, html[data-look="cam"] .kpi::before, html[data-look="cam"] .goal::before, html[data-look="cam"] .nav::before, html[data-look="cam"] .hbtn::before, html[data-look="cam"] .brand-mark::before, html[data-look="cam"] .toast::before, html[data-look="cam"] .seg::before, html[data-look="cam"] .round-btn::before, html[data-look="cam"] .tb-nav::before {
       content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none; z-index: 2;
       background: linear-gradient(135deg, var(--rim-hi), var(--rim-lo) 30%, var(--rim-lo) 64%, color-mix(in srgb, var(--gold) 72%, #fff));
       -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
@@ -735,10 +783,9 @@ html[data-look="cam"] .btn-tahsil { background: linear-gradient(180deg, color-mi
 html[data-look="cam"] .btn-erte { background: color-mix(in srgb, var(--erte) 14%, transparent); color: var(--erte); box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 0 0 1px color-mix(in srgb, var(--erte) 30%, transparent); }
 html[data-look="cam"] .btn-wa { background: linear-gradient(180deg, color-mix(in srgb, var(--wa) 82%, #fff 18%), var(--wa)); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 8px 18px color-mix(in srgb, var(--wa) 30%, transparent); }
 html[data-look="cam"] .btn[disabled] { opacity: .45; }
-html[data-look="cam"] .fab { width: 60px; height: 60px; border-radius: 50%; border: 0; font-size: 30px; font-weight: 400; line-height: 1; color: #1a1612;
-      background: linear-gradient(180deg, var(--gold-hi), var(--gold) 60%, var(--gold-dim));
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.75), inset 0 -2px 4px rgba(0,0,0,.14), 0 14px 30px color-mix(in srgb, var(--gold) 50%, transparent);
-      bottom: calc(100px + var(--safe-bot)); transition: transform .3s cubic-bezier(.3,1.6,.5,1); }
+html[data-look="cam"] .fab { position: fixed; right: 16px; bottom: calc(86px + var(--safe-bot)); width: 58px; height: 58px; border-radius: 18px; border: 0;
+      background: linear-gradient(180deg, #d4b03a, #b8901e); color: #1a1612; font-size: 32px; font-weight: 700; line-height: 1;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 10px 24px rgba(180,140,30,.45); z-index: 20; transition: transform .25s cubic-bezier(.3,1.6,.5,1); }
 html[data-look="cam"] .fab:active { transform: scale(1.1); }
 html[data-look="cam"] .chip { border: 0; background: color-mix(in srgb, #fff 42%, transparent); color: var(--ink); font-weight: 600; padding: 7px 14px;
       -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 0 0 1px rgba(255,255,255,.45); transition: background .2s, color .2s, transform .2s; }
@@ -913,7 +960,7 @@ html[data-look="cam"] .wk-day.on b { color: var(--cream); }
 @media (min-width: 760px) {
 html[data-look="cam"] .nav, html[data-look="cam"][data-mode="dark"] .nav { left: 0; right: 0; bottom: calc(14px + var(--safe-bot)); width: min(560px, 92vw); }
 html[data-look="cam"] .page { padding-bottom: 130px; }
-html[data-look="cam"] .fab { right: 28px; bottom: 110px; }
+html[data-look="cam"] .fab { right: 28px; bottom: 100px; }
 html[data-look="cam"] .m-cell { min-height: 92px; padding-top: 8px; }
 html[data-look="cam"] .m-cell .a1, html[data-look="cam"] .m-cell .a2 { display: block; }
 html[data-look="cam"] .m-cell .cdots { display: none; }
@@ -963,6 +1010,10 @@ html[data-look="cam"] .dev-del { background: color-mix(in srgb, var(--leather) 1
 html[data-look="cam"] .m-cell { min-height: 104px; }
 html[data-look="cam"] .m-cell .a3 { display: block; }
 }
+html[data-look="cam"] .goal { border-radius: 24px; }
+html[data-look="cam"] .goal-top span { color: var(--gold-dim); }
+html[data-look="cam"] .goal-empty { color: var(--mute); box-shadow: var(--glass-inset), 0 0 0 1.5px color-mix(in srgb, var(--gold) 40%, transparent), var(--glass-shadow); }
+html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--leather) 7%, transparent); }
   </style>
 </head>
 <body>
@@ -984,7 +1035,7 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
     try { const v = localStorage.getItem(ID_KEY); return ID_RE.test(v || "") ? v : null; } catch (e) { return null; }
   })();
   const cacheKey = () => DEFTER_ID ? KEY + ":" + DEFTER_ID : KEY;
-  const BUILD = "8";
+  const BUILD = "10";
   const FB_VERSIONS = ["13.0.0", "12.8.0", "12.2.1"]; /* sırayla denenir */
   /* Firebase web ayarları herkese açık bilgidir. firebase-config.js okunamazsa bu yedek kullanılır. */
   const FB_DEFAULT = {
@@ -1425,7 +1476,7 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
   }
 
   function waLink(k) {
-    const msg = `Merhaba ${k.musteri}, ${db.magaza} olarak ${fmtDate(k.vade)} vadeli ${fmtTRY(remaining(k))} tutarındaki ${typeAd(k.tur, k)} ödemenizi nazikçe hatırlatmak isteriz. Teşekkür ederiz.`;
+    const msg = fillTpl(defaultTpl().m, k);
     const t = fmtPhone(k.telefon);
     return `https://wa.me/${t}?text=${encodeURIComponent(msg)}`;
   }
@@ -1443,7 +1494,7 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
       <article class="card ${late?"late":""} ${isErt(k)?"ert":""}" data-open="${k.id}">
         <div class="spine ${st}"></div>
         ${stamp}
-        <div class="name-row ${st==="bekliyor"?"no-stamp":""}">${esc(k.musteri)}${late?`<span class="late-tag">GECİKTİ</span>`:""}${ertTag(k)}${edTag(k)}</div>
+        <div class="name-row ${st==="bekliyor"?"no-stamp":""}">${esc(k.musteri)}${late?`<span class="late-tag">GECİKTİ</span>`:""}${ertTag(k)}${scoreChip(k)}${edTag(k)}</div>
         <div class="meta" style="margin-top:3px">
           <span class="type-pill">${esc(typeAd(k.tur, k))}</span>
           ${k.belgeNo ? ` · No: ${esc(k.belgeNo)}` : ""}
@@ -1461,7 +1512,7 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
         ${showActs ? `<div class="acts">
           <button class="btn btn-tahsil" data-act="tahsil" data-id="${k.id}">Tahsil</button>
           <button class="btn btn-erte" data-act="ertele" data-id="${k.id}">Ertele</button>
-          <a class="btn btn-wa btn-icon" href="${waLink(k)}" target="_blank" rel="noopener" data-wa="1" title="WhatsApp hatırlat">${icon("msg")}</a>
+          <a class="btn btn-wa btn-icon" href="${waLink(k)}" target="_blank" rel="noopener" data-wa="1" data-wak="${k.id}" title="WhatsApp mesajı (şablon seç)">${icon("msg")}</a>
         </div>` : ""}
         ${(k.olusturan || k.sonKim) ? `<div class="meta" style="font-size:11px;opacity:.75;margin-top:6px">${k.olusturan ? "Ekleyen: " + esc(k.olusturan) : ""}${k.sonKim && k.sonKim !== k.olusturan ? ` · Son işlem: ${esc(k.sonKim)}` : ""}</div>` : ""}
       </article>`;
@@ -1479,10 +1530,9 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
     const sToday = sums(todayAll);
     const overdue = overdueList().filter(k => !isErt(k));
     const monthPref = t.slice(0,7);
-    const buAyTahsil = round2(all.reduce((a,k) => {
-      if ((k.tahsilTarihi||"").startsWith(monthPref)) a += (statusOf(k) === "tahsil" ? k.tutar : (k.tahsilTutar || 0));
-      return a;
-    }, 0));
+    const evAll = collectEvents();
+    const buAyTahsil = round2(evAll.filter(e => e.iso.startsWith(monthPref)).reduce((a, e) => a + e.tutar, 0));
+    const bugunTahsil = round2(evAll.filter(e => e.iso === t).reduce((a, e) => a + e.tutar, 0));
     const h = new Date().getHours();
     const greet = h < 12 ? "Günaydın" : h < 18 ? "İyi günler" : "İyi akşamlar";
     const next7 = {};
@@ -1493,12 +1543,14 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
       <div class="hero">
         <div style="font-size:11px;letter-spacing:.14em;color:var(--mute);font-weight:700">${greet.toUpperCase()}</div>
         <div class="hero-big">${fmtLong(t)}</div>
+        ${offChip()}
         <div class="sum-grid" style="margin-bottom:2px">
           <div class="sum bek"><div class="k">Açık bakiye</div><div class="v">${fmtK(openTotal())}</div></div>
-          <div class="sum tah"><div class="k">Bugün tahsil</div><div class="v">${fmtK(sToday.tah)}</div></div>
+          <div class="sum tah"><div class="k">Bugün tahsil</div><div class="v">${fmtK(bugunTahsil)}</div></div>
           <div class="sum ert"><div class="k">Bu ay tahsil</div><div class="v">${fmtK(buAyTahsil)}</div></div>
         </div>
       </div>
+      ${hedefCard()}
 
       <div class="sec-title">Bugün tahsil edilecekler <span class="cnt">${todayOpen.length}</span></div>
       ${todayOpen.length ? cardsGrid(todayOpen) : `
@@ -1524,6 +1576,7 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
           <span class="v">${fmtTRY(remaining(k))}</span>
         </button>`).join("")
       ).join("")}</div>` : `<div class="panel meta" style="padding:14px">Önümüzdeki 7 günde vadeli alacak görünmüyor.</div>`}
+      ${recentActivityHtml()}
       <button class="fab" id="fab">+</button>
     `;
   }
@@ -1722,7 +1775,7 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
           ${cells.map(iso => {
             if (!iso) return `<button class="m-cell mute" tabindex="-1"></button>`;
             const d = dayInfo(iso, events);
-            return `<button class="m-cell ${iso === selectedDate ? "on" : ""} ${iso === today ? "today" : ""}" data-calday="${iso}">
+            return `<button class="m-cell ${iso === selectedDate ? "on" : ""} ${iso === today ? "today" : ""}${offCls(iso)}" data-calday="${iso}">
               <span class="n">${+iso.slice(8)}</span>
               <span class="cdots">${dotsHtml(d)}</span>
               <span class="a1">${d.plSum ? kisa(d.plSum) : ""}</span><span class="a3">${d.erSum ? "↻" + kisa(d.erSum) : ""}</span><span class="a2">${d.coSum ? "+" + kisa(d.coSum) : ""}</span>
@@ -1737,7 +1790,7 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
       body = `
         <div class="m-wrap" style="padding:8px"><div class="wk2">
           ${w.map(iso => { const d = dayInfo(iso, events), dt = parseISO(iso);
-            return `<button class="${iso === selectedDate ? "on" : ""} ${iso === today ? "today" : ""}" data-calday="${iso}">${GUN3[dt.getDay()]}<b>${dt.getDate()}</b><span class="cdots">${dotsHtml(d)}</span></button>`; }).join("")}
+            return `<button class="${iso === selectedDate ? "on" : ""} ${iso === today ? "today" : ""}${offCls(iso)}" data-calday="${iso}">${GUN3[dt.getDay()]}<b>${dt.getDate()}</b><span class="cdots">${dotsHtml(d)}</span></button>`; }).join("")}
         </div></div>
         ${w.map(iso => { const d = dayInfo(iso, events), dt = parseISO(iso);
           const pl = d.pl.slice().sort(byName), er = d.er.slice().sort(byName);
@@ -1792,6 +1845,7 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
             <div style="flex:1;min-width:0">
               <div style="font-weight:800;overflow-wrap:anywhere">${esc(c.ad)}</div>
               <div class="meta">${c.n} kayıt · Son vade ${fmtDate(c.last)}</div>
+              ${scoreLine(c.ad)}
             </div>
             <div style="text-align:right;flex:0 0 auto">
               <div class="amt" style="font-size:15px;color:${c.bek?"var(--bekle)":"var(--tahsil)"}">${fmtTRY(c.bek)}</div>
@@ -1888,6 +1942,8 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
   const BASLIK = { ozet: "Özet", defter: "Defter", takvim: "Takvim", musteri: "Müşteriler", rapor: "Rapor" };
   let lastViewIdx = -1, lastCalMode = "";
   function render() {
+    if (leaving) return;
+    renderTick++;
     let body = "";
     if (view === "ozet") body = renderOzet();
     else if (view === "defter") body = renderDefter();
@@ -1927,6 +1983,8 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
     document.getElementById("btnBell")?.addEventListener("click", () => openDigest(true));
     document.getElementById("btnShareTop")?.addEventListener("click", () => openShare(selectedDate, ofDate(selectedDate), fmtLong(selectedDate)));
     document.getElementById("fab")?.addEventListener("click", () => openForm());
+    document.getElementById("goalOpen")?.addEventListener("click", openGoalSheet);
+    document.getElementById("actAll")?.addEventListener("click", openActivity);
     const pgEl = document.querySelector(".page"), tbEl = document.querySelector(".topbar");
     if (pgEl && tbEl) { const f = () => tbEl.classList.toggle("scrolled", pgEl.scrollTop > 6); pgEl.addEventListener("scroll", f, { passive: true }); f(); }
     document.querySelectorAll("[data-calmode]").forEach(b => b.onclick = () => {
@@ -2155,7 +2213,7 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
           <button class="btn btn-tahsil" id="dTahsil">Tahsil</button>
           <button class="btn btn-erte" id="dErtele">Ertele</button>
         </div>
-        <a class="btn btn-wa owner" style="width:100%;margin-top:8px" href="${waLink(k)}" target="_blank" rel="noopener">${icon("msg")} WhatsApp hatırlat</a>` : ""}
+        <a class="btn btn-wa owner" style="width:100%;margin-top:8px" href="${waLink(k)}" target="_blank" rel="noopener" data-wak="${k.id}">${icon("msg")} WhatsApp hatırlat</a>` : ""}
         <div class="g2" style="margin-top:8px">
           <button class="btn btn-ghost" id="dEdit">Düzenle</button>
           <button class="btn btn-ghost" id="dDel" style="color:#8b2e2e">Sil</button>
@@ -2224,6 +2282,7 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
     document.getElementById("tSave").onclick = async () => {
       const amt = parseMoney(document.getElementById("tTutar").value);
       if (amt <= 0) return toast("Tutar girin");
+      if (!(await mesaiGuard())) return;
       if (!db.kayitlar.find(x => x.id === k.id)) { closeSheet(); return toast("Kayıt artık yok"); }
       const tarih = document.getElementById("tTarih").value;
       const tSel = document.getElementById("tTaksit");
@@ -2264,8 +2323,13 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
       </div>`);
     document.getElementById("sheetClose").onclick = closeSheet;
     document.getElementById("eSave").onclick = async () => {
-      const yeni = document.getElementById("eTarih").value;
+      let yeni = document.getElementById("eTarih").value;
       if (!yeni) return toast("Tarih seçin");
+      if (!isWorkday(yeni)) {
+        const adj = firstWorkdayOnOrAfter(yeni);
+        toast(`${GUN[parseISO(yeni).getDay()]} mesai günü değil → ${fmtDate(adj)} tarihine alındı`, null, 3800);
+        yeni = adj;
+      }
       if (!db.kayitlar.find(x => x.id === k.id)) { closeSheet(); return toast("Kayıt artık yok"); }
       const neden = document.getElementById("eNeden").value.trim();
       const btn = document.getElementById("eSave");
@@ -2305,9 +2369,10 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
           <div class="sum tah"><div class="k">Tahsil</div><div class="v">${fmtK(s.tah)}</div></div>
           <div class="sum ert"><div class="k">Ertelenen</div><div class="v">${fmtK(s.ert)}</div></div>
         </div>
+        ${scorePanel(ad)}
         <div class="g2" style="margin-bottom:12px">
           <button class="btn btn-gold" id="cShare">Ekstre görseli</button>
-          ${bek.length ? `<a class="btn btn-wa owner" href="${waLink(bek[0])}" target="_blank" rel="noopener">${icon("msg")} WhatsApp</a>` : `<button class="btn btn-ghost" disabled>WhatsApp</button>`}
+          ${bek.length ? `<a class="btn btn-wa owner" href="${waLink(bek[0])}" target="_blank" rel="noopener" data-wak="${bek[0].id}">${icon("msg")} WhatsApp</a>` : `<button class="btn btn-ghost" disabled>WhatsApp</button>`}
         </div>
         ${cardsGrid(list)}
         <button class="btn btn-leather" id="cAdd" style="width:100%;margin-top:8px">Bu müşteriye kayıt ekle</button>
@@ -2461,6 +2526,12 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
         </div>
         ${db.pin ? `<button class="btn btn-ghost" id="sLockNow" style="width:100%;margin-top:8px">${icon("lock")} Şimdi kilitle</button>` : ""}
 
+        <label class="fld">Yönetim ayarları ${db.silmePin ? "🔒 (yetkili)" : ""}</label>
+        <button class="btn btn-ghost" id="sGoal" style="width:100%">🎯 Aylık tahsilat hedefi: ${db.hedef ? fmtK(db.hedef) : "tanımlı değil"}</button>
+        <button class="btn btn-ghost" id="sMesai" style="width:100%;margin-top:8px">🕘 Mesai saatleri: ${mesaiOn() ? mesaiOzet() : "tanımlı değil"}</button>
+        <button class="btn btn-ghost" id="sTpl" style="width:100%;margin-top:8px">💬 WhatsApp mesaj şablonları (${tpls().length})</button>
+        <p class="meta" style="margin:6px 2px">${db.silmePin ? "Bu ayarlar yalnızca Yetki PIN'ini bilen yetkili kişi tarafından değiştirilebilir." : "Yetki PIN'i belirlenmezse bu ayarları herkes değiştirebilir. Aşağıdan Yetki PIN'i belirleyin."}</p>
+
         <label class="fld">Kullanıcı adı (bu cihaz)</label>
         <button class="btn btn-ghost" id="sName" style="width:100%">✎ ${ME() ? esc(ME()) : "Adınızı girin"} · değiştir</button>
         <p class="meta" style="margin:6px 2px">Kayıtlarda “kim ekledi, kim tahsil etti” bilgisi bu adla tutulur.</p>
@@ -2471,12 +2542,12 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
         <label class="fld">Silinenler</label>
         <button class="btn btn-ghost" id="sTrash" style="width:100%">Silinenler kutusu (${db.kayitlar.filter(k => k.silindi).length})</button>
 
-        <label class="fld">Silme PIN'i (tüm cihazlar için ortak)</label>
+        <label class="fld">Yetki PIN'i (silme ve yönetim ayarları · tüm cihazlar için ortak)</label>
         <div class="g2">
-          <button class="btn btn-gold" id="sDelPinSet">${db.silmePin ? "PIN değiştir" : "Silme PIN'i belirle"}</button>
+          <button class="btn btn-gold" id="sDelPinSet">${db.silmePin ? "PIN değiştir" : "Yetki PIN'i belirle"}</button>
           <button class="btn btn-ghost" id="sDelPinDel" ${db.silmePin ? "" : "disabled"}>PIN kaldır</button>
         </div>
-        <p class="meta" style="margin:6px 2px">Kayıt silmek ve tüm defteri silmek için bu PIN istenir. PIN tüm cihazlarda aynıdır; bağlantıyı bilen ama PIN'i bilmeyen kişi silemez.</p>
+        <p class="meta" style="margin:6px 2px">Kayıt silmek, tüm defteri silmek, aylık hedefi, mesai saatlerini ve mesaj şablonlarını değiştirmek ile mesai dışında tahsilat işlemek için bu PIN istenir. PIN'i yalnızca yetkili kişilere söyleyin.</p>
 
         <label class="fld">Yedekleme (bağlantı gerekmez)</label>
         <div class="g2">
@@ -2506,6 +2577,9 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
     };
     renderShare();
     document.getElementById("sName").onclick = () => openNameSheet(false);
+    document.getElementById("sGoal").onclick = async () => { if (await guardAdmin("Aylık hedefi yalnızca yetkili kişi belirleyebilir")) openGoalSheet(); };
+    document.getElementById("sMesai").onclick = openMesaiSheet;
+    document.getElementById("sTpl").onclick = openTplManager;
     repaintDevices();
     const setLook = v => { db.gorunum = v; save(); applyTheme(); render(); openSettings(); toast(v === "klasik" ? "Klasik defter görünümü" : "Cam görünümü"); };
     document.getElementById("sLookCam").onclick = () => setLook("cam");
@@ -2977,7 +3051,7 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
     return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   }
   const shareLink = () => `${location.origin}${location.pathname}#d=${DEFTER_ID}`;
-  const sharedSettingsJson = () => JSON.stringify({ magaza: db.magaza, firma: { tel: db.firma.tel, vergi: db.firma.vergi, adres: db.firma.adres }, silmePin: db.silmePin || null });
+  const sharedSettingsJson = () => JSON.stringify({ magaza: db.magaza, firma: { tel: db.firma.tel, vergi: db.firma.vergi, adres: db.firma.adres }, silmePin: db.silmePin || null, hedef: Number(db.hedef) || 0, mesai: db.mesai || null, sablonlar: db.sablonlar || null });
 
   async function loadSdk() {
     let last;
@@ -3042,6 +3116,10 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
       return setSyncState(navigator.onLine ? "hata" : "cevrimdisi", fbErr(e));
     }
 
+    try {
+      const v = Number(localStorage.getItem(JOIN_KEY));
+      if (v) joinTs = v; else { joinTs = Date.now(); localStorage.setItem(JOIN_KEY, String(joinTs)); }
+    } catch (e) { joinTs = Date.now(); }
     const SEED_KEY = SEED_PREFIX + DEFTER_ID;
     let seeded = false;
     try { seeded = localStorage.getItem(SEED_KEY) === "1"; } catch (e) {}
@@ -3059,11 +3137,7 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
       snap.docChanges().forEach(ch => {
         const id = ch.doc.id;
         const i = db.kayitlar.findIndex(k => k.id === id);
-        if (ch.type === "removed") {
-          if (i >= 0) { db.kayitlar.splice(i, 1); changed = true; }
-          remoteRec.delete(id);
-          return;
-        }
+        if (ch.type === "removed") { checkClosedSoon(); return; } /* kayıtlar asla silinmez; toplu silinme = defter taşındı */
         if (ch.doc.metadata.hasPendingWrites) return; /* bizim kendi yazdığımız */
         let rec;
         try { rec = JSON.parse(ch.doc.data().d); } catch (e) { return; }
@@ -3104,6 +3178,9 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
           const f = o.firma || {};
           db.firma = { ...db.firma, tel: f.tel || "", vergi: f.vergi || "", adres: f.adres || "" };
           db.silmePin = o.silmePin || null;
+          db.hedef = Number(o.hedef) || 0;
+          db.mesai = o.mesai || null;
+          db.sablonlar = Array.isArray(o.sablonlar) ? o.sablonlar : null;
           remoteSet = sharedSettingsJson();
           changed = true;
         } else if (ch.doc.id === "logo") {
@@ -3111,6 +3188,11 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
           db.firma.logo = typeof raw === "string" ? raw : "";
           remoteLogo = db.firma.logo;
           changed = true;
+        } else if (ch.doc.id === "cikarilan") {
+          let m = {}; try { m = JSON.parse(raw) || {}; } catch (e) {}
+          if (m[DEV_ID] && m[DEV_ID] > joinTs) leaveDefter("cikarildi");
+        } else if (ch.doc.id === "kapali") {
+          if (!renewing) leaveDefter("yenilendi");
         }
       });
       if (changed) { cacheSave(); scheduleRender(); }
@@ -3194,6 +3276,7 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
         </div>
         <div class="meta" id="shareStatus" style="margin-top:8px">${esc(statusText())}</div>
         <button class="btn btn-ghost" id="pDiag" style="width:100%;margin-top:8px">Bağlantı durumu ve tanı</button>
+        <button class="btn btn-ghost" id="pRenew" style="width:100%;margin-top:8px">🔒 Bağlantıyı yenile (eskisini kapat)</button>
         <button class="btn btn-ghost" id="pLeave" style="width:100%;margin-top:8px">Bu cihazı defterden ayır</button>
         <p class="meta" style="margin-top:8px">Bağlantıyı yalnızca güvendiğiniz kişilere verin. Bağlantıyı bilen herkes defterin tamamına erişir.</p>
       </div>`;
@@ -3204,13 +3287,14 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
     host.innerHTML = shareSectionHtml();
     const on = (id, fn) => { const el = document.getElementById(id); if (el) el.onclick = fn; };
     on("pDiag", () => { closeSheet(); openStatusSheet(); });
+    on("pRenew", renewLink);
     on("pCopy", async () => {
       try { await navigator.clipboard.writeText(shareLink()); toast("Bağlantı kopyalandı"); }
       catch (e) { prompt("Bağlantıyı kopyalayın:", shareLink()); }
     });
     on("pLeave", () => {
       if (!confirm("Bu cihaz defterden ayrılsın mı? Defter silinmez; bağlantıyla tekrar girebilirsiniz.")) return;
-      try { localStorage.removeItem(ID_KEY); } catch (e) {}
+      try { localStorage.removeItem(ID_KEY); localStorage.removeItem(JOIN_KEY); } catch (e) {}
       history.replaceState(null, "", location.pathname + location.search);
       location.reload();
     });
@@ -3283,6 +3367,7 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
     try {
       const legacy = localStorage.getItem(KEY);
       localStorage.setItem(ID_KEY, id);
+      localStorage.setItem(JOIN_KEY, String(Date.now()));
       localStorage.setItem(KEY + ":" + id, legacy || JSON.stringify(defaultDB()));
       localStorage.setItem(SEED_PREFIX + id, "1");
       localStorage.setItem("kirtasiye_ilk_baglanti", "1");
@@ -3294,7 +3379,7 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
     const t = String(text || "").trim();
     const m = t.match(/[#&?]d=([A-Za-z0-9_-]{16,})/) || t.match(/^([A-Za-z0-9_-]{16,})$/);
     if (!m) return toast("Geçerli bir defter bağlantısı değil");
-    try { localStorage.setItem(ID_KEY, m[1]); } catch (e) { return toast("Tarayıcı kaydı engelliyor"); }
+    try { localStorage.setItem(ID_KEY, m[1]); localStorage.setItem(JOIN_KEY, String(Date.now())); } catch (e) { return toast("Tarayıcı kaydı engelliyor"); }
     location.hash = "d=" + m[1];
     location.reload();
   }
@@ -3468,14 +3553,14 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
   }
   async function guardDelete() {
     if (!db.silmePin) return true;
-    const p = await askPin("Silme PIN'i", "Silmek için ortak silme PIN'ini girin");
+    const p = await askPin("Yetki PIN'i", "Bu işlem için yetkili PIN'ini girin");
     if (p === null) return false;
     if ((await sha256(db.silmePin.s + ":" + p)) !== db.silmePin.h) { toast("PIN yanlış"); return false; }
     return true;
   }
   async function delPinSet() {
     if (db.silmePin && !(await guardDelete())) return;
-    const a = await askPin("Yeni silme PIN'i", "4-8 rakam");
+    const a = await askPin("Yeni yetki PIN'i", "4-8 rakam");
     if (a === null) return;
     if (!/^\d{4,8}$/.test(a)) return toast("PIN 4-8 rakam olmalı");
     const b = await askPin("PIN'i tekrar girin", "");
@@ -3483,12 +3568,12 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
     if (a !== b) return toast("PIN'ler uyuşmadı");
     const sl = newToken().slice(0, 10);
     db.silmePin = { s: sl, h: await sha256(sl + ":" + a) };
-    save(); openSettings(); toast("Silme PIN'i ayarlandı");
+    save(); openSettings(); toast("Yetki PIN'i ayarlandı");
   }
   async function delPinRemove() {
     if (!(await guardDelete())) return;
     db.silmePin = null;
-    save(); openSettings(); toast("Silme PIN'i kaldırıldı");
+    save(); openSettings(); toast("Yetki PIN'i kaldırıldı");
   }
 
   /* ---- Canlı işlem bildirimi (ekranda uyarı + arka planda sistem bildirimi) ---- */
@@ -3585,7 +3670,7 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
     const _d = openDetail, _f = openForm, _t = openTahsil, _e = openErtele;
     openDetail = k => { _d(k); trackSheet(k.id, false); };
     openForm = (edit, pre) => { _f(edit, pre); trackSheet(edit ? edit.id : null, !!edit); };
-    openTahsil = k => { _t(k); trackSheet(k.id, true); };
+    openTahsil = async k => { if (!(await mesaiGuard())) return; _t(k); trackSheet(k.id, true); };
     openErtele = k => { _e(k); trackSheet(k.id, true); };
   }
 
@@ -3610,25 +3695,29 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
     rolling = true;
     try {
       const t = todayISO();
-      const ids = kayitlar().filter(k => isOpen(k) && k.vade && k.vade < t).map(k => k.id);
+      const hedefGun = firstWorkdayOnOrAfter(t); /* bugün mesai günüyse bugün; değilse sonraki mesai günü */
+      /* geçmiş vadeliler VE bugün mesai günü olmadığında bugün vadeliler devredilir */
+      const due = rec => isOpen(rec) && rec.vade && (rec.vade < t || (rec.vade === t && !isWorkday(t)));
+      const ids = kayitlar().filter(due).map(k => k.id);
       let n = 0;
       for (const id of ids) {
         const ok = await mutateRecord(id, "Otomatik erteleme", rec => {
-          if (!isOpen(rec) || !rec.vade || rec.vade >= t) return false; /* başka cihaz zaten ertelemiş */
+          if (!due(rec)) return false; /* başka cihaz zaten ertelemiş */
           const eski = rec.vade, now = new Date().toISOString();
+          const neden = !isWorkday(eski) ? "Otomatik: mesai günü değil" : (hedefGun !== t ? "Otomatik: vade gününde alınmadı, bugün mesai günü değil" : "Otomatik: vade gününde tahsil edilmedi");
           rec.ertelemeGecmisi = rec.ertelemeGecmisi || [];
-          rec.ertelemeGecmisi.push({ eski, yeni: t, neden: "Otomatik: vade gününde tahsil edilmedi", t: now, auto: true });
+          rec.ertelemeGecmisi.push({ eski, yeni: hedefGun, neden, t: now, auto: true });
           rec.orijinalVade = rec.orijinalVade || eski;
-          rec.vade = t;
+          rec.vade = hedefGun;
           rec.durum = "bekliyor";
           rec.ertelemeSayisi = (rec.ertelemeSayisi || 0) + 1;
           rec.gecmis = rec.gecmis || [];
-          rec.gecmis.push({ t: now, a: "ertelendi", d: `${fmtDate(eski)} → ${fmtDate(t)} (otomatik)`, auto: true });
+          rec.gecmis.push({ t: now, a: "ertelendi", d: `${fmtDate(eski)} → ${fmtDate(hedefGun)} (otomatik)`, auto: true });
           return true;
         }, { auto: true });
         if (ok) n++;
       }
-      if (n) { render(); toast(`↻ ${n} tahsilat bugüne ertelendi`, null, 4500); }
+      if (n) { render(); toast(`↻ ${n} tahsilat ${hedefGun === t ? "bugüne" : fmtDate(hedefGun).slice(0, 5) + " tarihine (sonraki mesai günü)"} ertelendi`, null, 4800); }
     } catch (e) { console.warn("otomatik erteleme", e); }
     finally { rolling = false; }
   }
@@ -3683,7 +3772,7 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
           <div class="dev-row ${d.online ? "on" : ""}">
             <span class="dev-dot"></span>
             <div class="dev-mid"><b>${esc(d.ad)}${d.self ? `<span class="dev-me">Bu cihaz</span>` : ""}</b><span>${esc(d.cz)} · ${d.online ? "şu an çevrimiçi" : "son görülme " + ago(d.last)}</span></div>
-            ${(!d.self && !d.online) ? `<button class="dev-del" data-devdel="${d.id}">Kaldır</button>` : ""}
+            ${!d.self ? `<button class="dev-del" data-devkick="${d.id}">Çıkar</button>` : ""}
           </div>`).join("") || `<div class="dev-row"><div class="dev-mid"><span>Henüz cihaz bilgisi yok</span></div></div>`}
       </div>
       ${diag.cihazErr ? `<p class="meta" style="margin-top:6px">Cihaz listesi tam çalışmıyor (${esc(diag.cihazErr)}). Firestore kurallarını güncelleyin.</p>` : ""}`;
@@ -3691,14 +3780,571 @@ html[data-look="cam"] .m-cell .a3 { display: block; }
   function repaintDevices() {
     document.querySelectorAll("[data-devhost]").forEach(host => {
       host.innerHTML = devicesHtml();
-      host.querySelectorAll("[data-devdel]").forEach(b => b.onclick = () => {
-        if (!confirm("Bu cihaz listeden kaldırılsın mı? (Cihaz tekrar açılırsa kendiliğinden yeniden görünür)")) return;
-        fbm.deleteDoc(docRef("cihaz", b.dataset.devdel)).catch(() => toast("Kaldırılamadı"));
-      });
+      host.querySelectorAll("[data-devkick]").forEach(b => b.onclick = () => kickDevice(b.dataset.devkick));
     });
     setSyncState(syncState, syncDetail); /* başlıktaki "N cihaz" yazısını tazele */
   }
   setInterval(() => { if (cloudOn) repaintDevices(); }, 20000);
+
+  /* ================= GÜVENİLİRLİK PUANI · AKTİVİTE AKIŞI · AYLIK HEDEF · CİHAZ ÇIKARMA / BAĞLANTI YENİLEME ================= */
+  let leaving = false, renewing = false, joinTs = 0, closedTimer = null;
+  const JOIN_KEY = "kirtasiye_katilim";
+
+  /* ---- 1) Müşteri güvenilirlik puanı (ilk vadeye göre gecikme + erteleme sıklığı) ---- */
+  let renderTick = 0, scoreTick = -1, scoreCache = new Map(), actTick = -1, actCache = [];
+  const dayDiff = (a, b) => Math.round((parseISO(b) - parseISO(a)) / 86400000);
+  function lastCollectIso(k) {
+    const ev = (k.gecmis || []).filter(g => g.a === "tahsil" || g.a === "kismi").map(g => g.tarih || String(g.t).slice(0, 10)).sort();
+    return ev.length ? ev[ev.length - 1] : (k.tahsilTarihi || null);
+  }
+  function computeScores() {
+    const t = todayISO(), by = new Map();
+    kayitlar().forEach(k => {
+      if (statusOf(k) === "iptal") return;
+      const n = (k.musteri || "").trim(); if (!n) return;
+      if (!by.has(n)) by.set(n, []);
+      by.get(n).push(k);
+    });
+    const out = new Map();
+    by.forEach((list, ad) => {
+      let paid = 0, onTime = 0, waitN = 0, delaySum = 0, ert = 0, longOpen = 0;
+      list.forEach(k => {
+        ert += k.ertelemeSayisi || 0;
+        const ref = k.orijinalVade || k.vade; if (!ref) return;
+        if (statusOf(k) === "tahsil") {
+          const d = Math.max(0, dayDiff(ref, lastCollectIso(k) || k.vade));
+          paid++; delaySum += d; if (d <= 1) onTime++;
+        } else if (isOpen(k) && ref < t) {
+          const d = dayDiff(ref, t); waitN++; delaySum += d; if (d >= 30) longOpen++;
+        }
+      });
+      const denom = paid + waitN, avg = denom ? delaySum / denom : 0, er = ert / list.length;
+      let sc = 5;
+      sc -= avg >= 15 ? 3 : avg >= 8 ? 2 : avg >= 4 ? 1 : avg >= 2 ? 0.5 : 0;
+      sc -= er >= 2 ? 1.5 : er >= 1 ? 1 : er >= 0.5 ? 0.5 : 0;
+      if (longOpen) sc -= 0.5;
+      sc = Math.min(5, Math.max(1, Math.round(sc * 2) / 2));
+      const yeni = list.length < 2;
+      out.set(ad, { ad, score: sc, yeni, n: list.length, paid, onTime, avg: Math.round(avg * 10) / 10, ert, er: Math.round(er * 10) / 10,
+        label: yeni ? "Yeni müşteri" : sc >= 4.5 ? "Çok güvenilir" : sc >= 3.5 ? "Güvenilir" : sc >= 2.5 ? "Dikkatli" : "Riskli" });
+    });
+    return out;
+  }
+  function scoreOf(ad) {
+    if (scoreTick !== renderTick) { scoreCache = computeScores(); scoreTick = renderTick; }
+    return scoreCache.get((ad || "").trim());
+  }
+  const trNum = n => String(n).replace(".", ",");
+  const scoreColor = s => (!s || s.yeni) ? "var(--mute)" : s.score >= 3.5 ? "var(--gold-dim)" : s.score >= 2.5 ? "var(--erte)" : "var(--red)";
+  const starsHtml = s => `<span class="stars" style="--p:${s.yeni ? 0 : s.score / 5 * 100}%;--sc:${scoreColor(s)}">★★★★★</span>`;
+  function scoreLine(ad) {
+    const s = scoreOf(ad); if (!s) return "";
+    if (s.yeni) return `<div class="meta score-line">Yeni müşteri · puan için en az 2 kayıt gerekir</div>`;
+    return `<div class="score-line">${starsHtml(s)} <b style="color:${scoreColor(s)}">${trNum(s.score)}</b> <span class="meta">· ${s.label}</span></div>`;
+  }
+  function scoreChip(k) {
+    const s = scoreOf(k.musteri);
+    if (!s || s.yeni || s.score >= 3) return "";
+    return `<span class="sc-chip" style="--sc:${scoreColor(s)}">${s.score < 2.5 ? "⚠ Riskli" : "★ Dikkatli"}</span>`;
+  }
+  function scorePanel(ad) {
+    const s = scoreOf(ad); if (!s) return "";
+    if (s.yeni) return `<div class="panel score-panel"><b>Güvenilirlik puanı</b><div class="meta" style="margin-top:4px">Henüz yeterli geçmiş yok. En az 2 kayıt olunca puan hesaplanır.</div></div>`;
+    const pct = s.paid ? Math.round(s.onTime / s.paid * 100) : null;
+    return `<div class="panel score-panel">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="flex:1"><b>Güvenilirlik puanı</b><div style="margin-top:3px">${starsHtml(s)} <b style="color:${scoreColor(s)}">${trNum(s.score)}</b></div></div>
+        <div class="sc-label" style="--sc:${scoreColor(s)}">${s.label}</div>
+      </div>
+      <div class="score-facts">
+        <div><b>${trNum(s.avg)} gün</b><span>ortalama gecikme</span></div>
+        <div><b>${s.ert}</b><span>erteleme (${trNum(s.er)}/kayıt)</span></div>
+        <div><b>${pct === null ? "—" : "%" + pct}</b><span>zamanında ödeme${s.paid ? ` (${s.onTime}/${s.paid})` : ""}</span></div>
+      </div>
+      <div class="meta" style="margin-top:8px">İlk vadeye göre hesaplanır. Ödeme ilk vadeden en çok 1 gün sonra gelirse “zamanında” sayılır.</div>
+    </div>`;
+  }
+
+  /* ---- 2) Aktivite akışı ---- */
+  const dayOf = t => toISO(new Date(t));
+  const ACT_ICON = { olusturuldu: ["✚", "pl"], duzenlendi: ["✎", "pl"], tahsil: ["✓", "th"], kismi: ["◐", "th"], ertelendi: ["↻", "er"], silindi: ["✕", "ge"] };
+  function activityEvents() {
+    if (actTick === renderTick) return actCache;
+    const ev = [];
+    db.kayitlar.forEach(k => {
+      (k.gecmis || []).forEach(g => { if (g.t) ev.push({ t: g.t, a: g.a, d: g.d, kim: g.k || "", auto: !!g.auto, k }); });
+      if (k.silindi && k.sonT) ev.push({ t: k.sonT, a: "silindi", d: "", kim: k.sonKim || "", k });
+    });
+    ev.sort((a, b) => String(b.t).localeCompare(String(a.t)));
+    actCache = ev; actTick = renderTick;
+    return ev;
+  }
+  function actText(e) {
+    const k = e.k;
+    switch (e.a) {
+      case "olusturuldu": return `Yeni kayıt · ${fmtTRY(k.tutar)}`;
+      case "duzenlendi": return "Kaydı düzenledi";
+      case "tahsil": return `Tahsil etti · ${e.d || ""}`;
+      case "kismi": return `Kısmi tahsilat · ${e.d || ""}`;
+      case "ertelendi": return `${e.auto ? "Otomatik erteledi" : "Erteledi"} · ${String(e.d || "").replace(" (otomatik)", "")}`;
+      case "silindi": return "Kaydı sildi";
+      default: return ACT_AD[e.a] || e.a;
+    }
+  }
+  const hhmm = t => new Date(t).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
+  function actStamp(e) {
+    const iso = dayOf(e.t), today = todayISO();
+    return iso === today ? hhmm(e.t) : iso === addDays(today, -1) ? "dün " + hhmm(e.t) : fmtDate(iso).slice(0, 5) + " " + hhmm(e.t);
+  }
+  function actRow(e, withDate) {
+    const [ic, cl] = ACT_ICON[e.a] || ["•", "pl"];
+    return `<div class="row" ${e.k.silindi ? "" : `data-open="${e.k.id}"`}>
+      <div class="ic ${cl}">${ic}</div>
+      <div class="mid"><div class="t1">${esc(e.kim || "Biri")} · ${esc(e.k.musteri)}</div><div class="t2 wrap">${esc(actText(e))}</div></div>
+      <div class="v" style="font-size:12px;font-weight:700;color:var(--mute)">${withDate ? actStamp(e) : hhmm(e.t)}</div></div>`;
+  }
+  function recentActivityHtml() {
+    const ev = activityEvents().slice(0, 6);
+    if (!ev.length) return "";
+    return `<div class="sec-title">Son hareketler</div>
+      <div class="group">${ev.map(e => actRow(e, true)).join("")}</div>
+      <button class="btn btn-ghost" id="actAll" style="width:100%;margin-top:10px">Aktivite akışının tamamı</button>`;
+  }
+  let actFilter = "7", actWho = "";
+  function openActivity() {
+    const all = activityEvents(), today = todayISO();
+    const from = actFilter === "bugun" ? today : actFilter === "7" ? addDays(today, -6) : "0000-00-00";
+    const people = [...new Set(all.map(e => e.kim).filter(Boolean))].sort((a, b) => a.localeCompare(b, "tr"));
+    const list = all.filter(e => dayOf(e.t) >= from && (!actWho || e.kim === actWho));
+    const tList = all.filter(e => dayOf(e.t) === today);
+    const tahsilBugun = round2(collectEvents().filter(e => e.iso === today).reduce((a, e) => a + e.tutar, 0));
+    const shown = list.slice(0, 150);
+    const groups = [];
+    shown.forEach(e => { const d = dayOf(e.t); const g = groups[groups.length - 1]; if (g && g.d === d) g.items.push(e); else groups.push({ d, items: [e] }); });
+    openSheet(`
+      <div class="sheet-card full">
+        <div class="grab"></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <h2 style="flex:1;font-size:18px">Aktivite akışı</h2>
+          <button class="btn btn-ghost" id="sheetClose">Kapat</button>
+        </div>
+        <div class="meta" style="margin:10px 2px 6px">Bugün</div>
+        <div class="kpis" style="margin-top:0">
+          <div class="kpi pl"><div class="k"><i></i>Yeni kayıt</div><div class="v">${tList.filter(e => e.a === "olusturuldu").length}</div></div>
+          <div class="kpi th"><div class="k"><i></i>Tahsilat</div><div class="v">${fmtK(tahsilBugun)}</div></div>
+          <div class="kpi er"><div class="k"><i></i>Ertelenen</div><div class="v">${tList.filter(e => e.a === "ertelendi").length}</div></div>
+        </div>
+        <div class="chips" style="margin:6px 0 8px">
+          ${[["bugun", "Bugün"], ["7", "Son 7 gün"], ["tum", "Tümü"]].map(([id, ad]) => `<button class="chip ${actFilter === id ? "on" : ""}" data-actf="${id}">${ad}</button>`).join("")}
+        </div>
+        ${people.length ? `<div class="chips" style="margin:0 0 6px"><button class="chip ${!actWho ? "on" : ""}" data-actw="">Herkes</button>${people.map(p => `<button class="chip ${actWho === p ? "on" : ""}" data-actw="${esc(p)}">${esc(p)}</button>`).join("")}</div>` : ""}
+        ${groups.length ? groups.map(g => `
+          <div class="day-h"><b class="${g.d === today ? "today" : ""}">${g.d === today ? "Bugün" : g.d === addDays(today, -1) ? "Dün" : fmtLong(g.d)}</b><span>${g.items.length} hareket</span></div>
+          <div class="group">${g.items.map(e => actRow(e, false)).join("")}</div>`).join("")
+          : `<div class="empty">Bu aralıkta hareket yok.</div>`}
+        ${list.length > shown.length ? `<p class="meta" style="text-align:center;margin-top:10px">Son ${shown.length} hareket gösteriliyor.</p>` : ""}
+        <p class="meta" style="margin-top:10px">Bu özelliğin eklenmesinden önce yapılan işlemlerde “kim yaptı” bilgisi olmayabilir.</p>
+      </div>`, true);
+    document.getElementById("sheetClose").onclick = closeSheet;
+    document.querySelectorAll("[data-actf]").forEach(b => b.onclick = () => { actFilter = b.dataset.actf; openActivity(); });
+    document.querySelectorAll("[data-actw]").forEach(b => b.onclick = () => { actWho = b.dataset.actw; openActivity(); });
+    document.querySelectorAll("#sheet .row[data-open]").forEach(r => r.onclick = () => {
+      const k = kayitlar().find(x => x.id === r.dataset.open);
+      if (k) openDetail(k);
+    });
+  }
+
+  /* ---- 3) Aylık tahsilat hedefi ---- */
+  function hedefInfo() {
+    const goal = Number(db.hedef) || 0; if (!goal) return null;
+    const t = todayISO(), ym = t.slice(0, 7), y = +t.slice(0, 4), m = +t.slice(5, 7);
+    const dim = new Date(y, m, 0).getDate(), left = dim - (+t.slice(8)) + 1, monthEnd = `${ym}-${z2(dim)}`;
+    const ev = collectEvents();
+    const sumIn = pre => round2(ev.filter(e => e.iso.startsWith(pre)).reduce((a, e) => a + e.tutar, 0));
+    const got = sumIn(ym);
+    const pd = new Date(y, m - 2, 1), prev = `${pd.getFullYear()}-${z2(pd.getMonth() + 1)}`;
+    const openDue = round2(kayitlar().filter(k => isOpen(k) && k.vade && k.vade <= monthEnd).reduce((a, k) => a + remaining(k), 0));
+    const need = Math.max(0, round2(goal - got));
+    return { goal, got, pct: got / goal * 100, need, left, perDay: Math.ceil(need / Math.max(1, left)), openDue, proj: round2(got + openDue), prevTotal: sumIn(prev), ay: AY[m - 1], done: got >= goal };
+  }
+  function hedefCard() {
+    const h = hedefInfo();
+    if (!h) return "";
+    return `<div class="goal">
+      <div class="goal-top"><b>🎯 ${h.ay} hedefi</b><span>%${Math.round(h.pct)}</span></div>
+      <div class="goal-num"><b>${fmtK(h.got)}</b> / ${fmtK(h.goal)}</div>
+      <div class="goalbar"><i class="${h.done ? "ok" : ""}" style="width:${Math.min(100, h.pct)}%"></i></div>
+      <div class="goal-meta">${h.done ? "🎉 Hedef tamamlandı" : `Kalan <b>${fmtK(h.need)}</b> · günde ~<b>${fmtK(h.perDay)}</b> (${h.left} gün)`}</div>
+      <div class="goal-meta">Ay sonuna kadar beklenen toplam: <b>${fmtK(h.proj)}</b> (%${Math.round(h.proj / h.goal * 100)}) · Geçen ay: ${fmtK(h.prevTotal)}</div>
+    </div>`;
+  }
+  function openGoalSheet() {
+    openSheet(`
+      <div class="sheet-card">
+        <div class="grab"></div>
+        <h2 style="font-size:18px">Aylık tahsilat hedefi</h2>
+        <p class="meta" style="margin:6px 0 10px">Her ay için geçerli hedef tutar. Özet ekranında ilerleme çubuğu olarak görünür. Bu ayar tüm cihazlarda ortaktır.</p>
+        <input class="inp" id="gIn" inputmode="decimal" placeholder="örn. 150.000" value="${db.hedef ? esc(String(db.hedef).replace(".", ",")) : ""}" />
+        <button class="btn btn-gold" id="gSave" style="width:100%;margin-top:12px">Kaydet</button>
+        ${db.hedef ? `<button class="btn btn-ghost" id="gDel" style="width:100%;margin-top:8px">Hedefi kaldır</button>` : ""}
+        <button class="btn btn-ghost" id="sheetClose" style="width:100%;margin-top:8px">Vazgeç</button>
+      </div>`);
+    const inp = document.getElementById("gIn");
+    document.getElementById("sheetClose").onclick = closeSheet;
+    document.getElementById("gSave").onclick = () => {
+      const v = parseMoney(inp.value);
+      if (!(v > 0)) return toast("Geçerli bir tutar girin");
+      db.hedef = round2(v); save(); closeSheet(); render(); toast("Hedef kaydedildi");
+    };
+    const del = document.getElementById("gDel");
+    if (del) del.onclick = () => { db.hedef = 0; save(); closeSheet(); render(); toast("Hedef kaldırıldı"); };
+    setTimeout(() => inp.focus(), 60);
+  }
+
+  /* ---- 4) Cihazı uzaktan çıkar · bağlantıyı yenile ---- */
+  function showLeftScreen(reason) {
+    const [h, p] = reason === "cikarildi"
+      ? ["Bu cihaz defterden çıkarıldı", "Defter sahibi bu cihazın bağlantısını kesti. Yeniden katılmak için güncel bağlantıyı defter sahibinden isteyin."]
+      : ["Defter bağlantısı yenilendi", "Güvenlik için eski bağlantı kapatıldı. Yeni bağlantıyı defter sahibinden isteyin."];
+    document.getElementById("app").innerHTML = `
+      <div style="min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px">
+        <div class="panel" style="max-width:440px;width:100%;padding:24px">
+          <div style="font-size:11px;letter-spacing:.18em;color:var(--mute);font-weight:700;text-align:center">ÖDEME DEFTERİ</div>
+          <h2 style="text-align:center;margin:8px 0 6px;font-size:20px">${h}</h2>
+          <p class="meta" style="text-align:center;margin-bottom:14px">${p}</p>
+          <input class="inp" id="wLink" placeholder="Yeni defter bağlantısını buraya yapıştırın" />
+          <button class="btn btn-gold" id="wJoin" style="width:100%;margin-top:10px">Bağlantıyla katıl</button>
+        </div>
+      </div>`;
+    document.getElementById("wJoin").onclick = () => joinDefter(document.getElementById("wLink").value);
+  }
+  function leaveDefter(reason) {
+    if (leaving) return;
+    leaving = true; cloudOn = false;
+    try {
+      localStorage.removeItem(ID_KEY); localStorage.removeItem(JOIN_KEY);
+      localStorage.removeItem(KEY + ":" + DEFTER_ID); localStorage.removeItem(SEED_PREFIX + DEFTER_ID);
+    } catch (e) {}
+    try { closeSheet(); } catch (e) {}
+    showLeftScreen(reason);
+  }
+  function checkClosedSoon() {
+    clearTimeout(closedTimer);
+    closedTimer = setTimeout(async () => {
+      try { const s = await fbm.getDocFromServer(docRef("ayar", "kapali")); if (s.exists() && !renewing) leaveDefter("yenilendi"); } catch (e) {}
+    }, 1500);
+  }
+  async function kickDevice(id) {
+    let ad = "cihaz"; try { ad = JSON.parse((devDocs.get(id) || {}).d).ad || "cihaz"; } catch (e) {}
+    if (!confirm(`“${ad}” cihazı defterden çıkarılsın mı?\\n\\nCihaz açıksa hemen, kapalıysa açıldığında bağlantısı kesilir. Bağlantıyı bilmeye devam eder; tamamen engellemek için “Bağlantıyı yenile”yi kullanın.`)) return;
+    if (!(await guardDelete())) return;
+    try {
+      await fbm.runTransaction(fbDb, async tx => {
+        const ref = docRef("ayar", "cikarilan"); const snap = await tx.get(ref);
+        let m = {}; if (snap.exists()) { try { m = JSON.parse(snap.data().d) || {}; } catch (e) {} }
+        m[id] = Date.now();
+        Object.keys(m).forEach(k => { if (Date.now() - m[k] > 30 * 864e5) delete m[k]; });
+        tx.set(ref, { d: JSON.stringify(m), u: fbm.serverTimestamp() });
+      });
+      await fbm.deleteDoc(docRef("cihaz", id));
+      toast(`“${ad}” çıkarıldı`);
+      if (confirm("Bağlantıyı da yenilemek ister misiniz?\\n(Çıkardığınız kişinin eski bağlantıyla tekrar girmesini engeller.)")) renewLink();
+    } catch (e) { toast("Çıkarılamadı: " + fbErr(e)); }
+  }
+  async function renewLink() {
+    if (!cloudOn) return toast("Önce internete bağlanın");
+    if (!(await guardDelete())) return;
+    const t = prompt("Defter YENİ bir bağlantıya taşınacak, ESKİ bağlantı kapanacak.\\nDiğer cihazlar yeni bağlantıyı isteyecek (siz kendiniz dağıtırsınız).\\nİşlem sırasında kimse kayıt girmesin.\\n\\nDevam için büyük harfle YENILE yazın:");
+    if (!t || t.trim().toUpperCase().replace("İ", "I") !== "YENILE") return toast("Vazgeçildi");
+    renewing = true;
+    toast("Defter taşınıyor… lütfen sayfayı kapatmayın", null, 120000);
+    const oldId = DEFTER_ID, newId = newToken();
+    const col = (id, c) => fbm.collection(fbDb, "defterler", id, c);
+    try {
+      await pushNow();
+      const docs = [];
+      for (const c of ["kayitlar", "ayar"]) {
+        const snap = await fbm.getDocsFromServer(col(oldId, c));
+        snap.forEach(d => { if (!(c === "ayar" && (d.id === "cikarilan" || d.id === "kapali"))) docs.push([c, d.id, d.data()]); });
+      }
+      for (let i = 0; i < docs.length; i += 400) {
+        const b = fbm.writeBatch(fbDb);
+        docs.slice(i, i + 400).forEach(([c, id, data]) => b.set(fbm.doc(fbDb, "defterler", newId, c, id), { d: data.d, u: fbm.serverTimestamp() }));
+        await b.commit();
+      }
+      const want = docs.filter(x => x[0] === "kayitlar").length;
+      const chk = await fbm.getDocsFromServer(col(newId, "kayitlar"));
+      if (chk.size < want) throw new Error("doğrulama: " + chk.size + "/" + want);
+      /* eski defteri kapat: önce işaret (diğer cihazlar hemen anlasın), sonra eski belgeleri sil */
+      await fbm.setDoc(fbm.doc(fbDb, "defterler", oldId, "ayar", "kapali"), { d: JSON.stringify({ t: Date.now(), by: ME() || "" }), u: fbm.serverTimestamp() });
+      const old = [];
+      for (const c of ["kayitlar", "aktif", "cihaz", "ayar"]) {
+        const snap = await fbm.getDocsFromServer(col(oldId, c));
+        snap.forEach(d => { if (!(c === "ayar" && d.id === "kapali")) old.push(d.ref); });
+      }
+      for (let i = 0; i < old.length; i += 400) {
+        const b = fbm.writeBatch(fbDb);
+        old.slice(i, i + 400).forEach(r => b.delete(r));
+        await b.commit();
+      }
+      cloudOn = false;
+      try {
+        localStorage.setItem(ID_KEY, newId); localStorage.setItem(JOIN_KEY, String(Date.now()));
+        localStorage.setItem(KEY + ":" + newId, JSON.stringify(db));
+        localStorage.removeItem(KEY + ":" + oldId); localStorage.removeItem(SEED_PREFIX + newId);
+        localStorage.setItem("kirtasiye_ilk_baglanti", "1");
+      } catch (e) {}
+      location.hash = "d=" + newId;
+      location.reload();
+    } catch (e) {
+      renewing = false;
+      console.warn("bağlantı yenileme", e);
+      toast("Yenileme tamamlanamadı: " + fbErr(e) + ". Eski bağlantı çalışmaya devam ediyor.", null, 7000);
+    }
+  }
+
+  /* ================= MESAİ SAATLERİ · YETKİLİ AYARLAR · WHATSAPP ŞABLONLARI ================= */
+  const GUN_KISA = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"];
+  let mesaiOverrideUntil = 0, adminUntil = 0;
+
+  /* ---- Mesai tanımı: db.mesai = { ac, gunler:[0-6, 0=Pazar], bas:"09:00", bit:"18:00" } (tüm cihazlarda ortak) ---- */
+  const mesaiOn = () => !!(db.mesai && db.mesai.ac && Array.isArray(db.mesai.gunler) && db.mesai.gunler.length);
+  function isWorkday(iso) { return !mesaiOn() || db.mesai.gunler.includes(parseISO(iso).getDay()); }
+  function nextWorkday(iso) { let d = iso; for (let i = 0; i < 8; i++) { d = addDays(d, 1); if (isWorkday(d)) return d; } return addDays(iso, 1); }
+  function firstWorkdayOnOrAfter(iso) { return isWorkday(iso) ? iso : nextWorkday(iso); }
+  const toMin = hm => { const [h, m] = String(hm || "0:0").split(":").map(Number); return (h || 0) * 60 + (m || 0); };
+  function isWorkTime(now) {
+    now = now || new Date();
+    if (!mesaiOn()) return true;
+    if (!db.mesai.gunler.includes(now.getDay())) return false;
+    const cur = now.getHours() * 60 + now.getMinutes();
+    return cur >= toMin(db.mesai.bas) && cur < toMin(db.mesai.bit);
+  }
+  function mesaiOzet() {
+    if (!mesaiOn()) return "";
+    const order = [1, 2, 3, 4, 5, 6, 0], runs = []; let cur = [];
+    order.forEach(d => { if (db.mesai.gunler.includes(d)) cur.push(d); else { if (cur.length) runs.push(cur); cur = []; } });
+    if (cur.length) runs.push(cur);
+    const txt = runs.map(r => r.length > 2 ? `${GUN_KISA[r[0]]}–${GUN_KISA[r[r.length - 1]]}` : r.map(d => GUN_KISA[d]).join(", ")).join(", ");
+    return `${txt} · ${db.mesai.bas}–${db.mesai.bit}`;
+  }
+  function nextOpenText(now) {
+    now = now || new Date();
+    if (!mesaiOn()) return "";
+    for (let i = 0; i < 8; i++) {
+      const d = new Date(now.getTime()); d.setDate(d.getDate() + i);
+      if (!db.mesai.gunler.includes(d.getDay())) continue;
+      if (i === 0 && d.getHours() * 60 + d.getMinutes() >= toMin(db.mesai.bas)) continue;
+      return `${i === 0 ? "bugün" : i === 1 ? "yarın" : GUN[d.getDay()]} ${db.mesai.bas}`;
+    }
+    return "";
+  }
+  const offChip = () => (mesaiOn() && !isWorkTime())
+    ? `<div class="off-chip">🕘 Mesai dışı · tahsilat işlenemez · sonraki mesai: ${esc(nextOpenText())}</div>` : "";
+  const offCls = iso => (mesaiOn() && !isWorkday(iso)) ? " off" : "";
+
+  /* ---- Yetki PIN'i: silme ve yönetim ayarları ---- */
+  async function verifyPin(p) { return !!db.silmePin && (await sha256(db.silmePin.s + ":" + p)) === db.silmePin.h; }
+  /* PIN tanımlıysa yönetim ayarları yalnızca PIN'i bilen yetkili kişiye açılır (5 dk boyunca tekrar sormaz) */
+  async function guardAdmin(msg) {
+    if (!db.silmePin) return true;
+    if (Date.now() < adminUntil) return true;
+    const p = await askPin("Yetkili PIN'i", msg || "Bu ayar yalnızca yetkili kişi tarafından değiştirilebilir");
+    if (p === null) return false;
+    if (await verifyPin(p)) { adminUntil = Date.now() + 5 * 60000; return true; }
+    toast("PIN yanlış"); return false;
+  }
+  /* Tahsilat yalnızca mesai gün/saatinde işlenir; yetkili PIN'i mesai dışında da geçmeye izin verir */
+  async function mesaiGuard() {
+    if (isWorkTime() || Date.now() < mesaiOverrideUntil) return true;
+    const info = `Mesai dışı: tahsilat yalnızca ${mesaiOzet()} arasında işlenebilir. Sonraki mesai: ${nextOpenText()}.`;
+    if (!db.silmePin) { toast(info, null, 6500); return false; }
+    const p = await askPin("Mesai dışı işlem", info + " Yetkiliyseniz PIN girin.");
+    if (p === null) return false;
+    if (await verifyPin(p)) { mesaiOverrideUntil = Date.now() + 10 * 60000; return true; }
+    toast("PIN yanlış"); return false;
+  }
+  async function openMesaiSheet() {
+    if (!(await guardAdmin("Mesai saatlerini yalnızca yetkili kişi değiştirebilir"))) return;
+    const m = Object.assign({ ac: false, gunler: [1, 2, 3, 4, 5, 6], bas: "09:00", bit: "18:00" }, db.mesai || {});
+    m.gunler = (m.gunler || []).slice();
+    const order = [1, 2, 3, 4, 5, 6, 0];
+    openSheet(`
+      <div class="sheet-card">
+        <div class="grab"></div>
+        <div style="display:flex;align-items:center"><h2 style="flex:1;font-size:18px">Mesai saatleri</h2><button class="btn btn-ghost" id="sheetClose">Kapat</button></div>
+        <p class="meta" style="margin:8px 0">Tanımlarsanız tahsilat yalnızca mesai gün ve saatlerinde işlenebilir (yetkili PIN'i ile mesai dışında da geçilebilir). Mesai günü olmayan günlerde tahsil edilmeyen kayıtlar <b>sonraki mesai gününe</b> otomatik devredilir (örn. Cumartesi alınmayan, Pazar kapalıysa Pazartesi'ye).</p>
+        <button class="btn ${m.ac ? "btn-leather" : "btn-ghost"}" id="msAc" style="width:100%">Mesai kısıtı: <b>${m.ac ? "Açık" : "Kapalı"}</b></button>
+        <label class="fld">Mesai günleri</label>
+        <div class="chips" id="msDays">${order.map(d => `<button class="chip ${m.gunler.includes(d) ? "on" : ""}" data-d="${d}">${GUN_KISA[d]}</button>`).join("")}</div>
+        <div class="g2">
+          <div><label class="fld">Başlangıç</label><input class="inp" type="time" id="msBas" value="${m.bas}" /></div>
+          <div><label class="fld">Bitiş</label><input class="inp" type="time" id="msBit" value="${m.bit}" /></div>
+        </div>
+        <button class="btn btn-gold" id="msSave" style="width:100%;margin-top:14px">Kaydet</button>
+      </div>`);
+    document.getElementById("sheetClose").onclick = closeSheet;
+    document.getElementById("msAc").onclick = e => { m.ac = !m.ac; e.currentTarget.className = "btn " + (m.ac ? "btn-leather" : "btn-ghost"); e.currentTarget.innerHTML = `Mesai kısıtı: <b>${m.ac ? "Açık" : "Kapalı"}</b>`; };
+    document.querySelectorAll("#msDays [data-d]").forEach(b => b.onclick = () => {
+      const d = +b.dataset.d, i = m.gunler.indexOf(d);
+      if (i >= 0) m.gunler.splice(i, 1); else m.gunler.push(d);
+      b.classList.toggle("on", i < 0);
+    });
+    document.getElementById("msSave").onclick = () => {
+      m.bas = document.getElementById("msBas").value || "09:00"; m.bit = document.getElementById("msBit").value || "18:00";
+      if (m.ac && !m.gunler.length) return toast("En az bir mesai günü seçin");
+      if (toMin(m.bit) <= toMin(m.bas)) return toast("Bitiş saati başlangıçtan sonra olmalı");
+      db.mesai = { ac: m.ac, gunler: m.gunler.slice().sort((a, b) => a - b), bas: m.bas, bit: m.bit };
+      save(); closeSheet(); render(); scheduleRollover(600);
+      toast(m.ac ? "Mesai kaydedildi: " + mesaiOzet() : "Mesai kısıtı kapatıldı");
+    };
+  }
+
+  /* ---- WhatsApp mesaj şablonları ---- */
+  const WA_VARS = [["{musteri}", "Müşteri"], ["{tutar}", "Kayıt tutarı"], ["{kalan}", "Kalan tutar"], ["{vade}", "Vade"], ["{ilkvade}", "İlk vade"],
+    ["{tur}", "Ödeme türü"], ["{belge}", "Çek/senet no"], ["{erteleme}", "Erteleme sayısı"], ["{bakiye}", "Toplam bakiye"], ["{firma}", "Firma"], ["{tarih}", "Bugün"], ["{kisi}", "Adınız"]];
+  const DEFAULT_TPLS = [
+    { id: "t1", ad: "Vade hatırlatma", m: "Merhaba {musteri}, {firma} olarak {vade} vadeli {kalan} tutarındaki {tur} ödemenizi nazikçe hatırlatmak isteriz. Teşekkür ederiz.", varsayilan: true },
+    { id: "t2", ad: "Bugün vadesi geldi", m: "Merhaba {musteri}, {tarih} itibarıyla {kalan} tutarındaki ödemenizin vadesi gelmiştir. Bugün ödeme yapabilirseniz seviniriz. {firma}" },
+    { id: "t3", ad: "Ertelenen ödeme bildirimi", m: "Merhaba {musteri}, {ilkvade} tarihli {kalan} tutarındaki ödemeniz {vade} tarihine ertelenmiştir. Uygun olduğunuzda ödemenizi rica ederiz. {firma}" },
+    { id: "t4", ad: "Kısmi ödeme bildirimi", m: "Merhaba {musteri}, ödemeniz için teşekkür ederiz. {tutar} tutarındaki kaydınızdan kalan bakiye {kalan}, vadesi {vade}. {firma}" },
+    { id: "t5", ad: "Ödeme alındı / teşekkür", m: "Merhaba {musteri}, ödemenizi aldık, teşekkür ederiz. {firma}" },
+    { id: "t6", ad: "Bakiye bildirimi", m: "Merhaba {musteri}, {tarih} itibarıyla toplam açık bakiyeniz {bakiye}'dir. Bilgilerinize sunarız. {firma}" }
+  ];
+  const tpls = () => (Array.isArray(db.sablonlar) && db.sablonlar.length) ? db.sablonlar : DEFAULT_TPLS;
+  const defaultTpl = () => tpls().find(x => x.varsayilan) || tpls()[0];
+  function fillTpl(m, k) {
+    const ad = (k.musteri || "").trim();
+    const bakiye = round2(kayitlar().filter(x => (x.musteri || "").trim() === ad && isOpen(x)).reduce((a, x) => a + remaining(x), 0));
+    const map = {
+      musteri: ad, tutar: fmtTRY(k.tutar), kalan: fmtTRY(remaining(k)), vade: fmtDate(k.vade), ilkvade: fmtDate(k.orijinalVade || k.vade),
+      tur: typeAd(k.tur, k), belge: k.belgeNo || "", erteleme: String(k.ertelemeSayisi || 0), bakiye: fmtTRY(bakiye),
+      firma: db.magaza, tarih: fmtDate(todayISO()), kisi: ME() || ""
+    };
+    return String(m).replace(/\{(\w+)\}/g, (s, key) => (key in map) ? map[key] : s).replace(/[ \t]{2,}/g, " ").trim();
+  }
+  const SON_SABLON = "kirtasiye_son_sablon";
+  function openWaPicker(id) {
+    const k = kayitlar().find(x => x.id === id); if (!k) return;
+    const list = tpls();
+    let last = null; try { last = localStorage.getItem(SON_SABLON); } catch (e) {}
+    const byStatus = isErt(k) ? list.find(x => x.id === "t3") : statusOf(k) === "kismi" ? list.find(x => x.id === "t4") : k.vade === todayISO() ? list.find(x => x.id === "t2") : null;
+    let cur = (byStatus || list.find(x => x.id === last) || defaultTpl()).id;
+    const tplOf = i => list.find(x => x.id === i) || list[0];
+    openSheet(`
+      <div class="sheet-card">
+        <div class="grab"></div>
+        <div style="display:flex;align-items:center"><h2 style="flex:1;font-size:18px">WhatsApp mesajı</h2><button class="btn btn-ghost" id="sheetClose">Kapat</button></div>
+        <div class="meta" style="margin:6px 0 2px"><b>${esc(k.musteri)}</b> · kalan ${fmtTRY(remaining(k))} · vade ${fmtDate(k.vade)}</div>
+        <label class="fld">Şablon seçin</label>
+        <div class="chips wa-tpls">${list.map(x => `<button class="chip ${x.id === cur ? "on" : ""}" data-tpl="${esc(x.id)}">${esc(x.ad)}${x.varsayilan ? " ★" : ""}</button>`).join("")}</div>
+        <label class="fld">Mesaj (göndermeden önce düzenleyebilirsiniz)</label>
+        <textarea class="inp" id="waTxt" rows="6"></textarea>
+        <label class="fld">Telefon</label>
+        <input class="inp" id="waTel" inputmode="tel" value="${esc(k.telefon || "")}" placeholder="05xx (boşsa WhatsApp'ta seçersiniz)" />
+        <button class="btn btn-wa" id="waGo" style="width:100%;margin-top:14px">${icon("msg")} WhatsApp'ta aç</button>
+        <button class="btn btn-ghost" id="waMan" style="width:100%;margin-top:8px">⚙ Şablonları yönet${db.silmePin ? " 🔒" : ""}</button>
+      </div>`);
+    const txt = document.getElementById("waTxt");
+    const setTxt = () => { txt.value = fillTpl(tplOf(cur).m, k); };
+    setTxt();
+    document.getElementById("sheetClose").onclick = closeSheet;
+    document.querySelectorAll("[data-tpl]").forEach(b => b.onclick = () => {
+      cur = b.dataset.tpl; setTxt();
+      document.querySelectorAll("[data-tpl]").forEach(x => x.classList.toggle("on", x.dataset.tpl === cur));
+      try { localStorage.setItem(SON_SABLON, cur); } catch (e) {}
+    });
+    document.getElementById("waGo").onclick = () => {
+      const t = fmtPhone(document.getElementById("waTel").value);
+      window.open(`https://wa.me/${t}?text=${encodeURIComponent(txt.value.trim())}`, "_blank", "noopener");
+      toast("WhatsApp açılıyor");
+    };
+    document.getElementById("waMan").onclick = openTplManager;
+  }
+  document.addEventListener("click", e => {
+    const a = e.target.closest && e.target.closest("[data-wak]");
+    if (!a) return;
+    e.preventDefault(); e.stopPropagation();
+    openWaPicker(a.dataset.wak);
+  }, true);
+
+  function sampleRec() {
+    return kayitlar().find(isOpen) || { musteri: "Örnek Müşteri", tutar: 12500, tahsilTutar: 0, vade: todayISO(), tur: "nakit", telefon: "" };
+  }
+  async function openTplManager() {
+    if (!(await guardAdmin("Mesaj şablonlarını yalnızca yetkili kişi değiştirebilir"))) return;
+    renderTplManager();
+  }
+  const ownTpls = () => { if (!Array.isArray(db.sablonlar) || !db.sablonlar.length) db.sablonlar = DEFAULT_TPLS.map(x => ({ ...x })); return db.sablonlar; };
+  function renderTplManager() {
+    const list = tpls();
+    openSheet(`
+      <div class="sheet-card full">
+        <div class="grab"></div>
+        <div style="display:flex;align-items:center"><h2 style="flex:1;font-size:18px">WhatsApp şablonları</h2><button class="btn btn-ghost" id="sheetClose">Kapat</button></div>
+        <p class="meta" style="margin:8px 0">Mesaj gönderirken bu şablonlardan biri seçilir. ★ varsayılan şablon, toplu hatırlatmalarda (zil ekranı) kullanılır.</p>
+        ${list.map(x => `
+          <div class="panel tpl-row">
+            <div class="tpl-top"><b>${esc(x.ad)}</b>${x.varsayilan ? `<span class="dev-me">★ Varsayılan</span>` : ""}</div>
+            <div class="meta tpl-prev">${esc(x.m)}</div>
+            <div class="tpl-acts">
+              <button class="btn btn-ghost" data-tedit="${esc(x.id)}">Düzenle</button>
+              ${x.varsayilan ? "" : `<button class="btn btn-ghost" data-tdef="${esc(x.id)}">★ Varsayılan yap</button>`}
+              <button class="btn btn-ghost" data-tdel="${esc(x.id)}" style="color:var(--red)">Sil</button>
+            </div>
+          </div>`).join("")}
+        <button class="btn btn-gold" id="tNew" style="width:100%;margin-top:6px">+ Yeni şablon</button>
+        <button class="btn btn-ghost" id="tReset" style="width:100%;margin-top:8px">Varsayılan şablonlara dön</button>
+      </div>`, true);
+    document.getElementById("sheetClose").onclick = closeSheet;
+    document.getElementById("tNew").onclick = () => openTplEditor(null);
+    document.getElementById("tReset").onclick = () => { if (confirm("Tüm şablonlar silinip varsayılanlar geri yüklensin mi?")) { db.sablonlar = null; save(); renderTplManager(); toast("Varsayılan şablonlar yüklendi"); } };
+    document.querySelectorAll("[data-tedit]").forEach(b => b.onclick = () => openTplEditor(b.dataset.tedit));
+    document.querySelectorAll("[data-tdef]").forEach(b => b.onclick = () => { const a = ownTpls(); a.forEach(x => { x.varsayilan = x.id === b.dataset.tdef; }); save(); renderTplManager(); });
+    document.querySelectorAll("[data-tdel]").forEach(b => b.onclick = () => {
+      const a = ownTpls();
+      if (a.length <= 1) return toast("En az bir şablon kalmalı");
+      if (!confirm("Bu şablon silinsin mi?")) return;
+      const i = a.findIndex(x => x.id === b.dataset.tdel), was = a[i] && a[i].varsayilan;
+      if (i >= 0) a.splice(i, 1);
+      if (was && a[0]) a[0].varsayilan = true;
+      save(); renderTplManager();
+    });
+  }
+  function openTplEditor(id) {
+    const cur = id ? tpls().find(x => x.id === id) : null;
+    openSheet(`
+      <div class="sheet-card full">
+        <div class="grab"></div>
+        <div style="display:flex;align-items:center"><h2 style="flex:1;font-size:18px">${cur ? "Şablonu düzenle" : "Yeni şablon"}</h2><button class="btn btn-ghost" id="sheetClose">Vazgeç</button></div>
+        <label class="fld">Şablon adı</label>
+        <input class="inp" id="tAd" maxlength="40" placeholder="örn. Vade hatırlatma" value="${cur ? esc(cur.ad) : ""}" />
+        <label class="fld">Mesaj</label>
+        <textarea class="inp" id="tMsg" rows="6" placeholder="Merhaba {musteri}, ...">${cur ? esc(cur.m) : ""}</textarea>
+        <div class="meta" style="margin:8px 2px 4px">Değişken eklemek için dokunun:</div>
+        <div class="chips wa-vars">${WA_VARS.map(([v, ad]) => `<button class="chip" data-var="${v}" title="${esc(ad)}">${v}</button>`).join("")}</div>
+        <label class="fld">Önizleme (örnek kayıtla)</label>
+        <div class="panel tpl-prev-box" id="tPrev"></div>
+        <button class="btn btn-gold" id="tSave" style="width:100%;margin-top:14px">Kaydet</button>
+      </div>`, true);
+    const msg = document.getElementById("tMsg"), prev = document.getElementById("tPrev"), samp = sampleRec();
+    const repaint = () => { prev.textContent = fillTpl(msg.value || "", samp); };
+    msg.addEventListener("input", repaint); repaint();
+    document.getElementById("sheetClose").onclick = renderTplManager;
+    document.querySelectorAll("[data-var]").forEach(b => b.onclick = () => {
+      const s = msg.selectionStart ?? msg.value.length, e = msg.selectionEnd ?? s;
+      msg.value = msg.value.slice(0, s) + b.dataset.var + msg.value.slice(e);
+      msg.focus(); const p = s + b.dataset.var.length; msg.setSelectionRange(p, p); repaint();
+    });
+    document.getElementById("tSave").onclick = () => {
+      const ad = document.getElementById("tAd").value.trim(), m = msg.value.trim();
+      if (!ad || !m) return toast("Ad ve mesaj yazın");
+      const a = ownTpls();
+      if (cur) { const t = a.find(x => x.id === cur.id); if (t) { t.ad = ad; t.m = m; } }
+      else a.push({ id: "u" + Math.random().toString(36).slice(2, 8), ad, m, varsayilan: false });
+      save(); renderTplManager(); toast("Şablon kaydedildi");
+    };
+  }
 
   /* ---------- BAŞLAT ---------- */
   applyTheme();
