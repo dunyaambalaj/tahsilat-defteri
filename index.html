@@ -651,6 +651,15 @@
 
     #msDays { display: flex; flex-wrap: wrap; gap: 6px; overflow: visible; }
 
+    /* yönetici paneli · bildirim merkezi */
+    .ledger-list { display: flex; flex-direction: column; gap: 8px; }
+    .ledger-row { border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; background: var(--sheet); }
+    .ledger-row.cur { box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--gold) 55%, transparent); }
+    .ledger-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 2px; }
+    .ledger-row .tpl-acts { margin-top: 8px; }
+    .row.unread .t1::before { content: "●"; color: var(--bekle); font-size: 9px; margin-right: 6px; vertical-align: middle; }
+    #btChips, .nc-chips { display: flex; flex-wrap: wrap; gap: 6px; overflow: visible; }
+
     /* ===== CAM (data-look=cam) ===== */
 html[data-look="cam"], html[data-look="cam"][data-theme] {
       --serif: "New York", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
@@ -783,10 +792,14 @@ html[data-look="cam"] .btn-tahsil { background: linear-gradient(180deg, color-mi
 html[data-look="cam"] .btn-erte { background: color-mix(in srgb, var(--erte) 14%, transparent); color: var(--erte); box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 0 0 1px color-mix(in srgb, var(--erte) 30%, transparent); }
 html[data-look="cam"] .btn-wa { background: linear-gradient(180deg, color-mix(in srgb, var(--wa) 82%, #fff 18%), var(--wa)); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 8px 18px color-mix(in srgb, var(--wa) 30%, transparent); }
 html[data-look="cam"] .btn[disabled] { opacity: .45; }
-html[data-look="cam"] .fab { position: fixed; right: 16px; bottom: calc(86px + var(--safe-bot)); width: 58px; height: 58px; border-radius: 18px; border: 0;
-      background: linear-gradient(180deg, #d4b03a, #b8901e); color: #1a1612; font-size: 32px; font-weight: 700; line-height: 1;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 10px 24px rgba(180,140,30,.45); z-index: 20; transition: transform .25s cubic-bezier(.3,1.6,.5,1); }
-html[data-look="cam"] .fab:active { transform: scale(1.1); }
+html[data-look="cam"] .fab { position: fixed; right: 16px; bottom: calc(88px + var(--safe-bot)); width: 62px; height: 62px; border-radius: 50%; border: 0; z-index: 20;
+      font-size: 36px; font-weight: 300; line-height: 1; color: #2a2008; display: grid; place-items: center;
+      background: radial-gradient(120% 120% at 30% 18%, rgba(255,255,255,.85), rgba(239,214,121,.82) 40%, rgba(201,162,39,.92));
+      -webkit-backdrop-filter: blur(14px) saturate(180%); backdrop-filter: blur(14px) saturate(180%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.95), inset 0 -3px 8px rgba(120,90,10,.28), 0 16px 34px rgba(120,90,10,.40), 0 3px 8px rgba(0,0,0,.18);
+      animation: fabFloat 5s ease-in-out infinite; transition: transform .25s cubic-bezier(.3,1.6,.5,1); }
+@keyframes fabFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+html[data-look="cam"] .fab:active { animation: none; transform: scale(1.12); }
 html[data-look="cam"] .chip { border: 0; background: color-mix(in srgb, #fff 42%, transparent); color: var(--ink); font-weight: 600; padding: 7px 14px;
       -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 0 0 1px rgba(255,255,255,.45); transition: background .2s, color .2s, transform .2s; }
 html[data-look="cam"] .chip.on, html[data-look="cam"][data-mode="dark"] .chip.on { background: linear-gradient(180deg, var(--leather-2), var(--leather)); color: var(--cream); border: 0; box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 6px 14px color-mix(in srgb, var(--leather) 30%, transparent); }
@@ -1035,7 +1048,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     try { const v = localStorage.getItem(ID_KEY); return ID_RE.test(v || "") ? v : null; } catch (e) { return null; }
   })();
   const cacheKey = () => DEFTER_ID ? KEY + ":" + DEFTER_ID : KEY;
-  const BUILD = "10";
+  const BUILD = "11";
   const FB_VERSIONS = ["13.0.0", "12.8.0", "12.2.1"]; /* sırayla denenir */
   /* Firebase web ayarları herkese açık bilgidir. firebase-config.js okunamazsa bu yedek kullanılır. */
   const FB_DEFAULT = {
@@ -1059,7 +1072,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   const AY = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
   const GUN = ["Pazar","Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi"];
   const GUN3 = ["Paz","Pzt","Sal","Çar","Per","Cum","Cmt"];
-  const ACT_AD = { olusturuldu: "Oluşturuldu", duzenlendi: "Düzenlendi", tahsil: "Tahsil edildi", kismi: "Kısmi tahsilat", ertelendi: "Ertelendi" };
+  const ACT_AD = { olusturuldu: "Oluşturuldu", duzenlendi: "Düzenlendi", tahsil: "Tahsil edildi", kismi: "Kısmi tahsilat", ertelendi: "Ertelendi", silindi: "Silindi", geri: "Geri getirildi" };
   const TK_AD = { soz: "Ödeme sözü", vade: "Vadeli alacak", plan: "Planlı tahsilat" };
 
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -1345,7 +1358,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
 
   function headerKlasik() {
     const d = digest();
-    const nNot = d.gec.length + d.bug.length + d.ert.length;
+    const nNot = d.gec.length + d.bug.length + d.ert.length + unreadCount();
     const logoHtml = db.firma.logo
       ? `<img src="${db.firma.logo}" alt="${esc(db.magaza)}" />`
       : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8M8 11h5"/></svg>`;
@@ -1361,7 +1374,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
             </div>
             <div class="hbar">
               ${hbtn("btnThemeToggle", isDark ? "sun" : "moon", isDark ? "Aydınlık mod" : "Karanlık mod")}
-              ${hbtn("btnBell", "bell", "Hatırlatmalar", nNot ? `<span class="bell-badge">${nNot > 9 ? "9+" : nNot}</span>` : "")}
+              ${hbtn("btnBell", "bell", "Bildirimler", nNot ? `<span class="bell-badge">${nNot > 9 ? "9+" : nNot}</span>` : "")}
               ${hbtn("btnShareTop", "share", "Paylaş")}
               ${hbtn("btnSettings", "gear", "Ayarlar")}
             </div>
@@ -1373,7 +1386,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
 
   function headerCam() {
     const d = digest();
-    const nNot = d.gec.length + d.bug.length + d.ert.length;
+    const nNot = d.gec.length + d.bug.length + d.ert.length + unreadCount();
     const logoHtml = db.firma.logo
       ? `<img src="${db.firma.logo}" alt="${esc(db.magaza)}" />`
       : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`;
@@ -1391,7 +1404,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
           <nav class="tb-nav"><i class="gi"></i>${VIEWS.map(([id, ad]) => `<button data-view="${id}" class="${view === id ? "on" : ""}">${ad}</button>`).join("")}</nav>
           <div class="hbar">
             ${hbtn("btnThemeToggle", isDark ? "sun" : "moon", isDark ? "Aydınlık mod" : "Karanlık mod")}
-            ${hbtn("btnBell", "bell", "Hatırlatmalar", nNot ? `<span class="bell-badge">${nNot > 9 ? "9+" : nNot}</span>` : "")}
+            ${hbtn("btnBell", "bell", "Bildirimler", nNot ? `<span class="bell-badge">${nNot > 9 ? "9+" : nNot}</span>` : "")}
             ${hbtn("btnShareTop", "share", "Paylaş")}
             ${hbtn("btnSettings", "gear", "Ayarlar")}
           </div>
@@ -1658,9 +1671,9 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     return String(Math.round(n));
   };
   /* Tahsilat hareketleri: yeni kayıtlarda her tahsilat sayısal olarak saklanır; eski kayıtlarda kalan tutar tahsil tarihine yazılır */
-  function collectEvents() {
+  function collectEvents(src) {
     const ev = [];
-    kayitlar().forEach(k => {
+    (src || kayitlar()).forEach(k => {
       let sum = 0;
       (k.gecmis || []).forEach(g => {
         if ((g.a === "tahsil" || g.a === "kismi") && typeof g.tutar === "number") {
@@ -1980,7 +1993,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       render();
       toast(db.karanlik ? "Karanlık mod açık" : "Aydınlık mod açık");
     });
-    document.getElementById("btnBell")?.addEventListener("click", () => openDigest(true));
+    document.getElementById("btnBell")?.addEventListener("click", openNotifCenter);
     document.getElementById("btnShareTop")?.addEventListener("click", () => openShare(selectedDate, ofDate(selectedDate), fmtLong(selectedDate)));
     document.getElementById("fab")?.addEventListener("click", () => openForm());
     document.getElementById("goalOpen")?.addEventListener("click", openGoalSheet);
@@ -2228,7 +2241,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       if (!(await guardDelete())) return;
       pushUndo("Silme");
       const i = db.kayitlar.findIndex(x => x.id === k.id);
-      if (i>=0) db.kayitlar[i].silindi = true;
+      if (i>=0) { const r0 = db.kayitlar[i]; r0.silindi = true; (r0.gecmis = r0.gecmis || []).push({ t: new Date().toISOString(), a: "silindi", d: fmtTRY(r0.tutar) }); }
       save(); closeSheet(); render(); toast("Kayıt silindi", UNDO);
     };
   }
@@ -2460,7 +2473,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
           c.width = Math.round(im.width * sc); c.height = Math.round(im.height * sc);
           c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
           db.firma.logo = c.toDataURL("image/png");
-          save(); closeSheet(); render(); openSettings(); toast("Logo kaydedildi");
+          save(); render(); renderAdminPanel(); toast("Logo kaydedildi");
         } catch(e) { toast("Logo işlenemedi"); }
       };
       im.onerror = () => toast("Resim okunamadı");
@@ -2482,23 +2495,6 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
           <button class="btn btn-ghost" id="sheetClose">Kapat</button>
         </div>
 
-        <label class="fld">Firma bilgileri</label>
-        <input class="inp" id="sAd" value="${esc(db.magaza)}" placeholder="Firma adı / unvan" />
-        <div class="row2">
-          <div><label class="fld">Telefon</label><input class="inp" id="sTel" inputmode="tel" value="${esc(db.firma.tel)}" placeholder="05xx" /></div>
-          <div><label class="fld">Vergi no</label><input class="inp" id="sVergi" value="${esc(db.firma.vergi)}" placeholder="İsteğe bağlı" /></div>
-        </div>
-        <label class="fld">Adres</label>
-        <textarea class="inp" id="sAdres" rows="2" placeholder="Fiş ve paylaşımlarda görünür">${esc(db.firma.adres)}</textarea>
-        <label class="fld">Logo</label>
-        <div style="display:flex;gap:8px;align-items:center">
-          <div class="brand-mark" style="border-color:var(--line);background:var(--badge);color:var(--mute);width:48px;height:48px;overflow:hidden;flex:0 0 48px">${db.firma.logo ? `<img src="${db.firma.logo}" style="width:100%;height:100%;object-fit:cover">` : icon("book")}</div>
-          <button class="btn btn-gold" id="sLogoBtn" style="flex:1">Logo yükle</button>
-          <button class="btn btn-ghost" id="sLogoDel" ${db.firma.logo ? "" : "disabled"}>Kaldır</button>
-        </div>
-        <input type="file" id="sLogoFile" accept="image/*" class="hidden" />
-        <button class="btn btn-leather" id="sSave" style="width:100%;margin-top:12px">Firma bilgilerini kaydet</button>
-
         <label class="fld">Görünüm</label>
         <button class="btn ${db.karanlik ? "btn-leather" : "btn-ghost"}" id="sDark" style="width:100%">${icon(db.karanlik ? "sun" : "moon")} Karanlık mod: ${db.karanlik ? "Açık" : "Kapalı"}</button>
         <label class="fld">Görünüm stili</label>
@@ -2515,22 +2511,23 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         <p class="meta" style="margin:6px 2px">Açılışta: dün alınmayan ödemeler “geciken” olarak, bugün ve yarın vadeli ödemeler de özet hâlinde gösterilir. Sistem bildirimi tarayıcı iznine bağlıdır.</p>
         <button class="btn ${db.ayar.canli?"btn-leather":"btn-ghost"}" id="sCanli" style="width:100%;margin-top:8px">${icon("bell")} Canlı işlem bildirimi: ${db.ayar.canli?"Açık":"Kapalı"}</button>
         <p class="meta" style="margin:6px 2px">Başkası kayıt ya da tahsilat girince, uygulama arka plandayken (küçültülmüş ya da başka sekmedeyken) bildirim gelir. Ekran açıkken köşede kısa bir uyarı görünür.</p>
+        <label class="fld">Bildirim türleri (bu cihaz)</label>
+        <div class="chips" id="btChips">${Object.keys(KIND_AD).map(k => `<button class="chip ${btPref(k) ? "on" : ""}" data-bt="${k}">${KIND_AD[k]}</button>`).join("")}</div>
+        <p class="meta" style="margin:6px 2px">Seçili türlerdeki işlemler için uyarı gelir; zil düğmesindeki Bildirimler ekranında hepsi listelenir.</p>
 
         <label class="fld">Ortak defter (herkes ekleyip düzenleyebilir)</label>
         <div id="shareHost"></div>
 
-        <label class="fld">Koruma (PIN kilidi)</label>
+        <label class="fld">Cihaz kilidi (yalnızca bu cihaza özel PIN)</label>
         <div class="g2">
           <button class="btn btn-gold" id="sPinSet">${db.pin ? "PIN değiştir" : "PIN kur"}</button>
           <button class="btn btn-ghost" id="sPinDel" ${db.pin ? "" : "disabled"}>PIN kaldır</button>
         </div>
         ${db.pin ? `<button class="btn btn-ghost" id="sLockNow" style="width:100%;margin-top:8px">${icon("lock")} Şimdi kilitle</button>` : ""}
 
-        <label class="fld">Yönetim ayarları ${db.silmePin ? "🔒 (yetkili)" : ""}</label>
-        <button class="btn btn-ghost" id="sGoal" style="width:100%">🎯 Aylık tahsilat hedefi: ${db.hedef ? fmtK(db.hedef) : "tanımlı değil"}</button>
-        <button class="btn btn-ghost" id="sMesai" style="width:100%;margin-top:8px">🕘 Mesai saatleri: ${mesaiOn() ? mesaiOzet() : "tanımlı değil"}</button>
-        <button class="btn btn-ghost" id="sTpl" style="width:100%;margin-top:8px">💬 WhatsApp mesaj şablonları (${tpls().length})</button>
-        <p class="meta" style="margin:6px 2px">${db.silmePin ? "Bu ayarlar yalnızca Yetki PIN'ini bilen yetkili kişi tarafından değiştirilebilir." : "Yetki PIN'i belirlenmezse bu ayarları herkes değiştirebilir. Aşağıdan Yetki PIN'i belirleyin."}</p>
+        <label class="fld">Yönetici</label>
+        <button class="btn btn-gold" id="sAdmin" style="width:100%">🛡 Yönetici paneli ${db.silmePin ? "🔒" : ""}</button>
+        <p class="meta" style="margin:6px 2px">Firma bilgileri, defterler, aylık hedef, mesai saatleri, WhatsApp şablonları, cihaz yönetimi, silinenler, yedekleme ve şifre ayarları yönetici şifresiyle açılan panelde.</p>
 
         <label class="fld">Kullanıcı adı (bu cihaz)</label>
         <button class="btn btn-ghost" id="sName" style="width:100%">✎ ${ME() ? esc(ME()) : "Adınızı girin"} · değiştir</button>
@@ -2539,54 +2536,18 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         <label class="fld">Bağlı cihazlar</label>
         <div data-devhost></div>
 
-        <label class="fld">Silinenler</label>
-        <button class="btn btn-ghost" id="sTrash" style="width:100%">Silinenler kutusu (${db.kayitlar.filter(k => k.silindi).length})</button>
-
-        <label class="fld">Yetki PIN'i (silme ve yönetim ayarları · tüm cihazlar için ortak)</label>
-        <div class="g2">
-          <button class="btn btn-gold" id="sDelPinSet">${db.silmePin ? "PIN değiştir" : "Yetki PIN'i belirle"}</button>
-          <button class="btn btn-ghost" id="sDelPinDel" ${db.silmePin ? "" : "disabled"}>PIN kaldır</button>
-        </div>
-        <p class="meta" style="margin:6px 2px">Kayıt silmek, tüm defteri silmek, aylık hedefi, mesai saatlerini ve mesaj şablonlarını değiştirmek ile mesai dışında tahsilat işlemek için bu PIN istenir. PIN'i yalnızca yetkili kişilere söyleyin.</p>
-
-        <label class="fld">Yedekleme (bağlantı gerekmez)</label>
-        <div class="g2">
-          <button class="btn btn-gold" id="sExp">${icon("fileDown")} JSON indir</button>
-          <button class="btn btn-ghost" id="sImp">${icon("fileUp")} JSON yükle</button>
-        </div>
-        <label class="fld">Excel aktarımı</label>
-        <div class="g2">
-          <button class="btn btn-leather" id="sCsv">${icon("fileDown")} CSV indir</button>
-          <button class="btn btn-ghost" id="sCsvImp">${icon("fileUp")} CSV yükle</button>
-        </div>
-        <input type="file" id="sFile" accept="application/json" class="hidden" />
-        <input type="file" id="sCsvFile" accept=".csv,text/csv" class="hidden" />
-        <div class="g2" style="margin-top:10px">
-          <button class="btn btn-ghost" id="sUndo">${icon("undo")} Son işlemi geri al</button>
-          <button class="btn btn-ghost" id="sWipe" style="color:#8b2e2e">Tüm defteri sil</button>
-        </div>
+        <button class="btn btn-ghost" id="sUndo" style="width:100%;margin-top:10px">${icon("undo")} Son işlemi geri al</button>
         <p class="meta" style="margin-top:12px">Kayıtlar ortak defterde (bulutta) saklanır; bağlantıya sahip herkes aynı anda görür ve düzenler. İnternet yokken yapılan işlemler bağlantı gelince otomatik gönderilir. Tema, karanlık mod, PIN ve bildirim ayarları yalnızca bu cihaza aittir. “Ana ekrana ekle” ile uygulama gibi kullanın.</p>
       </div>`, true);
     document.getElementById("sheetClose").onclick = closeSheet;
-    document.getElementById("sSave").onclick = () => {
-      db.magaza = document.getElementById("sAd").value.trim() || db.magaza;
-      db.firma.tel = document.getElementById("sTel").value.trim();
-      db.firma.vergi = document.getElementById("sVergi").value.trim();
-      db.firma.adres = document.getElementById("sAdres").value.trim();
-      save(); closeSheet(); render(); toast("Ayarlar kaydedildi");
-    };
     renderShare();
     document.getElementById("sName").onclick = () => openNameSheet(false);
-    document.getElementById("sGoal").onclick = async () => { if (await guardAdmin("Aylık hedefi yalnızca yetkili kişi belirleyebilir")) openGoalSheet(); };
-    document.getElementById("sMesai").onclick = openMesaiSheet;
-    document.getElementById("sTpl").onclick = openTplManager;
+    document.getElementById("sAdmin").onclick = openAdminPanel;
+    document.querySelectorAll("[data-bt]").forEach(b => b.onclick = () => { const k = b.dataset.bt; db.ayar.bt = db.ayar.bt || {}; db.ayar.bt[k] = !btPref(k); save(); b.classList.toggle("on", btPref(k)); render(); });
     repaintDevices();
     const setLook = v => { db.gorunum = v; save(); applyTheme(); render(); openSettings(); toast(v === "klasik" ? "Klasik defter görünümü" : "Cam görünümü"); };
     document.getElementById("sLookCam").onclick = () => setLook("cam");
     document.getElementById("sLookKlasik").onclick = () => setLook("klasik");
-    document.getElementById("sTrash").onclick = openTrash;
-    document.getElementById("sDelPinSet").onclick = delPinSet;
-    document.getElementById("sDelPinDel").onclick = delPinRemove;
     document.getElementById("sCanli").onclick = async () => {
       if (!db.ayar.canli) {
         if (!("Notification" in window)) return toast("Bu tarayıcı bildirimi desteklemiyor");
@@ -2604,11 +2565,6 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     document.querySelectorAll("[data-tema]").forEach(b => b.onclick = () => {
       db.tema = b.dataset.tema; save(); applyTheme(); render(); openSettings(); toast("Tema: " + (TEMALAR.find(t => t.id === db.tema) || {}).ad);
     });
-    document.getElementById("sLogoBtn").onclick = () => document.getElementById("sLogoFile").click();
-    document.getElementById("sLogoFile").onchange = e => { const f = e.target.files?.[0]; if (f) processLogo(f); };
-    document.getElementById("sLogoDel").onclick = () => {
-      db.firma.logo = ""; save(); closeSheet(); render(); openSettings(); toast("Logo kaldırıldı");
-    };
     document.getElementById("sBild").onclick = () => {
       db.ayar.bildirim = !db.ayar.bildirim; save(); openSettings();
       toast("Günlük hatırlatma " + (db.ayar.bildirim ? "açık" : "kapalı"));
@@ -2667,21 +2623,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       });
     };
     document.getElementById("sLockNow")?.addEventListener("click", showLock);
-    document.getElementById("sExp").onclick = exportJSON;
-    document.getElementById("sImp").onclick = () => document.getElementById("sFile").click();
-    document.getElementById("sFile").onchange = importJSON;
-    document.getElementById("sCsv").onclick = exportCSV;
-    document.getElementById("sCsvImp").onclick = () => document.getElementById("sCsvFile").click();
-    document.getElementById("sCsvFile").onchange = e => { const f = e.target.files?.[0]; if (f) importCSV(f); };
     document.getElementById("sUndo").onclick = () => { closeSheet(); undoLast(); };
-    document.getElementById("sWipe").onclick = async () => {
-      if (!(await guardDelete())) return;
-      const onay = prompt("DİKKAT: Bu ortak defterdir, tüm kayıtlar HERKES için silinir.\nDevam etmek için büyük harfle SIL yazın:");
-      if (!onay || onay.trim().toUpperCase().replace("İ", "I") !== "SIL") return toast("Vazgeçildi");
-      pushUndo("Sıfırlama");
-      db.kayitlar.forEach(k => { k.silindi = true; });
-      save(); closeSheet(); render(); toast("Defter temizlendi", UNDO);
-    };
   }
 
   /* ---------- JSON YEDEK ---------- */
@@ -3051,7 +2993,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   }
   const shareLink = () => `${location.origin}${location.pathname}#d=${DEFTER_ID}`;
-  const sharedSettingsJson = () => JSON.stringify({ magaza: db.magaza, firma: { tel: db.firma.tel, vergi: db.firma.vergi, adres: db.firma.adres }, silmePin: db.silmePin || null, hedef: Number(db.hedef) || 0, mesai: db.mesai || null, sablonlar: db.sablonlar || null });
+  const sharedSettingsJson = () => JSON.stringify({ magaza: db.magaza, firma: { tel: db.firma.tel, vergi: db.firma.vergi, adres: db.firma.adres }, silmePin: db.silmePin || null, hedef: Number(db.hedef) || 0, mesai: db.mesai || null, sablonlar: db.sablonlar || null, otoErt: db.otoErt === false ? false : true });
 
   async function loadSdk() {
     let last;
@@ -3150,10 +3092,10 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
           if (localJson === json) { remoteRec.set(id, json); return; }
           const base = remoteRec.get(id);
           if (base !== undefined && localJson !== base) return; /* bu cihazda gönderilmemiş değişiklik var, o kazanır */
-          if (liveReady && !isMine(rec)) remoteNotes.push(describeChange(db.kayitlar[i], rec));
+          if (liveReady) pushNotes(db.kayitlar[i], rec);
           db.kayitlar[i] = rec;
         } else {
-          if (liveReady && !isMine(rec)) remoteNotes.push(describeChange(null, rec));
+          if (liveReady) pushNotes(null, rec);
           db.kayitlar.push(rec);
         }
         remoteRec.set(id, json);
@@ -3181,6 +3123,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
           db.hedef = Number(o.hedef) || 0;
           db.mesai = o.mesai || null;
           db.sablonlar = Array.isArray(o.sablonlar) ? o.sablonlar : null;
+          db.otoErt = o.otoErt === false ? false : true;
           remoteSet = sharedSettingsJson();
           changed = true;
         } else if (ch.doc.id === "logo") {
@@ -3193,6 +3136,8 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
           if (m[DEV_ID] && m[DEV_ID] > joinTs) leaveDefter("cikarildi");
         } else if (ch.doc.id === "kapali") {
           if (!renewing) leaveDefter("yenilendi");
+        } else if (ch.doc.id === "kasa") {
+          vaultRaw = raw;
         }
       });
       if (changed) { cacheSave(); scheduleRender(); }
@@ -3276,7 +3221,6 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         </div>
         <div class="meta" id="shareStatus" style="margin-top:8px">${esc(statusText())}</div>
         <button class="btn btn-ghost" id="pDiag" style="width:100%;margin-top:8px">Bağlantı durumu ve tanı</button>
-        <button class="btn btn-ghost" id="pRenew" style="width:100%;margin-top:8px">🔒 Bağlantıyı yenile (eskisini kapat)</button>
         <button class="btn btn-ghost" id="pLeave" style="width:100%;margin-top:8px">Bu cihazı defterden ayır</button>
         <p class="meta" style="margin-top:8px">Bağlantıyı yalnızca güvendiğiniz kişilere verin. Bağlantıyı bilen herkes defterin tamamına erişir.</p>
       </div>`;
@@ -3287,7 +3231,6 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     host.innerHTML = shareSectionHtml();
     const on = (id, fn) => { const el = document.getElementById(id); if (el) el.onclick = fn; };
     on("pDiag", () => { closeSheet(); openStatusSheet(); });
-    on("pRenew", renewLink);
     on("pCopy", async () => {
       try { await navigator.clipboard.writeText(shareLink()); toast("Bağlantı kopyalandı"); }
       catch (e) { prompt("Bağlantıyı kopyalayın:", shareLink()); }
@@ -3368,6 +3311,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       const legacy = localStorage.getItem(KEY);
       localStorage.setItem(ID_KEY, id);
       localStorage.setItem(JOIN_KEY, String(Date.now()));
+      localStorage.setItem("kirtasiye_sahip_" + id, "1");
       localStorage.setItem(KEY + ":" + id, legacy || JSON.stringify(defaultDB()));
       localStorage.setItem(SEED_PREFIX + id, "1");
       localStorage.setItem("kirtasiye_ilk_baglanti", "1");
@@ -3518,7 +3462,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   }
   function restoreRecs(ids) {
     pushUndo("Geri getirme");
-    ids.forEach(id => { const r = db.kayitlar.find(x => x.id === id); if (r) r.silindi = false; });
+    ids.forEach(id => { const r = db.kayitlar.find(x => x.id === id); if (r) { r.silindi = false; (r.gecmis = r.gecmis || []).push({ t: new Date().toISOString(), a: "geri", d: "Silinenlerden geri getirildi" }); } });
     save(); render(); openTrash();
     toast(ids.length + " kayıt geri getirildi");
   }
@@ -3539,7 +3483,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         <div style="background:var(--sheet);color:var(--ink);border-radius:16px;padding:18px;max-width:320px;width:100%;box-shadow:var(--shadow)">
           <h3 style="font-size:17px;margin-bottom:4px">${esc(title)}</h3>
           <p class="meta" style="margin-bottom:10px">${esc(sub || "")}</p>
-          <input class="inp" id="apIn" type="password" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="PIN" style="text-align:center;letter-spacing:.3em" />
+          <input class="inp" id="apIn" type="password" autocomplete="off" maxlength="40" placeholder="Şifre" style="text-align:center;letter-spacing:.15em" />
           <div class="g2" style="margin-top:12px"><button class="btn btn-ghost" id="apNo">Vazgeç</button><button class="btn btn-gold" id="apOk">Tamam</button></div>
         </div>`;
       document.body.appendChild(o);
@@ -3552,10 +3496,10 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     });
   }
   async function guardDelete() {
-    if (!db.silmePin) return true;
+    if (!db.silmePin || adminActive()) return true;
     const p = await askPin("Yetki PIN'i", "Bu işlem için yetkili PIN'ini girin");
     if (p === null) return false;
-    if ((await sha256(db.silmePin.s + ":" + p)) !== db.silmePin.h) { toast("PIN yanlış"); return false; }
+    if (!(await verifyPin(p))) { toast("PIN yanlış"); return false; }
     return true;
   }
   async function delPinSet() {
@@ -3577,7 +3521,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   }
 
   /* ---- Canlı işlem bildirimi (ekranda uyarı + arka planda sistem bildirimi) ---- */
-  const isMine = rec => { const me = ME(); return rec.sonKim === "Sistem" || (!!me && rec.sonKim === me); };
+  const isMine = rec => { const me = ME(); return !!me && rec.sonKim === me; };
   function describeChange(old, rec) {
     const kim = rec.sonKim || "Biri";
     if (!old) return rec.silindi ? null : `${kim} yeni kayıt ekledi: ${rec.musteri} · ${fmtTRY(rec.tutar)}`;
@@ -3691,7 +3635,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   let rolling = false, rollTimer = null;
   function scheduleRollover(ms) { clearTimeout(rollTimer); rollTimer = setTimeout(autoRollover, ms || 1200); }
   async function autoRollover() {
-    if (rolling) return;
+    if (rolling || db.otoErt === false) return;
     rolling = true;
     try {
       const t = todayISO();
@@ -3772,7 +3716,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
           <div class="dev-row ${d.online ? "on" : ""}">
             <span class="dev-dot"></span>
             <div class="dev-mid"><b>${esc(d.ad)}${d.self ? `<span class="dev-me">Bu cihaz</span>` : ""}</b><span>${esc(d.cz)} · ${d.online ? "şu an çevrimiçi" : "son görülme " + ago(d.last)}</span></div>
-            ${!d.self ? `<button class="dev-del" data-devkick="${d.id}">Çıkar</button>` : ""}
+            ${(!d.self && adminActive()) ? `<button class="dev-del" data-devkick="${d.id}">Çıkar</button>` : ""}
           </div>`).join("") || `<div class="dev-row"><div class="dev-mid"><span>Henüz cihaz bilgisi yok</span></div></div>`}
       </div>
       ${diag.cihazErr ? `<p class="meta" style="margin-top:6px">Cihaz listesi tam çalışmıyor (${esc(diag.cihazErr)}). Firestore kurallarını güncelleyin.</p>` : ""}`;
@@ -3867,13 +3811,13 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
 
   /* ---- 2) Aktivite akışı ---- */
   const dayOf = t => toISO(new Date(t));
-  const ACT_ICON = { olusturuldu: ["✚", "pl"], duzenlendi: ["✎", "pl"], tahsil: ["✓", "th"], kismi: ["◐", "th"], ertelendi: ["↻", "er"], silindi: ["✕", "ge"] };
+  const ACT_ICON = { olusturuldu: ["✚", "pl"], duzenlendi: ["✎", "pl"], tahsil: ["✓", "th"], kismi: ["◐", "th"], ertelendi: ["↻", "er"], silindi: ["✕", "ge"], geri: ["↺", "pl"] };
   function activityEvents() {
     if (actTick === renderTick) return actCache;
     const ev = [];
     db.kayitlar.forEach(k => {
       (k.gecmis || []).forEach(g => { if (g.t) ev.push({ t: g.t, a: g.a, d: g.d, kim: g.k || "", auto: !!g.auto, k }); });
-      if (k.silindi && k.sonT) ev.push({ t: k.sonT, a: "silindi", d: "", kim: k.sonKim || "", k });
+      if (k.silindi && k.sonT && !(k.gecmis || []).some(g => g.a === "silindi")) ev.push({ t: k.sonT, a: "silindi", d: "", kim: k.sonKim || "", k });
     });
     ev.sort((a, b) => String(b.t).localeCompare(String(a.t)));
     actCache = ev; actTick = renderTick;
@@ -3887,7 +3831,8 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       case "tahsil": return `Tahsil etti · ${e.d || ""}`;
       case "kismi": return `Kısmi tahsilat · ${e.d || ""}`;
       case "ertelendi": return `${e.auto ? "Otomatik erteledi" : "Erteledi"} · ${String(e.d || "").replace(" (otomatik)", "")}`;
-      case "silindi": return "Kaydı sildi";
+      case "silindi": return `Tahsilatı sildi · ${fmtTRY(k.tutar)}`;
+      case "geri": return "Silinen kaydı geri getirdi";
       default: return ACT_AD[e.a] || e.a;
     }
   }
@@ -4089,7 +4034,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       }
       cloudOn = false;
       try {
-        localStorage.setItem(ID_KEY, newId); localStorage.setItem(JOIN_KEY, String(Date.now()));
+        localStorage.setItem(ID_KEY, newId); localStorage.setItem(JOIN_KEY, String(Date.now())); localStorage.setItem("kirtasiye_sahip_" + newId, "1");
         localStorage.setItem(KEY + ":" + newId, JSON.stringify(db));
         localStorage.removeItem(KEY + ":" + oldId); localStorage.removeItem(SEED_PREFIX + newId);
         localStorage.setItem("kirtasiye_ilk_baglanti", "1");
@@ -4144,14 +4089,13 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   const offCls = iso => (mesaiOn() && !isWorkday(iso)) ? " off" : "";
 
   /* ---- Yetki PIN'i: silme ve yönetim ayarları ---- */
-  async function verifyPin(p) { return !!db.silmePin && (await sha256(db.silmePin.s + ":" + p)) === db.silmePin.h; }
   /* PIN tanımlıysa yönetim ayarları yalnızca PIN'i bilen yetkili kişiye açılır (5 dk boyunca tekrar sormaz) */
   async function guardAdmin(msg) {
     if (!db.silmePin) return true;
     if (Date.now() < adminUntil) return true;
     const p = await askPin("Yetkili PIN'i", msg || "Bu ayar yalnızca yetkili kişi tarafından değiştirilebilir");
     if (p === null) return false;
-    if (await verifyPin(p)) { adminUntil = Date.now() + 5 * 60000; return true; }
+    if (await verifyPin(p)) { adminUntil = Date.now() + 10 * 60000; adminPw = p; return true; }
     toast("PIN yanlış"); return false;
   }
   /* Tahsilat yalnızca mesai gün/saatinde işlenir; yetkili PIN'i mesai dışında da geçmeye izin verir */
@@ -4344,6 +4288,445 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       else a.push({ id: "u" + Math.random().toString(36).slice(2, 8), ad, m, varsayilan: false });
       save(); renderTplManager(); toast("Şablon kaydedildi");
     };
+  }
+
+  /* ================= YÖNETİCİ PANELİ · ÇOKLU DEFTER (ŞİFRELİ KASA) · BİLDİRİM MERKEZİ ================= */
+  let adminPw = null, vaultRaw = null;
+  const REG_KEY = "kirtasiye_defterlerim", PBK_ITER = 150000;
+  const hasSubtle = () => !!(window.crypto && crypto.subtle && window.TextEncoder);
+  const encT = s => new TextEncoder().encode(s);
+  const b64e = u8 => { let s = ""; u8.forEach(b => { s += String.fromCharCode(b); }); return btoa(s); };
+  const b64d = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  const toHex = u8 => [...u8].map(x => x.toString(16).padStart(2, "0")).join("");
+
+  /* ---- Yönetici şifresi doğrulayıcı (PBKDF2; eski SHA-256 doğrulayıcılar da çalışır) ---- */
+  async function pbkdf2Bits(pw, saltStr) {
+    const base = await crypto.subtle.importKey("raw", encT(pw), "PBKDF2", false, ["deriveBits"]);
+    return new Uint8Array(await crypto.subtle.deriveBits({ name: "PBKDF2", salt: encT(saltStr), iterations: PBK_ITER, hash: "SHA-256" }, base, 256));
+  }
+  async function makeVerifier(pw) {
+    const s = newToken().slice(0, 16);
+    if (!hasSubtle()) return { s, h: await sha256(s + ":" + pw) };
+    return { s, i: PBK_ITER, h: toHex(await pbkdf2Bits(pw, s + "|dogrula")) };
+  }
+  async function verifyPin(p) {
+    const v = db.silmePin; if (!v) return false;
+    if (v.i && hasSubtle()) return toHex(await pbkdf2Bits(p, v.s + "|dogrula")) === v.h;
+    return (await sha256(v.s + ":" + p)) === v.h;
+  }
+  const adminActive = () => !!db.silmePin && Date.now() < adminUntil;
+
+  /* ---- Şifreli kasa: diğer defterlerin listesi/bağlantıları yönetici şifresiyle şifrelenir (AES-GCM) ---- */
+  async function vaultKeyFor(pw, salt) {
+    const base = await crypto.subtle.importKey("raw", encT(pw), "PBKDF2", false, ["deriveKey"]);
+    return crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations: PBK_ITER, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+  }
+  async function vaultSeal(pw, obj) {
+    const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+    const key = await vaultKeyFor(pw, salt);
+    const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encT(JSON.stringify(obj))));
+    return { v: 1, s: b64e(salt), iv: b64e(iv), ct: b64e(ct) };
+  }
+  async function vaultOpen(pw, blob) {
+    try {
+      const key = await vaultKeyFor(pw, b64d(blob.s));
+      const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64d(blob.iv) }, key, b64d(blob.ct));
+      return JSON.parse(new TextDecoder().decode(pt));
+    } catch (e) { return null; }
+  }
+  async function loadGroup() {
+    const me = { id: DEFTER_ID, ad: db.magaza };
+    let list = [], bozuk = false;
+    if (vaultRaw && adminPw && hasSubtle()) {
+      let blob = null; try { blob = JSON.parse(vaultRaw); } catch (e) {}
+      const o = blob && await vaultOpen(adminPw, blob);
+      if (o && Array.isArray(o.defterler)) list = o.defterler; else if (blob) bozuk = true;
+    }
+    if (!list.some(x => x.id === DEFTER_ID)) list.unshift(me); else list = list.map(x => x.id === DEFTER_ID ? { ...x, ad: db.magaza } : x);
+    return { list, bozuk };
+  }
+  const dRef = (id, c, d) => fbm.doc(fbDb, "defterler", id, c, d);
+  async function readGenel(id) {
+    const s = await fbm.getDocFromServer(dRef(id, "ayar", "genel"));
+    if (!s.exists()) return null;
+    try { return JSON.parse(s.data().d); } catch (e) { return null; }
+  }
+  const writeGenel = (id, o) => fbm.setDoc(dRef(id, "ayar", "genel"), { d: JSON.stringify(o), u: fbm.serverTimestamp() });
+  const GENEL_BOS = ad => ({ magaza: ad, firma: { tel: "", vergi: "", adres: "" }, silmePin: null, hedef: 0, mesai: null, sablonlar: null, otoErt: true });
+  async function setLedgerPin(id, verifier) { const o = (await readGenel(id)) || GENEL_BOS("Defter"); o.silmePin = verifier; await writeGenel(id, o); }
+  /* Grup listesini şifreleyip gruptaki HER defterin kasasına yazar; istenirse yönetici şifresini tüm defterlere uygular */
+  async function writeGroup(list, pw, opts) {
+    opts = opts || {};
+    const raw = JSON.stringify(await vaultSeal(pw, { defterler: list, t: Date.now() }));
+    const fails = [];
+    for (const L of list) {
+      try {
+        await fbm.setDoc(dRef(L.id, "ayar", "kasa"), { d: raw, u: fbm.serverTimestamp() });
+        if (opts.propagatePin && L.id !== DEFTER_ID) await setLedgerPin(L.id, db.silmePin);
+      } catch (e) { fails.push(L.ad || L.id); }
+    }
+    vaultRaw = raw;
+    try { localStorage.setItem(REG_KEY, JSON.stringify(list)); } catch (e) {}
+    return fails;
+  }
+  function localSummary() {
+    const recs = kayitlar(), t = todayISO();
+    return { id: DEFTER_ID, ad: db.magaza, n: recs.length, bak: openTotal(), ert: recs.filter(isErt).length,
+      bugun: round2(collectEvents().filter(e => e.iso === t).reduce((a, e) => a + e.tutar, 0)), son: recs.reduce((m, k) => (k.sonT && k.sonT > m) ? k.sonT : m, "") };
+  }
+  async function ledgerSummary(id) {
+    const out = { id, ad: null, n: 0, bak: 0, ert: 0, bugun: 0, son: "", err: null };
+    try {
+      const g = await readGenel(id); if (g && g.magaza) out.ad = g.magaza;
+      const snap = await fbm.getDocsFromServer(fbm.collection(fbDb, "defterler", id, "kayitlar"));
+      const recs = [];
+      snap.forEach(d => { try { const r = JSON.parse(d.data().d); r.id = d.id; normalizeRec(r); if (!r.silindi) recs.push(r); } catch (e) {} });
+      const t = todayISO();
+      out.n = recs.length;
+      out.bak = round2(recs.filter(isOpen).reduce((a, k) => a + remaining(k), 0));
+      out.ert = recs.filter(isErt).length;
+      out.bugun = round2(collectEvents(recs).filter(e => e.iso === t).reduce((a, e) => a + e.tutar, 0));
+      out.son = recs.reduce((m, k) => (k.sonT && k.sonT > m) ? k.sonT : m, "");
+    } catch (e) { out.err = fbErr(e); }
+    return out;
+  }
+  async function openLedger(id) {
+    if (id === DEFTER_ID) return;
+    try { await pushNow(); } catch (e) {}
+    cloudOn = false;
+    try { localStorage.setItem(ID_KEY, id); localStorage.setItem(JOIN_KEY, String(Date.now())); localStorage.removeItem(SEED_PREFIX + id); } catch (e) {}
+    location.hash = "d=" + id;
+    location.reload();
+  }
+  async function addNewLedger(ad) {
+    const { list, bozuk } = await loadGroup();
+    if (bozuk) throw new Error("kasa çözülemedi");
+    const id = newToken();
+    const o = GENEL_BOS(ad); o.silmePin = db.silmePin;
+    await writeGenel(id, o);
+    list.push({ id, ad });
+    const fails = await writeGroup(list, adminPw);
+    try { localStorage.setItem("kirtasiye_sahip_" + id, "1"); } catch (e) {}
+    return { id, fails };
+  }
+  async function addExistingLedger(link) {
+    const m = String(link || "").trim().match(/[#&?]d=([A-Za-z0-9_-]{16,})/) || String(link || "").trim().match(/^([A-Za-z0-9_-]{16,})$/);
+    if (!m) throw new Error("geçerli bir defter bağlantısı değil");
+    const id = m[1];
+    const { list, bozuk } = await loadGroup();
+    if (bozuk) throw new Error("kasa çözülemedi");
+    if (list.some(x => x.id === id)) throw new Error("bu defter zaten listede");
+    const g = await readGenel(id);
+    const snap = await fbm.getDocsFromServer(fbm.collection(fbDb, "defterler", id, "kayitlar"));
+    if (!g && snap.size === 0 && !confirm("Bu bağlantıda kayıt ya da ayar bulunamadı (boş ya da yanlış olabilir). Yine de eklensin mi?")) throw new Error("vazgeçildi");
+    const ad = (g && g.magaza) || "Defter";
+    const o = g || GENEL_BOS(ad); o.silmePin = db.silmePin;
+    await writeGenel(id, o);
+    list.push({ id, ad });
+    const fails = await writeGroup(list, adminPw);
+    return { id, ad, fails };
+  }
+  async function removeFromGroup(id) {
+    const { list } = await loadGroup();
+    const yeni = list.filter(x => x.id !== id);
+    try { await fbm.deleteDoc(dRef(id, "ayar", "kasa")); } catch (e) {}
+    return writeGroup(yeni, adminPw);
+  }
+  async function renameLedger(id, ad) {
+    const { list } = await loadGroup();
+    if (id === DEFTER_ID) { db.magaza = ad; save(); }
+    else { const o = (await readGenel(id)) || GENEL_BOS(ad); o.magaza = ad; await writeGenel(id, o); }
+    return writeGroup(list.map(x => x.id === id ? { ...x, ad } : x), adminPw);
+  }
+  /* Yönetici şifresini değiştir: grup listesi yeni şifreyle yeniden şifrelenir, tüm defterlere uygulanır */
+  async function setAdminPassword(newPw) {
+    let grup = null;
+    if (DEFTER_ID && cloudOn && hasSubtle() && vaultRaw && adminPw) { const g = await loadGroup(); if (!g.bozuk) grup = g.list; }
+    db.silmePin = await makeVerifier(newPw);
+    adminPw = newPw; adminUntil = Date.now() + 10 * 60000;
+    save();
+    if (grup && grup.length > 1) return writeGroup(grup, newPw, { propagatePin: true });
+    if (DEFTER_ID && cloudOn && hasSubtle() && grup) return writeGroup(grup, newPw);
+    return [];
+  }
+
+  /* ---- Yönetici paneli ---- */
+  const adminTouch = () => { if (db.silmePin) adminUntil = Date.now() + 10 * 60000; };
+  async function openAdminPanel() {
+    if (!db.silmePin) return openAdminSetup();
+    if (!adminActive() || !adminPw) {
+      const p = await askPin("Yönetici girişi", "Yönetici şifresini girin");
+      if (p === null) return;
+      if (!(await verifyPin(p))) return toast("Şifre yanlış");
+      adminPw = p;
+      if (!db.silmePin.i && hasSubtle()) { db.silmePin = await makeVerifier(p); save(); } /* eski doğrulayıcıyı güçlendir */
+    }
+    adminTouch();
+    renderAdminPanel();
+  }
+  function openAdminSetup() {
+    openSheet(`
+      <div class="sheet-card">
+        <div class="grab"></div>
+        <div style="display:flex;align-items:center"><h2 style="flex:1;font-size:18px">Yönetici şifresi belirle</h2><button class="btn btn-ghost" id="sheetClose">Vazgeç</button></div>
+        <p class="meta" style="margin:8px 0">Bu şifre yönetici paneline giriş, kayıt silme ve tüm yönetim ayarları için kullanılır. <b>En az 6 karakter</b>, harf ve rakam karışık uzun bir şifre önerilir. Şifreyi unutursanız sıfırlayamazsınız (defteri oluşturan cihaz hariç).</p>
+        <p class="meta" style="margin:0 0 10px;color:var(--erte)">⚠️ Şifreyi hemen yönetici belirlemelidir; belirlenene kadar panel herkese açıktır.</p>
+        <input class="inp" id="apw1" type="password" autocomplete="new-password" maxlength="40" placeholder="Yeni şifre" />
+        <input class="inp" id="apw2" type="password" autocomplete="new-password" maxlength="40" placeholder="Şifre (tekrar)" style="margin-top:8px" />
+        <button class="btn btn-gold" id="apwSave" style="width:100%;margin-top:12px">Şifreyi kaydet ve panele gir</button>
+      </div>`);
+    document.getElementById("sheetClose").onclick = closeSheet;
+    document.getElementById("apwSave").onclick = async () => {
+      const a = document.getElementById("apw1").value, b = document.getElementById("apw2").value;
+      if (a.length < 6) return toast("Şifre en az 6 karakter olmalı");
+      if (a !== b) return toast("Şifreler uyuşmadı");
+      await setAdminPassword(a);
+      toast("Yönetici şifresi belirlendi");
+      renderAdminPanel();
+    };
+  }
+  function changeAdminPassword() {
+    openSheet(`
+      <div class="sheet-card">
+        <div class="grab"></div>
+        <div style="display:flex;align-items:center"><h2 style="flex:1;font-size:18px">Yönetici şifresini değiştir</h2><button class="btn btn-ghost" id="sheetClose">Vazgeç</button></div>
+        <p class="meta" style="margin:8px 0">Diğer defterleriniz varsa onların yönetici şifresi de değişir.</p>
+        <input class="inp" id="apw1" type="password" autocomplete="new-password" maxlength="40" placeholder="Yeni şifre (en az 6 karakter)" />
+        <input class="inp" id="apw2" type="password" autocomplete="new-password" maxlength="40" placeholder="Yeni şifre (tekrar)" style="margin-top:8px" />
+        <button class="btn btn-gold" id="apwSave" style="width:100%;margin-top:12px">Şifreyi değiştir</button>
+      </div>`);
+    document.getElementById("sheetClose").onclick = renderAdminPanel;
+    document.getElementById("apwSave").onclick = async () => {
+      const a = document.getElementById("apw1").value, b = document.getElementById("apw2").value;
+      if (a.length < 6) return toast("Şifre en az 6 karakter olmalı");
+      if (a !== b) return toast("Şifreler uyuşmadı");
+      const fails = await setAdminPassword(a);
+      toast(fails.length ? "Şifre değişti; güncellenemeyen defter: " + fails.join(", ") : "Yönetici şifresi değiştirildi");
+      renderAdminPanel();
+    };
+  }
+  async function wipeAll() {
+    const onay = prompt("DİKKAT: Bu defterdeki tüm kayıtlar HERKES için silinir.\nDevam etmek için büyük harfle SIL yazın:");
+    if (!onay || onay.trim().toUpperCase().replace("İ", "I") !== "SIL") return toast("Vazgeçildi");
+    pushUndo("Sıfırlama");
+    const now = new Date().toISOString();
+    db.kayitlar.forEach(k => { if (!k.silindi) { k.silindi = true; (k.gecmis = k.gecmis || []).push({ t: now, a: "silindi", d: fmtTRY(k.tutar) }); } });
+    save(); closeSheet(); render(); toast("Defter temizlendi", UNDO);
+  }
+  const money0 = n => fmtK(n);
+  const agoIso = iso => iso ? ago(new Date(iso).getTime()) : "—";
+  async function renderLedgers(host) {
+    if (!DEFTER_ID || !cloudReady()) { host.innerHTML = `<div class="meta">Çoklu defter yönetimi için bu cihazın bir ortak defterle bağlı olması gerekir.</div>`; return; }
+    if (!hasSubtle()) { host.innerHTML = `<div class="meta">Bu tarayıcı şifreli kasayı desteklemiyor (güvenli bağlantı / güncel tarayıcı gerekir).</div>`; return; }
+    host.innerHTML = `<div class="meta">Defterler yükleniyor…</div>`;
+    const g = await loadGroup();
+    if (g.bozuk) {
+      host.innerHTML = `<div class="meta" style="color:var(--red)">Defter kasası bu şifreyle çözülemedi (başka bir şifreyle oluşturulmuş olabilir).</div>
+        <button class="btn btn-ghost" id="gReset" style="width:100%;margin-top:8px">Kasayı sıfırla (yalnızca bu defter kalır)</button>`;
+      document.getElementById("gReset").onclick = async () => { if (!confirm("Defter listesi sıfırlansın mı? Defterlerin kendisi silinmez; yalnızca liste.")) return; await writeGroup([{ id: DEFTER_ID, ad: db.magaza }], adminPw); renderLedgers(host); };
+      return;
+    }
+    const sums = await Promise.all(g.list.map(L => L.id === DEFTER_ID ? Promise.resolve(localSummary()) : ledgerSummary(L.id)));
+    const tBak = round2(sums.reduce((a, s) => a + (s.bak || 0), 0)), tBug = round2(sums.reduce((a, s) => a + (s.bugun || 0), 0));
+    host.innerHTML = `
+      ${g.list.length > 1 ? `<div class="meta" style="margin:0 2px 6px">Tüm defterlerin toplamı</div><div class="kpis" style="margin:0 0 10px"><div class="kpi pl"><div class="k"><i></i>Açık bakiye</div><div class="v">${money0(tBak)}</div></div><div class="kpi th"><div class="k"><i></i>Bugün tahsil</div><div class="v">${money0(tBug)}</div></div><div class="kpi er"><div class="k"><i></i>Defter</div><div class="v">${g.list.length}</div></div></div>` : ""}
+      <div class="ledger-list">
+        ${g.list.map((L, i) => { const s = sums[i], cur = L.id === DEFTER_ID; return `
+          <div class="ledger-row ${cur ? "cur" : ""}">
+            <div class="ledger-top"><b>${esc(s.ad || L.ad)}</b>${cur ? `<span class="dev-me">Bu defter</span>` : ""}</div>
+            <div class="meta">${s.err ? "Okunamadı: " + esc(s.err) : `${s.n} kayıt · açık <b>${money0(s.bak)}</b> · bugün tahsil <b>${money0(s.bugun)}</b> · ertelenen ${s.ert} · son işlem ${agoIso(s.son)}`}</div>
+            <div class="tpl-acts">
+              ${cur ? "" : `<button class="btn btn-gold" data-lopen="${esc(L.id)}">Aç ve yönet</button>`}
+              <button class="btn btn-ghost" data-lren="${esc(L.id)}">Adı değiştir</button>
+              ${cur ? "" : `<button class="btn btn-ghost" data-ldel="${esc(L.id)}" style="color:var(--red)">Listeden çıkar</button>`}
+            </div>
+          </div>`; }).join("")}
+      </div>
+      <div class="tpl-acts" style="margin-top:8px">
+        <button class="btn btn-leather" id="lNew">＋ Yeni defter</button>
+        <button class="btn btn-ghost" id="lAdd">🔗 Mevcut defteri ekle</button>
+      </div>
+      <p class="meta" style="margin-top:8px">Defter listesi yönetici şifrenizle <b>şifrelenerek</b> saklanır; çalışanlar diğer defterlerin bağlantısını göremez. Tüm defterlerde aynı yönetici şifresi geçerlidir.</p>`;
+    host.querySelectorAll("[data-lopen]").forEach(b => b.onclick = () => openLedger(b.dataset.lopen));
+    host.querySelectorAll("[data-lren]").forEach(b => b.onclick = async () => {
+      const L = g.list.find(x => x.id === b.dataset.lren); const ad = prompt("Defter adı:", L.ad); if (!ad || !ad.trim()) return;
+      try { await renameLedger(L.id, ad.trim()); toast("Ad değiştirildi"); renderAdminPanel(); } catch (e) { toast("Değiştirilemedi: " + fbErr(e)); }
+    });
+    host.querySelectorAll("[data-ldel]").forEach(b => b.onclick = async () => {
+      const L = g.list.find(x => x.id === b.dataset.ldel);
+      if (!confirm(`“${L.ad}” listeden çıkarılsın mı? Defterin kendisi silinmez; yalnızca bu listeden kalkar.`)) return;
+      try { await removeFromGroup(L.id); toast("Listeden çıkarıldı"); renderLedgers(host); } catch (e) { toast("Çıkarılamadı: " + fbErr(e)); }
+    });
+    document.getElementById("lNew").onclick = async () => {
+      const ad = prompt("Yeni defterin adı (örn. Şube 2):"); if (!ad || !ad.trim()) return;
+      try { const r = await addNewLedger(ad.trim()); toast(r.fails.length ? "Oluşturuldu; kasa güncellenemedi: " + r.fails.join(", ") : "Defter oluşturuldu"); if (confirm(`“${ad.trim()}” defterine şimdi geçilsin mi?`)) openLedger(r.id); else renderLedgers(host); }
+      catch (e) { toast("Oluşturulamadı: " + (e.message || fbErr(e))); }
+    };
+    document.getElementById("lAdd").onclick = async () => {
+      const link = prompt("Eklenecek defterin bağlantısını yapıştırın.\nNot: o defterin yönetici şifresi, sizinkiyle aynı yapılacaktır."); if (!link) return;
+      try { const r = await addExistingLedger(link); toast("Eklendi: " + r.ad); renderLedgers(host); }
+      catch (e) { toast("Eklenemedi: " + (e.message || fbErr(e))); }
+    };
+  }
+  function renderAdminPanel() {
+    adminTouch();
+    const owner = (() => { try { return localStorage.getItem("kirtasiye_sahip_" + DEFTER_ID) === "1"; } catch (e) { return false; } })();
+    openSheet(`
+      <div class="sheet-card full admin">
+        <div class="grab"></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <h2 style="flex:1;font-size:18px">🛡 Yönetici paneli</h2>
+          <button class="btn btn-ghost" id="admLock">Kilitle</button>
+          <button class="btn btn-ghost" id="sheetClose">Kapat</button>
+        </div>
+        <p class="meta" style="margin:6px 2px 0">Yalnızca yönetici şifresini bilen kişi buraya girebilir. Oturum 10 dakika açık kalır.</p>
+
+        <label class="fld">Defterlerim (çoklu defter)</label>
+        <div id="ledgerHost"></div>
+
+        <label class="fld">Firma bilgileri</label>
+        <input class="inp" id="sAd" value="${esc(db.magaza)}" placeholder="Firma adı / unvan" />
+        <div class="row2">
+          <div><label class="fld">Telefon</label><input class="inp" id="sTel" inputmode="tel" value="${esc(db.firma.tel)}" placeholder="05xx" /></div>
+          <div><label class="fld">Vergi no</label><input class="inp" id="sVergi" value="${esc(db.firma.vergi)}" placeholder="İsteğe bağlı" /></div>
+        </div>
+        <label class="fld">Adres</label>
+        <textarea class="inp" id="sAdres" rows="2" placeholder="Fiş ve paylaşımlarda görünür">${esc(db.firma.adres)}</textarea>
+        <label class="fld">Logo</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="brand-mark" style="border-color:var(--line);background:var(--badge);color:var(--mute);width:48px;height:48px;overflow:hidden;flex:0 0 48px">${db.firma.logo ? `<img src="${db.firma.logo}" style="width:100%;height:100%;object-fit:cover">` : icon("book")}</div>
+          <button class="btn btn-gold" id="sLogoBtn" style="flex:1">Logo yükle</button>
+          <button class="btn btn-ghost" id="sLogoDel" ${db.firma.logo ? "" : "disabled"}>Kaldır</button>
+        </div>
+        <input type="file" id="sLogoFile" accept="image/*" class="hidden" />
+        <button class="btn btn-leather" id="sSave" style="width:100%;margin-top:12px">Firma bilgilerini kaydet</button>
+
+        <label class="fld">Tahsilat ayarları</label>
+        <button class="btn btn-ghost" id="sGoal" style="width:100%">🎯 Aylık tahsilat hedefi: ${db.hedef ? fmtK(db.hedef) : "tanımlı değil"}</button>
+        <button class="btn btn-ghost" id="sMesai" style="width:100%;margin-top:8px">🕘 Mesai saatleri: ${mesaiOn() ? mesaiOzet() : "tanımlı değil"}</button>
+        <button class="btn btn-ghost" id="sTpl" style="width:100%;margin-top:8px">💬 WhatsApp mesaj şablonları (${tpls().length})</button>
+        <button class="btn ${db.otoErt === false ? "btn-ghost" : "btn-leather"}" id="aOto" style="width:100%;margin-top:8px">↻ Otomatik erteleme: ${db.otoErt === false ? "Kapalı" : "Açık"}</button>
+
+        <label class="fld">Erişim ve güvenlik</label>
+        <div data-devhost></div>
+        <button class="btn btn-ghost" id="aRenew" style="width:100%;margin-top:8px">🔒 Bağlantıyı yenile (eskisini kapat)</button>
+        <button class="btn btn-gold" id="aPw" style="width:100%;margin-top:8px">🔑 Yönetici şifresini değiştir</button>
+        ${owner ? `<button class="btn btn-ghost" id="aPwReset" style="width:100%;margin-top:8px;color:var(--red)">Şifreyi sıfırla (bu cihaz defteri oluşturdu)</button>` : ""}
+
+        <label class="fld">Silinenler ve yedek</label>
+        <button class="btn btn-ghost" id="sTrash" style="width:100%">🗑 Silinenler kutusu (${db.kayitlar.filter(k => k.silindi).length})</button>
+        <div class="g2" style="margin-top:8px">
+          <button class="btn btn-gold" id="sExp">${icon("fileDown")} JSON indir</button>
+          <button class="btn btn-ghost" id="sImp">${icon("fileUp")} JSON yükle</button>
+        </div>
+        <div class="g2" style="margin-top:8px">
+          <button class="btn btn-leather" id="sCsv">${icon("fileDown")} CSV indir</button>
+          <button class="btn btn-ghost" id="sCsvImp">${icon("fileUp")} CSV yükle</button>
+        </div>
+        <input type="file" id="sFile" accept="application/json" class="hidden" />
+        <input type="file" id="sCsvFile" accept=".csv,text/csv" class="hidden" />
+
+        <label class="fld" style="color:var(--red)">Tehlikeli bölge</label>
+        <button class="btn btn-ghost" id="sWipe" style="width:100%;color:#8b2e2e">Tüm defteri sil</button>
+      </div>`, true);
+    const $ = id => document.getElementById(id);
+    $("sheetClose").onclick = closeSheet;
+    $("admLock").onclick = () => { adminUntil = 0; adminPw = null; closeSheet(); toast("Yönetici paneli kilitlendi"); };
+    renderLedgers($("ledgerHost"));
+    $("sSave").onclick = () => {
+      db.magaza = $("sAd").value.trim() || db.magaza;
+      db.firma.tel = $("sTel").value.trim(); db.firma.vergi = $("sVergi").value.trim(); db.firma.adres = $("sAdres").value.trim();
+      save(); closeSheet(); render(); toast("Ayarlar kaydedildi");
+    };
+    $("sLogoBtn").onclick = () => $("sLogoFile").click();
+    $("sLogoFile").onchange = e => { const f = e.target.files?.[0]; if (f) processLogo(f); };
+    $("sLogoDel").onclick = () => { db.firma.logo = ""; save(); render(); renderAdminPanel(); toast("Logo kaldırıldı"); };
+    $("sGoal").onclick = openGoalSheet; $("sMesai").onclick = openMesaiSheet; $("sTpl").onclick = openTplManager;
+    $("aOto").onclick = () => { db.otoErt = db.otoErt === false ? true : false; save(); if (db.otoErt) scheduleRollover(600); renderAdminPanel(); toast("Otomatik erteleme " + (db.otoErt ? "açık" : "kapalı")); };
+    repaintDevices();
+    $("aRenew").onclick = renewLink;
+    $("aPw").onclick = changeAdminPassword;
+    const pr = $("aPwReset");
+    if (pr) pr.onclick = async () => {
+      const t = prompt("Yönetici şifresi kaldırılacak; ardından yenisini belirleyebilirsiniz.\nDiğer defterlerin kasası da sıfırlanır.\nDevam için büyük harfle SIFIRLA yazın:");
+      if (!t || t.trim().toUpperCase().replace("İ", "I") !== "SIFIRLA") return toast("Vazgeçildi");
+      db.silmePin = null; adminPw = null; adminUntil = 0; save();
+      if (cloudOn && hasSubtle()) { try { await fbm.deleteDoc(dRef(DEFTER_ID, "ayar", "kasa")); } catch (e) {} vaultRaw = null; }
+      closeSheet(); toast("Şifre sıfırlandı. Yönetici panelinden yeni şifre belirleyin.");
+    };
+    $("sTrash").onclick = openTrash;
+    $("sExp").onclick = exportJSON; $("sImp").onclick = () => $("sFile").click(); $("sFile").onchange = importJSON;
+    $("sCsv").onclick = exportCSV; $("sCsvImp").onclick = () => $("sCsvFile").click();
+    $("sCsvFile").onchange = e => { const f = e.target.files?.[0]; if (f) importCSV(f); };
+    $("sWipe").onclick = wipeAll;
+  }
+
+  /* ---- Bildirim merkezi: eklenen, tahsil edilen, silinen, düzenlenen, ertelenen, geri getirilen — hepsi ---- */
+  const ACT_KIND = { olusturuldu: "ekle", tahsil: "tahsil", kismi: "tahsil", silindi: "sil", duzenlendi: "duzenle", ertelendi: "ertele", geri: "geri" };
+  const KIND_AD = { ekle: "Eklenen", tahsil: "Tahsil edilen", sil: "Silinen", duzenle: "Düzenlenen", ertele: "Ertelenen", geri: "Geri getirilen" };
+  const SEEN_KEY = "kirtasiye_bildirim_son";
+  const btPref = k => !(db.ayar.bt && db.ayar.bt[k] === false);
+  function lastSeen() {
+    try { let v = localStorage.getItem(SEEN_KEY); if (!v) { v = new Date().toISOString(); localStorage.setItem(SEEN_KEY, v); } return v; } catch (e) { return ""; }
+  }
+  const markSeen = () => { try { localStorage.setItem(SEEN_KEY, new Date().toISOString()); } catch (e) {} };
+  const evMine = e => { const me = ME(); return !!me && e.kim === me; };
+  function unreadCount() {
+    const ls = lastSeen(); let n = 0;
+    for (const e of activityEvents()) { if (String(e.t) <= ls) break; if (!evMine(e) && btPref(ACT_KIND[e.a] || "")) n++; }
+    return n;
+  }
+  function noteList(old, rec) {
+    const oldN = old ? (old.gecmis || []).length : 0, added = (rec.gecmis || []).slice(oldN), out = [], nm = rec.musteri;
+    added.forEach(g => {
+      const kim = g.k || rec.sonKim || "Biri", kind = ACT_KIND[g.a]; if (!kind) return;
+      let m = null;
+      switch (g.a) {
+        case "olusturuldu": m = `${kim} yeni tahsilat ekledi: ${nm} · ${fmtTRY(rec.tutar)}`; break;
+        case "tahsil": m = `${kim} tahsil etti: ${nm} · ${g.tutar ? fmtTRY(g.tutar) : (g.d || "")}`; break;
+        case "kismi": m = `${kim} kısmi tahsilat girdi: ${nm} · ${g.tutar ? fmtTRY(g.tutar) : (g.d || "")}`; break;
+        case "ertelendi": m = kim === "Sistem" ? `Sistem otomatik erteledi: ${nm} → ${fmtDate(rec.vade)}` : `${kim} erteledi: ${nm} → ${fmtDate(rec.vade)}`; break;
+        case "duzenlendi": m = `${kim} kaydı düzenledi: ${nm}`; break;
+        case "silindi": m = `${kim} tahsilatı sildi: ${nm} · ${fmtTRY(rec.tutar)}`; break;
+        case "geri": m = `${kim} silinen kaydı geri getirdi: ${nm}`; break;
+      }
+      if (m && btPref(kind)) out.push(m);
+    });
+    if (!added.length) { /* gecmişsiz değişiklik (eski sürüm istemcisi) */
+      const m = describeChange(old, rec);
+      const kind = !old ? "ekle" : (rec.silindi && !old.silindi) ? "sil" : (!rec.silindi && old.silindi) ? "geri" : "duzenle";
+      if (m && btPref(kind)) out.push(m);
+    }
+    return out;
+  }
+  function pushNotes(old, rec) { if (isMine(rec)) return; noteList(old, rec).forEach(m => remoteNotes.push(m)); }
+  let ncFilter = "hepsi";
+  function openNotifCenter() {
+    const prev = lastSeen(); markSeen(); setTimeout(() => { try { render(); } catch (e) {} }, 0);
+    const all = activityEvents(), today = todayISO();
+    const list = all.filter(e => ncFilter === "hepsi" || ACT_KIND[e.a] === ncFilter).slice(0, 200);
+    const cnt = k => all.filter(e => ACT_KIND[e.a] === k).length;
+    const d = digest(), nRem = d.ert.length + d.gec.length + d.bug.length + d.yarin.length;
+    const groups = [];
+    list.forEach(e => { const dd = dayOf(e.t), g = groups[groups.length - 1]; if (g && g.d === dd) g.items.push(e); else groups.push({ d: dd, items: [e] }); });
+    openSheet(`
+      <div class="sheet-card full">
+        <div class="grab"></div>
+        <div style="display:flex;align-items:center;gap:8px"><h2 style="flex:1;font-size:18px">Bildirimler</h2><button class="btn btn-ghost" id="sheetClose">Kapat</button></div>
+        <button class="btn btn-ghost" id="ncRem" style="width:100%;margin-top:10px">🔔 Hatırlatmalar · ${nRem}</button>
+        <div class="chips nc-chips" style="margin:10px 0 4px">
+          <button class="chip ${ncFilter === "hepsi" ? "on" : ""}" data-ncf="hepsi">Tümü ${all.length}</button>
+          ${Object.keys(KIND_AD).map(k => `<button class="chip ${ncFilter === k ? "on" : ""}" data-ncf="${k}">${KIND_AD[k]} ${cnt(k)}</button>`).join("")}
+        </div>
+        ${groups.length ? groups.map(g => `
+          <div class="day-h"><b class="${g.d === today ? "today" : ""}">${g.d === today ? "Bugün" : g.d === addDays(today, -1) ? "Dün" : fmtLong(g.d)}</b><span>${g.items.length} bildirim</span></div>
+          <div class="group">${g.items.map(e => { const un = String(e.t) > prev && !evMine(e); return actRow(e, false).replace('class="row"', `class="row${un ? " unread" : ""}"`); }).join("")}</div>`).join("")
+          : `<div class="empty">Bu türde bildirim yok.</div>`}
+      </div>`, true);
+    document.getElementById("sheetClose").onclick = closeSheet;
+    document.getElementById("ncRem").onclick = () => openDigest(true);
+    document.querySelectorAll("[data-ncf]").forEach(b => b.onclick = () => { ncFilter = b.dataset.ncf; openNotifCenter(); });
+    document.querySelectorAll("#sheet .row[data-open]").forEach(r => r.onclick = () => { const k = kayitlar().find(x => x.id === r.dataset.open); if (k) openDetail(k); });
   }
 
   /* ---------- BAŞLAT ---------- */
