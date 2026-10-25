@@ -3166,6 +3166,9 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
   const memberRef = (id, userId) => fbm.doc(fbDb, "defterler", id, "uyeler", userId);
   const memberApplicationRef = (id, userId) => fbm.doc(fbDb, "defterler", id, "uyelikBasvurulari", userId);
   const memberApplicationsRef = id => fbm.collection(fbDb, "defterler", id, "uyelikBasvurulari");
+  const adminApplicationsRef = () => fbm.collection(fbDb, "uyelikBildirimleri");
+  const adminApplicationRef = id => fbm.doc(fbDb, "uyelikBildirimleri", id);
+  const adminApplicationId = (ledgerId, userId) => ledgerId + "__" + userId;
   let applicationWatcher = null, applicationWatcherKey = "";
   let adminApplicationsWatcher = null, adminApplicationsWatcherUid = "", adminInboxToken = 0;
   const ADMIN_EMAIL = "izmirdunyaambalaj@gmail.com";
@@ -3238,22 +3241,24 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
       try {
         const ref = memberApplicationRef(DEFTER_ID, uidValue);
         const current = await fbm.getDoc(ref);
-        if (current.exists() && current.data().status === "pending") {
-          requestButton.textContent = "Başvuru beklemede";
-          toast("Başvurunuz zaten bekliyor");
-        } else {
-          const now = new Date().toISOString();
-          await fbm.setDoc(ref, {
-            uid: uidValue,
-            email: user.email || "",
-            name: user.displayName || "",
-            status: "pending",
-            createdAt: current.exists() ? (current.data().createdAt || now) : now,
-            updatedAt: now
-          });
-          requestButton.textContent = "Başvuru gönderildi";
-          toast("Başvurunuz defter yöneticisine iletildi");
-        }
+        const now = new Date().toISOString();
+        const application = {
+          uid: uidValue,
+          email: user.email || "",
+          name: user.displayName || "",
+          status: "pending",
+          createdAt: current.exists() ? (current.data().createdAt || now) : now,
+          updatedAt: now
+        };
+        const globalId = adminApplicationId(DEFTER_ID, uidValue);
+        const batch = fbm.writeBatch(fbDb);
+        if (!(current.exists() && current.data().status === "pending")) batch.set(ref, application);
+        batch.set(adminApplicationRef(globalId), { ...application, defterId: DEFTER_ID });
+        await batch.commit();
+        requestButton.textContent = "Başvuru gönderildi";
+        toast(current.exists() && current.data().status === "pending"
+          ? "Başvurunuz yönetici bildirim kuyruğuna iletildi"
+          : "Başvurunuz defter yöneticisine iletildi");
       } catch (e) {
         requestButton.disabled = false;
         toast("Başvuru gönderilemedi: " + fbErr(e));
@@ -3325,7 +3330,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
       const [members, applications, globalApplications] = await Promise.all([
         fbm.getDocs(fbm.collection(fbDb, "defterler", DEFTER_ID, "uyeler")),
         fbm.getDocs(memberApplicationsRef(DEFTER_ID)),
-        isFixedAdmin(fbAuth.currentUser) ? fbm.getDocs(fbm.collectionGroup(fbDb, "uyelikBasvurulari")) : Promise.resolve(null)
+        isFixedAdmin(fbAuth.currentUser) ? fbm.getDocs(adminApplicationsRef()) : Promise.resolve(null)
       ]);
       if (token !== memberLoadToken || !host.isConnected) return;
       const rows = [];
@@ -3338,14 +3343,14 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
         if (d.data().status === "pending") pending.push({ id: d.id, uid: d.id, ledgerId: DEFTER_ID, ...d.data() });
       });
       if (globalApplications) globalApplications.forEach(d => {
-        const a = d.data(), ledgerId = d.ref.parent.parent && d.ref.parent.parent.id;
-        if (a.status !== "pending" || !ledgerId) return;
-        const local = pending.find(x => x.ledgerId === ledgerId && x.uid === d.id);
-        if (local) local.fromGroupQuery = true;
-        else pending.push({ ...a, id: d.id, uid: d.id, ledgerId, fromGroupQuery: true });
+        const a = d.data();
+        if (a.status !== "pending") return;
+        const local = pending.find(x => x.ledgerId === a.defterId && x.uid === a.uid);
+        if (local) { local.globalId = d.id; local.source = "global"; }
+        else pending.push({ ...a, id: d.id, globalId: d.id, source: "global", ledgerId: a.defterId, uid: a.uid });
       });
       pending.sort((a,b) => String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
-      const requests = pending.map(a => `<div class="mini-day" style="align-items:center"><div class="who"><b>${esc(a.name || a.email || a.uid || a.id)}</b><div class="meta">${esc(a.email || "")} · Defter: ${esc(String(a.ledgerId || DEFTER_ID).slice(0,10))}… · UID: ${esc(a.uid || a.id)}</div></div><div style="display:flex;gap:6px"><button class="btn btn-gold" data-request-approve="${esc((a.ledgerId || DEFTER_ID) + "/" + (a.uid || a.id))}">Onayla</button><button class="btn btn-ghost" data-request-reject="${esc((a.ledgerId || DEFTER_ID) + "/" + (a.uid || a.id))}">Reddet</button></div></div>`).join("");
+      const requests = pending.map(a => `<div class="mini-day" style="align-items:center"><div class="who"><b>${esc(a.name || a.email || a.uid || a.id)}</b><div class="meta">${esc(a.email || "")} · Defter: ${esc(String(a.ledgerId || DEFTER_ID).slice(0,10))}… · UID: ${esc(a.uid || a.id)}</div></div><div style="display:flex;gap:6px"><button class="btn btn-gold" data-request-approve="${esc(a.id)}">Onayla</button><button class="btn btn-ghost" data-request-reject="${esc(a.id)}">Reddet</button></div></div>`).join("");
       host.innerHTML = `
         <label class="fld">Yeni üyelik başvuruları ${pending.length ? `· ${pending.length}` : ""}</label>
         <div class="mini">${requests || '<div class="meta">Bekleyen başvuru yok.</div>'}</div>
@@ -3365,27 +3370,29 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
         } catch (e) { toast("Üye eklenemedi: " + fbErr(e)); }
       };
       host.querySelectorAll("[data-request-approve]").forEach(button => button.onclick = async () => {
-        const key = button.dataset.requestApprove;
-        const req = pending.find(x => x.ledgerId + "/" + x.uid === key);
+        const id = button.dataset.requestApprove;
+        const req = pending.find(x => x.id === id);
         if (!req) return;
         button.disabled = true;
         try {
           const batch = fbm.writeBatch(fbDb);
-          const ledgerId = req.ledgerId || DEFTER_ID, userId = req.uid || req.id, now = new Date().toISOString();
+          const ledgerId = req.ledgerId || DEFTER_ID, userId = req.uid || id, now = new Date().toISOString();
           batch.set(memberRef(ledgerId, userId), { role: "editor", email: req.email || "", name: req.name || "", addedAt: now, addedBy: fbAuth.currentUser.uid });
           batch.update(memberApplicationRef(ledgerId, userId), { status: "approved", handledAt: now, handledBy: fbAuth.currentUser.uid });
+          if (req.globalId) batch.update(adminApplicationRef(req.globalId), { status: "approved", updatedAt: now, handledAt: now, handledBy: fbAuth.currentUser.uid });
           await batch.commit();
           toast("Başvuru onaylandı, üye erişimi açıldı"); loadLedgerMembers(host);
         } catch (e) { button.disabled = false; toast("Başvuru onaylanamadı: " + fbErr(e)); }
       });
       host.querySelectorAll("[data-request-reject]").forEach(button => button.onclick = async () => {
-        const key = button.dataset.requestReject;
-        const req = pending.find(x => x.ledgerId + "/" + x.uid === key);
-        if (!req) return;
+        const id = button.dataset.requestReject;
         button.disabled = true;
         try {
-          const ledgerId = req.ledgerId || DEFTER_ID, userId = req.uid || req.id, now = new Date().toISOString();
-          await fbm.updateDoc(memberApplicationRef(ledgerId, userId), { status: "rejected", handledAt: now, handledBy: fbAuth.currentUser.uid });
+          const ledgerId = req.ledgerId || DEFTER_ID, userId = req.uid || id, now = new Date().toISOString();
+          const batch = fbm.writeBatch(fbDb);
+          batch.update(memberApplicationRef(ledgerId, userId), { status: "rejected", handledAt: now, handledBy: fbAuth.currentUser.uid });
+          if (req.globalId) batch.update(adminApplicationRef(req.globalId), { status: "rejected", updatedAt: now, handledAt: now, handledBy: fbAuth.currentUser.uid });
+          await batch.commit();
           toast("Başvuru reddedildi"); loadLedgerMembers(host);
         } catch (e) { button.disabled = false; toast("Başvuru reddedilemedi: " + fbErr(e)); }
       });
@@ -3746,6 +3753,9 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
       batch.update(memberApplicationRef(app.defterId, app.uid), {
         status, handledAt: now, handledBy: fbAuth.currentUser.uid
       });
+      batch.update(adminApplicationRef(app.id), {
+        status, updatedAt: now, handledAt: now, handledBy: fbAuth.currentUser.uid
+      });
       await batch.commit();
       toast(status === "approved" ? "Başvuru onaylandı, defter erişimi açıldı" : "Başvuru reddedildi");
       loadAdminInbox(host);
@@ -3760,16 +3770,12 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     const token = ++adminInboxToken;
     host.innerHTML = '<div class="meta">Üyelik bildirimleri yükleniyor…</div>';
     try {
-      const snap = await fbm.getDocs(fbm.collectionGroup(fbDb, "uyelikBasvurulari"));
+      const snap = await fbm.getDocs(adminApplicationsRef());
       if (token !== adminInboxToken || !host.isConnected) return;
       const pending = [];
-      snap.forEach(d => {
-        const app = d.data(), ledgerDoc = d.ref.parent.parent;
-        if (app.status !== "pending" || !ledgerDoc || !ledgerDoc.parent || ledgerDoc.parent.id !== "defterler") return;
-        pending.push({ ...app, id: d.id, uid: d.id, defterId: ledgerDoc.id });
-      });
+      snap.forEach(d => { if (d.data().status === "pending") pending.push({ id: d.id, ...d.data() }); });
       pending.sort((a,b) => String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
-      host.innerHTML = pending.length ? pending.map((a, i) => `
+      host.innerHTML = pending.length ? pending.map(a => `
         <div class="mini-day" style="align-items:center;margin-top:8px">
           <div class="who" style="min-width:0;overflow-wrap:anywhere">
             <b>${esc(a.name || a.email || a.uid)}</b>
@@ -3777,16 +3783,16 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
             <div class="meta">UID: ${esc(a.uid || "")}</div>
           </div>
           <div style="display:flex;gap:6px;flex-shrink:0">
-            <button class="btn btn-gold" data-admin-approve="${i}">Onayla</button>
-            <button class="btn btn-ghost" data-admin-reject="${i}">Reddet</button>
+            <button class="btn btn-gold" data-admin-approve="${esc(a.id)}">Onayla</button>
+            <button class="btn btn-ghost" data-admin-reject="${esc(a.id)}">Reddet</button>
           </div>
         </div>`).join("") : '<div class="meta">Bekleyen üyelik talebi yok.</div>';
       host.querySelectorAll("[data-admin-approve]").forEach(button => {
-        const app = pending[Number(button.dataset.adminApprove)];
+        const app = pending.find(x => x.id === button.dataset.adminApprove);
         button.onclick = () => app && resolveAdminApplication(app, "approved", host, button);
       });
       host.querySelectorAll("[data-admin-reject]").forEach(button => {
-        const app = pending[Number(button.dataset.adminReject)];
+        const app = pending.find(x => x.id === button.dataset.adminReject);
         button.onclick = () => app && resolveAdminApplication(app, "rejected", host, button);
       });
     } catch (e) {
@@ -3801,12 +3807,11 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     if (adminApplicationsWatcher) adminApplicationsWatcher();
     adminApplicationsWatcherUid = user.uid;
     let initial = true;
-    adminApplicationsWatcher = fbm.onSnapshot(fbm.collectionGroup(fbDb, "uyelikBasvurulari"), snap => {
+    adminApplicationsWatcher = fbm.onSnapshot(adminApplicationsRef(), snap => {
       const added = [];
       snap.docChanges().forEach(change => {
-        const app = change.doc.data(), parent = change.doc.ref.parent.parent;
-        if ((change.type === "added" || change.type === "modified") && app.status === "pending"
-          && parent && parent.parent && parent.parent.id === "defterler") added.push(app);
+        const app = change.doc.data();
+        if (change.type === "added" && app.status === "pending") added.push(app);
       });
       const host = document.getElementById("adminInbox");
       if (host && host.isConnected) loadAdminInbox(host);
