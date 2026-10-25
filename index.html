@@ -3035,7 +3035,11 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   const docRef = (name, id) => fbm.doc(fbDb, "defterler", DEFTER_ID, name, id);
   const ownerRef = id => fbm.doc(fbDb, "defterler", id, "meta", "owner");
   const memberRef = (id, userId) => fbm.doc(fbDb, "defterler", id, "uyeler", userId);
+  const ADMIN_EMAIL = "izmirdunyaambalaj@gmail.com";
   const isGoogleUser = user => !!user && !user.isAnonymous;
+  const isFixedAdmin = user => isGoogleUser(user)
+    && !!user.emailVerified
+    && String(user.email || "").toLowerCase() === ADMIN_EMAIL;
 
   async function authenticateGoogle() {
     const ok = await cloudInit();
@@ -3099,6 +3103,10 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   async function ensureLedgerAccess(id) {
     const user = fbAuth && fbAuth.currentUser;
     if (!isGoogleUser(user)) return false;
+    if (isFixedAdmin(user)) {
+      ledgerRole = "owner";
+      return true;
+    }
     const oref = ownerRef(id);
     let ownerSnap = await fbm.getDoc(oref);
     if (!ownerSnap.exists()) {
