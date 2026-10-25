@@ -54,7 +54,7 @@ service cloud.firestore {
           && request.resource.data.defterId == resource.data.defterId
           && request.resource.data.email == request.auth.token.email
           && request.resource.data.status == 'pending'
-          && resource.data.status in ['pending', 'rejected']
+          && resource.data.status in ['pending', 'rejected', 'approved']
           && request.resource.data.createdAt == resource.data.createdAt
           && request.resource.data.keys().hasAll(bekleyenBasvuruAlanlari())
           && request.resource.data.keys().hasOnly(bekleyenBasvuruAlanlari())
