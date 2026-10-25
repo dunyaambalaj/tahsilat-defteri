@@ -1040,7 +1040,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   const KEY = "kirtasiye_odeme_defteri_v1";
   const ID_KEY = "kirtasiye_ortak_defter_id";
   /* Ortak defter kodu: bağlantıdaki #d=KOD ya da bu cihazda daha önce kaydedilen kod.
-     Bağlantıyı bilen HERKES okuyabilir ve düzenleyebilir. */
+     Google hesabı ve üyelik gerekir. */
   const ID_RE = /^[A-Za-z0-9_-]{16,}$/;
   let DEFTER_ID = (() => {
     const h = (location.hash.match(/[#&]d=([A-Za-z0-9_-]{16,})/) || [])[1];
@@ -1048,7 +1048,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     try { const v = localStorage.getItem(ID_KEY); return ID_RE.test(v || "") ? v : null; } catch (e) { return null; }
   })();
   const cacheKey = () => DEFTER_ID ? KEY + ":" + DEFTER_ID : KEY;
-  const BUILD = "11";
+  const BUILD = "12";
   const FB_VERSIONS = ["13.0.0", "12.8.0", "12.2.1"]; /* sırayla denenir */
   /* Firebase web ayarları herkese açık bilgidir. firebase-config.js okunamazsa bu yedek kullanılır. */
   const FB_DEFAULT = {
@@ -3079,7 +3079,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
           <h2 style="text-align:center;margin:8px 0 4px;font-size:20px">${uidValue ? "Üyelik bekleniyor" : "Google hesabınızla giriş yapın"}</h2>
           <p class="meta" style="text-align:center;margin:12px 0">${esc(message || (uidValue ? "Bu Google hesabı henüz bu deftere eklenmemiş. Defter yöneticisine kullanıcı kodunuzu iletin." : "Hesabınız, defter erişim yetkinizi belirlemek için kullanılır."))}</p>
           ${uidValue ? `<label class="fld">Google kullanıcı kodunuz</label><input class="inp" id="authUid" readonly value="${esc(uidValue)}" /><button class="btn btn-ghost" id="authCopy" style="width:100%;margin-top:8px">Kullanıcı kodunu kopyala</button>` : ""}
-          <button class="btn btn-gold" id="authGoogle" style="width:100%;margin-top:12px">${user && user.isAnonymous ? "Google hesabını bağla" : "Google ile giriş yap"}</button>
+          <button class="btn btn-gold" id="authGoogle" style="width:100%;margin-top:12px">${user && user.isAnonymous ? "Google hesabını bağla" : uidValue ? "Üyeliği yeniden kontrol et" : "Google ile giriş yap"}</button>
           <p class="meta" style="margin-top:12px;text-align:center">Erişim yalnızca defter yöneticisinin üyeliğinizi onaylamasıyla açılır.</p>
         </div>
       </div>`;
@@ -3117,7 +3117,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       return true;
     }
     const member = await fbm.getDoc(memberRef(id, user.uid));
-    if (!member.exists() || !["editor", "reader"].includes(member.data().role)) {
+    if (!member.exists() || member.data().role !== "editor") {
       ledgerRole = null;
       showAccountGate("Bu Google hesabı bu deftere henüz üye değil. Kullanıcı kodunuzu defter yöneticisine gönderin.");
       return false;
@@ -3144,13 +3144,13 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         rows.push(`<div class="mini-day" style="align-items:center"><div class="who"><b>${esc(m.name || m.email || d.id)}</b><div class="meta">${esc(d.id)} · ${esc(m.role || "üye")}</div></div>${d.id === fbAuth.currentUser.uid ? '<span class="dev-me">Sahip</span>' : `<button class="btn btn-ghost" data-member-remove="${esc(d.id)}" style="color:var(--red)">Kaldır</button>`}</div>`);
       });
       host.innerHTML = `
-        <div class="g2"><input class="inp" id="memberUid" placeholder="Google kullanıcı kodu" /><select class="inp" id="memberRole"><option value="editor">Düzenleyebilir</option><option value="reader">Yalnızca görüntüler</option></select></div>
+        <div class="g2"><input class="inp" id="memberUid" placeholder="Google kullanıcı kodu" /><div class="inp" style="display:flex;align-items:center">Düzenleyebilir</div></div>
         <button class="btn btn-gold" id="memberAdd" style="width:100%;margin-top:8px">Üye ekle</button>
         <div class="mini" style="margin-top:8px">${rows.join("") || '<div class="meta">Henüz başka üye yok.</div>'}</div>
         <p class="meta" style="margin-top:8px">Yeni kişi önce Google ile giriş yapmalı ve kullanıcı kodunu size iletmeli.</p>`;
       document.getElementById("memberAdd").onclick = async () => {
         const id = document.getElementById("memberUid").value.trim();
-        const role = document.getElementById("memberRole").value;
+        const role = "editor";
         if (!/^[A-Za-z0-9_-]{20,}$/.test(id)) return toast("Geçerli Google kullanıcı kodu girin");
         if (id === fbAuth.currentUser.uid) return toast("Kendinizi tekrar ekleyemezsiniz");
         try {
@@ -3371,7 +3371,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         <div class="meta" id="shareStatus" style="margin-top:8px">${esc(statusText())}</div>
         <button class="btn btn-ghost" id="pDiag" style="width:100%;margin-top:8px">Bağlantı durumu ve tanı</button>
         <button class="btn btn-ghost" id="pLeave" style="width:100%;margin-top:8px">Bu cihazı defterden ayır</button>
-        <p class="meta" style="margin-top:8px">Bağlantıyı yalnızca güvendiğiniz kişilere verin. Bağlantıyı bilen herkes defterin tamamına erişir.</p>
+        <p class="meta" style="margin-top:8px">Bağlantı tek başına erişim vermez. Her kullanıcı Google hesabıyla giriş yapıp deftere üye olarak eklenmelidir.</p>
       </div>`;
   }
   function renderShare() {
@@ -3427,7 +3427,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         </div>
         <p class="meta" style="margin:8px 0">Durum: <b id="shareStatus" style="color:${syncColor()}">${esc(syncLabel())}</b></p>
         ${link ? `
-        <p class="meta" style="margin:0 0 8px">Bu bağlantıyı açan <b>herkes</b> aynı defteri canlı görür, kayıt ekleyip düzenleyebilir.</p>
+        <p class="meta" style="margin:0 0 8px">Bağlantı defteri tanımlar; erişim için Google hesabının yönetici tarafından eklenmesi gerekir.</p>
         <input class="inp" id="pLink" readonly value="${esc(link)}" onclick="this.select()" />
         <div class="g2" style="margin-top:8px">
           <button class="btn btn-gold" id="pCopy">Bağlantıyı kopyala</button>
