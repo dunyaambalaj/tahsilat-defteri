@@ -259,6 +259,8 @@
     /* ---------- KAYIT KARTLARI ---------- */
     .cards { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 10px; min-width: 0; }
     .card {
+      display: flex;
+      flex-direction: column;
       background: var(--sheet);
       border: 1px solid var(--line);
       border-radius: 16px;
@@ -268,7 +270,10 @@
       overflow: hidden;
       min-width: 0;
     }
+    .cards { align-items: stretch; }
     .cards .card { margin-bottom: 0; }
+    .card .acts { margin-top: auto; padding-top: 10px; }
+    .card .record-by { margin-top: 6px; }
     .card .spine { position: absolute; left: 0; top: 0; bottom: 0; width: 6px; }
     .spine.bekliyor { background: var(--bekle); }
     .spine.tahsil { background: var(--tahsil); }
@@ -294,7 +299,11 @@
     .stamp.kismi { color: var(--kismi); }
     .stamp.iptal { color: #777; }
     .amt { font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.02em; font-size: 17px; white-space: nowrap; }
-    .amt.sub { font-size: 14px; font-weight: 700; }
+    .amt.sub { font-size: 12px; font-weight: 600; }
+    .amount-stack { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; min-width: 145px; }
+    .amount-stack .amount-caption { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; font-weight: 800; color: var(--tahsil); }
+    .amount-stack .amount-main { color: var(--ink); font-size: clamp(17px, 2vw, 21px); line-height: 1.15; }
+    .amount-stack .amount-detail { color: var(--mute); text-align: right; }
     .meta { color: var(--mute); font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
     .type-pill {
       display: inline-flex; align-items: center; gap: 4px;
@@ -648,6 +657,14 @@
     .dev-mid { flex: 1; min-width: 0; }
     .dev-mid b { font-size: 14px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .dev-mid > span { font-size: 12px; color: var(--mute); display: block; }
+    .branch-options{display:flex;gap:7px;overflow:auto;padding:5px 1px;scrollbar-width:thin}.branch-option{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:7px 10px;background:var(--sheet);font-size:11px;color:var(--ink);cursor:pointer;white-space:nowrap}.branch-option input{accent-color:var(--gold-dim);width:15px;height:15px;margin:0}.branch-option.on{border-color:var(--gold-dim);background:color-mix(in srgb,var(--gold) 14%,var(--sheet))}
+    .branch-label{display:inline-flex;align-items:center;gap:5px;margin-top:3px;padding:3px 8px;border-radius:999px;background:color-mix(in srgb,var(--gold) 22%,transparent);color:var(--gold);font-size:10px;font-weight:800;letter-spacing:.03em;vertical-align:middle}.branch-label:before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+    .branch-switch{width:100%;display:flex;align-items:center;gap:14px;padding:16px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 15%,var(--sheet)),var(--sheet) 60%);color:var(--ink);text-align:left;box-shadow:0 14px 32px rgba(20,41,35,.09);cursor:pointer}.branch-switch .bs-icon{width:48px;height:48px;border-radius:17px;background:linear-gradient(145deg,var(--leather-2),var(--leather));color:#fff;display:grid;place-items:center}.branch-switch .bs-copy{flex:1;min-width:0}.branch-switch .bs-copy b,.branch-switch .bs-copy span{display:block}.branch-switch .bs-copy span{font-size:12px;color:var(--mute);margin-top:4px}.branch-card{padding:16px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,var(--sheet),color-mix(in srgb,var(--paper) 65%,var(--sheet)));box-shadow:0 10px 25px rgba(20,41,35,.06);margin-top:10px}.branch-card .bc-top{display:flex;align-items:center;gap:12px}.branch-card .bc-mark{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;background:var(--pill);color:var(--leather);font-weight:900}.branch-card .bc-info{flex:1;min-width:0}.branch-card .bc-info b{display:block;overflow-wrap:anywhere}.branch-card .bc-info span{display:block;font-size:12px;color:var(--mute);margin-top:3px}.branch-card .bc-active{font-size:10px;font-weight:800;color:var(--tahsil);padding:5px 8px;border-radius:999px;background:color-mix(in srgb,var(--tahsil) 13%,transparent)}
+    .branch-picker .branch-hero{padding:22px;border-radius:24px;color:#fff;background:radial-gradient(120% 160% at 100% 0%,color-mix(in srgb,var(--gold) 45%,transparent),transparent 48%),linear-gradient(135deg,var(--leather-2),var(--leather));margin:12px 0 16px}.branch-picker .branch-hero small{letter-spacing:.14em;font-size:10px;opacity:.72;font-weight:800}.branch-picker .branch-hero h3{font-size:25px;margin-top:7px}.branch-picker .branch-hero p{font-size:13px;opacity:.8;margin:6px 0 0}
+    .member-launch{width:100%;margin-top:12px;padding:16px;display:flex;align-items:center;gap:14px;text-align:left;border:1px solid var(--line);border-radius:18px;color:var(--ink);background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 14%,var(--sheet)),var(--sheet) 58%);box-shadow:0 10px 25px rgba(20,41,35,.08);cursor:pointer}.member-launch .ml-icon{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;color:#fff;background:linear-gradient(145deg,var(--leather-2),var(--leather));box-shadow:0 7px 16px color-mix(in srgb,var(--leather) 22%,transparent)}.member-launch .ml-copy{flex:1;min-width:0}.member-launch .ml-copy b,.member-launch .ml-copy span{display:block}.member-launch .ml-copy b{font-size:14px}.member-launch .ml-copy span{color:var(--mute);font-size:12px;margin-top:3px}.member-launch .ml-count{border-radius:999px;padding:5px 10px;background:var(--pill);font-size:12px;font-weight:800}
+.member-sheet .member-intro{margin:10px 0 16px;padding:16px;border-radius:20px;color:#fff;background:radial-gradient(120% 170% at 100% 0%,color-mix(in srgb,var(--gold) 45%,transparent),transparent 48%),linear-gradient(135deg,var(--leather-2),var(--leather));box-shadow:0 14px 28px color-mix(in srgb,var(--leather) 20%,transparent)}.member-sheet .member-intro .eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.14em;opacity:.72;font-weight:800}.member-sheet .member-intro b{display:block;font-size:22px;margin-top:4px}.member-sheet .member-intro p{margin:5px 0 0;font-size:12px;opacity:.8}.member-sheet .member-list{display:grid;gap:10px}
+.member-card{position:relative;overflow:hidden;display:grid;grid-template-columns:46px minmax(0,1fr);gap:12px;padding:14px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,var(--sheet),color-mix(in srgb,var(--paper) 58%,var(--sheet)));box-shadow:0 7px 18px rgba(20,41,35,.055)}.member-card:before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:0 4px 4px 0;background:linear-gradient(var(--gold),var(--gold-dim))}.member-avatar{width:46px;height:46px;display:grid;place-items:center;border-radius:16px;background:linear-gradient(145deg,color-mix(in srgb,var(--gold) 44%,var(--sheet)),var(--pill));color:var(--leather);font-size:15px;font-weight:900;letter-spacing:.04em}.member-info{min-width:0}.member-name{font-size:14px;font-weight:850;overflow-wrap:anywhere}.member-email{font-size:12px;color:var(--mute);margin-top:3px;overflow-wrap:anywhere}.member-meta{font-size:10px;color:var(--mute);margin-top:5px;overflow-wrap:anywhere;opacity:.82}.member-actions{grid-column:1/-1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--line)}.member-actions .inp{flex:1 1 160px;width:auto;min-width:150px;padding:9px 11px}.member-actions .btn{min-height:40px}.member-role-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:var(--badge);color:var(--leather);font-weight:800;font-size:11px}.member-role-badge:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--gold-dim)}.member-transfer{border:1px solid color-mix(in srgb,var(--gold-dim) 50%,var(--line));background:color-mix(in srgb,var(--gold) 12%,var(--sheet));color:var(--ink)}
+@media(min-width:760px){.member-sheet.sheet-card{width:min(760px,94vw)}.member-sheet .member-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
     .dev-me { display: inline-block; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: color-mix(in srgb, var(--gold) 28%, transparent); color: var(--gold-dim); margin-left: 6px; }
     .dev-del { border: 0; background: var(--ghost); color: var(--mute); font-size: 12px; font-weight: 700; padding: 6px 10px; border-radius: 999px; cursor: pointer; }
     .look-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -1189,7 +1206,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     try { const v = localStorage.getItem(ID_KEY); return ID_RE.test(v || "") ? v : null; } catch (e) { return null; }
   })();
   const cacheKey = () => DEFTER_ID ? KEY + ":" + DEFTER_ID : KEY;
-  const BUILD = "16";
+  const BUILD = "19";
   const FB_VERSIONS = ["13.0.0", "12.8.0", "12.2.1"]; /* sırayla denenir */
   /* Firebase web ayarları herkese açık bilgidir. firebase-config.js okunamazsa bu yedek kullanılır. */
   const FB_DEFAULT = {
@@ -1272,7 +1289,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     return {
       magaza: "Kırtasiye Toptan", pin: null, kayitlar: [],
       tema: "deri", karanlik: false,
-      firma: { tel: "", adres: "", vergi: "", logo: "" },
+      firma: { tel: "", adres: "", vergi: "", logo: "", sube: "" },
       ayar: { bildirim: true, sys: false },
       sonBildirim: "",
       olusturma: new Date().toISOString()
@@ -1286,7 +1303,8 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
       d.kayitlar = Array.isArray(d.kayitlar) ? d.kayitlar : [];
       d.magaza = d.magaza || "Kırtasiye Toptan";
       d.tema ||= "deri";
-      d.firma ||= { tel: "", adres: "", vergi: "", logo: "" };
+      d.firma ||= { tel: "", adres: "", vergi: "", logo: "", sube: "" };
+      d.firma.sube ||= "";
       d.firma.tel ||= "";
       d.firma.adres ||= "";
       d.firma.vergi ||= "";
@@ -1336,8 +1354,9 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
   let unlockDone = false;
 
   /* ---------- GERİ AL ---------- */
-  const NAME_KEY = "kirtasiye_kullanici";
+  const NAME_KEY = "kirtasiye_kullanici", FIRST_NAME_KEY = "kirtasiye_ad", LAST_NAME_KEY = "kirtasiye_soyad";
   const ME = () => { try { return (localStorage.getItem(NAME_KEY) || "").trim(); } catch (e) { return ""; } };
+  const hasFullName = () => { try { return !!localStorage.getItem(FIRST_NAME_KEY)?.trim() && !!localStorage.getItem(LAST_NAME_KEY)?.trim(); } catch(e) { return false; } };
   const DEV_ID = (() => {
     try { let v = localStorage.getItem("kirtasiye_cihaz"); if (!v) { v = Math.random().toString(36).slice(2, 10); localStorage.setItem("kirtasiye_cihaz", v); } return v; }
     catch (e) { return Math.random().toString(36).slice(2, 10); }
@@ -1518,9 +1537,12 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
             <div style="flex:1;min-width:0">
               <div style="font-size:10px;letter-spacing:.18em;color:#c9a227;font-weight:700;">ÖDEME DEFTERİ · <span id="syncDot" data-short="1" style="color:${syncColor()};cursor:pointer;text-decoration:underline dotted" title="Bağlantı durumu">${esc(syncLabel(true))}</span></div>
               <div style="font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(db.magaza)}</div>
+              ${db.firma.sube ? `<div class="branch-label">${esc(db.firma.sube)} şubesi</div>` : ""}
             </div>
             <div class="hbar">
-              ${hbtn("btnThemeToggle", isDark ? "sun" : "moon", isDark ? "Aydınlık mod" : "Karanlık mod")}
+              ${hbtn("btnBranches", "book", "Şubeler")}
+              ${hbtn("btnBranches", "book", "Şubeler")}
+            ${hbtn("btnThemeToggle", isDark ? "sun" : "moon", isDark ? "Aydınlık mod" : "Karanlık mod")}
               ${hbtn("btnBell", "bell", "Bildirimler", nNot ? `<span class="bell-badge">${nNot > 9 ? "9+" : nNot}</span>` : "")}
               ${hbtn("btnShareTop", "share", "Paylaş")}
               ${hbtn("btnSettings", "gear", "Ayarlar")}
@@ -1545,7 +1567,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
             <div class="brand-mark">${logoHtml}</div>
             <div style="min-width:0">
               <div class="name">${esc(db.magaza)}</div>
-              <div class="sub"><span id="syncDot" style="color:${syncColor()};cursor:pointer" title="Bağlantı durumu">${esc(syncLabel())}</span></div>
+              <div class="sub">${db.firma.sube ? `<span class="branch-label">${esc(db.firma.sube)} şubesi</span> · ` : ""}<span id="syncDot" style="color:${syncColor()};cursor:pointer" title="Bağlantı durumu">${esc(syncLabel())}</span></div>
             </div>
           </div>
           <nav class="tb-nav"><i class="gi"></i>${VIEWS.map(([id, ad]) => `<button data-view="${id}" class="${view === id ? "on" : ""}">${ad}</button>`).join("")}</nav>
@@ -1650,8 +1672,8 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     const stamp = st !== "bekliyor" ? `<span class="stamp ${st}">${statusLabel(st)}</span>` : "";
     const rem = remaining(k);
     const amtLine = st === "kismi"
-      ? `<div class="amt sub">${fmtTRY(k.tahsilTutar)} / ${fmtTRY(k.tutar)}</div><div class="meta">Kalan ${fmtTRY(rem)}</div>`
-      : `<div class="amt">${fmtTRY(late ? rem : k.tutar)}</div>`;
+      ? `<div class="amount-stack"><span class="amount-caption">Kalan tahsilat</span><strong class="amt amount-main">${fmtTRY(rem)}</strong><span class="meta amount-detail">Tahsil ${fmtTRY(k.tahsilTutar)} / ${fmtTRY(k.tutar)}</span></div>`
+      : `<div class="amount-stack"><strong class="amt amount-main">${fmtTRY(late ? rem : k.tutar)}</strong>${late ? '<span class="meta amount-detail">Kalan tahsilat</span>' : ''}</div>`;
     return `
       <article class="card ${late?"late":""} ${isErt(k)?"ert":""}" data-open="${k.id}">
         <div class="spine ${st}"></div>
@@ -1662,7 +1684,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
           ${k.belgeNo ? ` · No: ${esc(k.belgeNo)}` : ""}
           ${k.turKayit === "soz" ? " · Ödeme sözü" : k.turKayit === "vade" ? " · Vadeli" : ""}
         </div>
-        <div style="display:flex;justify-content:space-between;gap:8px;margin-top:6px;align-items:flex-end;flex-wrap:wrap">
+        <div class="payment-detail-row" style="display:flex;justify-content:space-between;gap:8px;margin-top:6px;align-items:flex-end;flex-wrap:wrap">
           <div class="meta" style="min-width:0;flex:1 1 45%">
             Söz/vade: <b>${fmtDate(k.vade)}</b> · Kayıt: ${fmtDate(k.kayitTarihi)}
             ${k.tahsilTarihi ? ` · Tahsil: ${fmtDate(k.tahsilTarihi)}` : ""}
@@ -1676,7 +1698,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
           <button class="btn btn-erte" data-act="ertele" data-id="${k.id}">Ertele</button>
           <a class="btn btn-wa btn-icon" href="${waLink(k)}" target="_blank" rel="noopener" data-wa="1" data-wak="${k.id}" title="WhatsApp mesajı (şablon seç)">${icon("msg")}</a>
         </div>` : ""}
-        ${(k.olusturan || k.sonKim) ? `<div class="meta" style="font-size:11px;opacity:.75;margin-top:6px">${k.olusturan ? "Ekleyen: " + esc(k.olusturan) : ""}${k.sonKim && k.sonKim !== k.olusturan ? ` · Son işlem: ${esc(k.sonKim)}` : ""}</div>` : ""}
+        ${(k.olusturan || k.sonKim) ? `<div class="meta record-by" style="font-size:11px;opacity:.75">${k.olusturan ? "Ekleyen: " + esc(k.olusturan) : ""}${k.sonKim && k.sonKim !== k.olusturan ? ` · Son işlem: ${esc(k.sonKim)}` : ""}</div>` : ""}
       </article>`;
   }
   const cardsGrid = list => `<div class="cards">${list.map(paymentCard).join("")}</div>`;
@@ -2133,6 +2155,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
   function bind() {
     document.querySelectorAll("[data-view]").forEach(b => b.onclick = () => { view = b.dataset.view; render(); });
     document.getElementById("btnSettings")?.addEventListener("click", openSettings);
+    document.getElementById("btnBranches")?.addEventListener("click", openBranchSelector);
     document.getElementById("btnThemeToggle")?.addEventListener("click", () => {
       db.karanlik = !db.karanlik;
       save();
@@ -2232,6 +2255,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
   /* ---------- KAYIT FORMU ---------- */
   function openForm(edit, prefill) {
     if (!canWriteLedger()) return toast("Bu defterde salt görüntüleme yetkiniz var");
+    if (!hasFullName()) { openNameSheet(true); return; }
     const k = edit || {
       id: uid(), musteri: (prefill && prefill.musteri) || "", telefon: "", tutar: "", tur: "nakit", turKayit: "soz",
       taksitSayisi: 1,
@@ -3137,7 +3161,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   }
   const shareLink = () => `${location.origin}${location.pathname}#d=${DEFTER_ID}`;
-  const sharedSettingsJson = () => JSON.stringify({ magaza: db.magaza, firma: { tel: db.firma.tel, vergi: db.firma.vergi, adres: db.firma.adres }, silmePin: db.silmePin || null, hedef: Number(db.hedef) || 0, mesai: db.mesai || null, sablonlar: db.sablonlar || null, otoErt: db.otoErt === false ? false : true });
+  const sharedSettingsJson = () => JSON.stringify({ magaza: db.magaza, firma: { tel: db.firma.tel, vergi: db.firma.vergi, adres: db.firma.adres, sube: db.firma.sube || "" }, silmePin: db.silmePin || null, hedef: Number(db.hedef) || 0, mesai: db.mesai || null, sablonlar: db.sablonlar || null, otoErt: db.otoErt === false ? false : true });
 
   async function loadSdk() {
     let last;
@@ -3179,6 +3203,13 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
   const adminApplicationsRef = () => fbm.collection(fbDb, "uyelikBildirimleri");
   const adminApplicationRef = id => fbm.doc(fbDb, "uyelikBildirimleri", id);
   const adminApplicationId = (ledgerId, userId) => ledgerId + "__" + userId;
+  const ORG_ID = "dunyaambalaj";
+  const orgMemberRef = userId => fbm.doc(fbDb, "organizasyonlar", ORG_ID, "uyeler", userId);
+  const orgBranchesRef = () => fbm.collection(fbDb, "organizasyonlar", ORG_ID, "defterler");
+  const orgBranchRef = id => fbm.doc(fbDb, "organizasyonlar", ORG_ID, "defterler", id);
+  const userLedgerIndexRef = (userId, id) => fbm.doc(fbDb, "kullaniciDefterleri", userId, "defterler", id);
+  const userLedgerIndex = userId => fbm.collection(fbDb, "kullaniciDefterleri", userId, "defterler");
+  const userProfileRef = userId => fbm.doc(fbDb, "kullaniciProfilleri", userId);
   let applicationWatcher = null, applicationWatcherKey = "";
   let ownRoleWatcher = null, ownRoleWatcherKey = "";
   let adminApplicationsWatcher = null, adminApplicationsWatcherUid = "", adminInboxToken = 0;
@@ -3187,17 +3218,17 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
   const isFixedAdmin = user => isGoogleUser(user)
     && !!user.emailVerified
     && String(user.email || "").toLowerCase() === ADMIN_EMAIL;
-  const ROLE_LABEL = { owner: "Sahip", admin: "Admin", editor: "Düzenleme", viewer: "Salt görüntüleme" };
+  const ROLE_LABEL = { owner: "Sahip", admin: "Admin", accounting: "Muhasebe · tüm şubeler · görüntüleme", editor: "Düzenleme", viewer: "Salt görüntüleme" };
   const isLedgerManager = () => isFixedAdmin(fbAuth && fbAuth.currentUser) || ["owner", "admin"].includes(ledgerRole);
   const canAssignAdminRole = () => isFixedAdmin(fbAuth && fbAuth.currentUser) || ledgerRole === "owner";
   const canWriteLedger = () => !DEFTER_ID || ["owner", "admin", "editor"].includes(ledgerRole);
   const canManageSharedSettings = () => !DEFTER_ID || ["owner", "admin"].includes(ledgerRole) || isFixedAdmin(fbAuth && fbAuth.currentUser);
   const canAssignRole = (role, targetRole = "", targetUid = "") => {
     const user = fbAuth && fbAuth.currentUser;
-    if (!["admin", "editor", "viewer"].includes(role) || targetUid === (user && user.uid)) return false;
+    if (!["admin", "accounting", "editor", "viewer"].includes(role) || targetUid === (user && user.uid)) return false;
     if (isFixedAdmin(user) || ledgerRole === "owner") return targetRole !== "owner";
     return ledgerRole === "admin"
-      && ["editor", "viewer"].includes(role)
+      && ["accounting", "editor", "viewer"].includes(role)
       && (!targetRole || ["editor", "viewer"].includes(targetRole));
   };
   const canRemoveMember = (targetRole, targetUid) => {
@@ -3207,7 +3238,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     return ledgerRole === "admin" && ["editor", "viewer"].includes(targetRole);
   };
   const roleOptions = (selected = "editor", forAdmin = canAssignAdminRole()) => {
-    const roles = forAdmin ? ["admin", "editor", "viewer"] : ["editor", "viewer"];
+    const roles = forAdmin ? ["admin", "accounting", "editor", "viewer"] : ["accounting", "editor", "viewer"];
     return roles.map(role => `<option value="${role}" ${role === selected ? "selected" : ""}>${ROLE_LABEL[role]}</option>`).join("");
   };
 
@@ -3269,35 +3300,45 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
       try { await authenticateGoogle(); }
       catch (e) { button.disabled = false; toast("Giriş yapılamadı: " + fbErr(e)); }
     };
-    const requestButton = document.getElementById("membershipRequest");
-    if (requestButton) requestButton.onclick = async () => {
-      requestButton.disabled = true;
-      try {
-        const ref = memberApplicationRef(DEFTER_ID, uidValue);
-        const current = await fbm.getDoc(ref);
-        const now = new Date().toISOString();
-        const application = {
-          uid: uidValue,
-          email: user.email || "",
-          name: user.displayName || "",
-          status: "pending",
-          createdAt: current.exists() ? (current.data().createdAt || now) : now,
-          updatedAt: now
-        };
-        const globalId = adminApplicationId(DEFTER_ID, uidValue);
-        const batch = fbm.writeBatch(fbDb);
-        if (!(current.exists() && current.data().status === "pending")) batch.set(ref, application);
-        batch.set(adminApplicationRef(globalId), { ...application, defterId: DEFTER_ID });
-        await batch.commit();
-        requestButton.textContent = "Başvuru gönderildi";
-        toast(current.exists() && current.data().status === "pending"
-          ? "Başvurunuz yönetici bildirim kuyruğuna iletildi"
-          : "Başvurunuz defter yöneticisine iletildi");
-      } catch (e) {
-        requestButton.disabled = false;
-        toast("Başvuru gönderilemedi: " + fbErr(e));
-      }
-    };
+    const requestButton=document.getElementById("membershipRequest");
+    if(requestButton)requestButton.onclick=()=>openMembershipApplication(requestButton);
+  }
+
+  async function openMembershipApplication(trigger) {
+    const user=fbAuth&&fbAuth.currentUser;if(!isGoogleUser(user)||!DEFTER_ID)return toast("Önce Google hesabıyla giriş yapıp bir defter bağlantısı açın");
+    try {
+      const [branchSnap,profileSnap]=await Promise.all([fbm.getDocs(orgBranchesRef()),fbm.getDoc(userProfileRef(user.uid)).catch(()=>null)]);
+      const branches=branchSnap.docs.map(d=>({id:d.id,...d.data()}));
+      if(!branches.some(b=>b.id===DEFTER_ID))branches.unshift({id:DEFTER_ID,companyName:"Bu defter",branchName:"Bağlantıdaki şube"});
+      const profile=profileSnap&&profileSnap.exists()?profileSnap.data():{};
+      const storedFirst=localStorage.getItem(FIRST_NAME_KEY)||profile.firstName||"",storedLast=localStorage.getItem(LAST_NAME_KEY)||profile.lastName||"";
+      const existingApplication=await fbm.getDoc(memberApplicationRef(DEFTER_ID,user.uid));
+      const requestedLedgers=existingApplication.exists()?existingApplication.data().requestedLedgers:null;
+      const selected=Array.isArray(requestedLedgers)?requestedLedgers:[DEFTER_ID];
+      openSheet(`<div class="sheet-card full branch-picker"><div class="grab"></div><div style="display:flex;align-items:center;gap:8px"><div style="flex:1"><div class="meta">ÜYELİK BAŞVURUSU</div><h2 style="font-size:21px">Şube erişimi iste</h2></div><button class="btn btn-ghost" id="appClose">Kapat</button></div><div class="branch-hero"><small>EKİBİNİZE KATILIN</small><h3>Doğru şubeler, doğru erişim.</h3><p>Ad soyadınızı ve erişmek istediğiniz defterleri seçin.</p></div><label class="fld">Ad</label><input class="inp" id="appFirst" maxlength="40" autocomplete="given-name" value="${esc(storedFirst)}" placeholder="Adınız"><label class="fld">Soyad</label><input class="inp" id="appLast" maxlength="50" autocomplete="family-name" value="${esc(storedLast)}" placeholder="Soyadınız"><label class="fld">Departman</label><select class="inp" id="appDepartment"><option value="satis">Satış</option><option value="operasyon">Operasyon</option><option value="muhasebe">Muhasebe</option><option value="diger">Diğer</option></select><label class="fld">Talep edilen erişim</label><select class="inp" id="appRole"><option value="viewer">Salt görüntüleme</option><option value="editor">Düzenleme</option><option value="admin">Admin · tüm defterler</option></select><p class="meta" id="appRoleNote" style="margin:6px 0">Admin veya Muhasebe erişimi onaylanırsa tüm defterler açılır. Erişim onay bekler.</p><label class="fld">Erişim istediğiniz şubeler</label><div class="branch-options" style="flex-wrap:wrap;overflow:visible">${branches.map(b=>`<label class="branch-option ${selected.includes(b.id)?"on":""}"><input type="checkbox" data-app-ledger value="${esc(b.id)}" ${selected.includes(b.id)?"checked":""}><span>${esc(b.companyName||"Firma")}${b.branchName?" · "+esc(b.branchName):""}</span></label>`).join("")}</div><div class="meta" style="margin-top:8px">Google hesabı · <b>${esc(user.email||"")}</b></div><button class="btn btn-gold" id="appSubmit" style="width:100%;margin-top:14px">Başvuruyu gönder</button></div>`,true);
+      document.getElementById("appClose").onclick=closeSheet;
+      const dep=document.getElementById("appDepartment"),role=document.getElementById("appRole"),note=document.getElementById("appRoleNote");
+      if(profile.department)dep.value=profile.department;
+      const updateRole=()=>{const accounting=dep.value==="muhasebe";if(accounting){role.value="viewer";role.disabled=true;note.textContent="Muhasebe departmanı tüm defterleri salt görüntüleme yetkisiyle görür."}else{role.disabled=false;note.textContent=role.value==="admin"?"Admin yetkisi onaylanırsa tüm defterlere erişim otomatik verilir.":"Seçtiğiniz şube erişimleri yönetici onayına gönderilir."}};
+      dep.onchange=updateRole;role.onchange=updateRole;updateRole();
+      document.getElementById("appSubmit").onclick=async()=>{
+        const button=document.getElementById("appSubmit"),firstName=document.getElementById("appFirst").value.trim(),lastName=document.getElementById("appLast").value.trim();
+        if(!firstName||!lastName)return toast("Ad ve soyad zorunludur");
+        const selectedIds=[...document.querySelectorAll("[data-app-ledger]:checked")].map(x=>x.value);
+        if(!selectedIds.includes(DEFTER_ID))selectedIds.unshift(DEFTER_ID);
+        button.disabled=true;
+        try{
+          const now=new Date().toISOString(),ref=memberApplicationRef(DEFTER_ID,user.uid),current=await fbm.getDoc(ref);
+          const roleRequest=dep.value==="muhasebe"?"accounting":role.value,fullName=firstName+" "+lastName;
+          const application={uid:user.uid,email:user.email||"",name:fullName,firstName,lastName,department:dep.value,requestedRole:roleRequest,requestedLedgers:[...new Set(selectedIds)],status:"pending",createdAt:current.exists()?(current.data().createdAt||now):now,updatedAt:now};
+          const batch=fbm.writeBatch(fbDb);batch.set(ref,application);batch.set(adminApplicationRef(adminApplicationId(DEFTER_ID,user.uid)),{...application,defterId:DEFTER_ID});
+          batch.set(userProfileRef(user.uid),{uid:user.uid,email:user.email||"",firstName,lastName,fullName,department:dep.value,updatedAt:now},{merge:true});
+          await batch.commit();
+          try{localStorage.setItem(FIRST_NAME_KEY,firstName);localStorage.setItem(LAST_NAME_KEY,lastName);localStorage.setItem(NAME_KEY,fullName)}catch(e){}
+          closeSheet();if(trigger){trigger.textContent="Başvuru gönderildi";trigger.disabled=true}toast("Başvurunuz seçtiğiniz şubeler ve erişim rolüyle iletildi");
+        }catch(e){button.disabled=false;toast("Başvuru gönderilemedi: "+fbErr(e))}
+      };
+    } catch(e) { toast("Şubeler yüklenemedi: "+fbErr(e)); }
   }
 
   function watchOwnLedgerRole(id) {
@@ -3307,21 +3348,72 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     if (ownRoleWatcherKey === key) return;
     if (ownRoleWatcher) ownRoleWatcher();
     ownRoleWatcherKey = key;
-    ownRoleWatcher = fbm.onSnapshot(memberRef(id, user.uid), snap => {
-      if (!snap.exists() || !["owner", "admin", "editor", "viewer"].includes(snap.data().role)) {
-        ledgerRole = null;
-        cloudOn = false;
+    let localRole = null, globalRole = null, denied = false;
+    const applyRole = () => {
+      const role = localRole === "owner" ? "owner" : (["owner","admin"].includes(globalRole) ? "admin" : globalRole === "accounting" ? "viewer" : localRole);
+      if (!role || !["owner","admin","editor","viewer"].includes(role)) {
+        if (denied) return;
+        denied = true; ledgerRole = null; cloudOn = false;
         showAccountGate("Bu defterdeki erişiminiz kaldırıldı. Yöneticiyle iletişime geçin.");
         return;
       }
-      const nextRole = snap.data().role;
-      if (nextRole !== ledgerRole) {
-        ledgerRole = nextRole;
-        closeSheet();
-        render();
-        toast("Defter rolünüz güncellendi: " + (ROLE_LABEL[nextRole] || nextRole));
-      }
-    }, e => console.warn("Üyelik rolü dinlenemedi:", e));
+      denied = false;
+      if (role !== ledgerRole) { ledgerRole = role; closeSheet(); render(); toast("Defter rolünüz güncellendi: " + (ROLE_LABEL[role] || role)); }
+    };
+    const a = fbm.onSnapshot(memberRef(id, user.uid), snap => { localRole = snap.exists() ? snap.data().role : null; applyRole(); }, e => console.warn("Defter üyeliği izlenemedi:", e));
+    const b = fbm.onSnapshot(orgMemberRef(user.uid), snap => { globalRole = snap.exists() ? snap.data().role : null; applyRole(); }, e => console.warn("Şirket rolü izlenemedi:", e));
+    ownRoleWatcher = () => { a(); b(); };
+  }
+
+  async function ledgerBranchInfo(id) {
+    if (id === DEFTER_ID) return { companyName: db.magaza || "Firma", branchName: db.firma.sube || "" };
+    const g = await readGenel(id);
+    return { companyName: g?.magaza || "Defter", branchName: g?.firma?.sube || "" };
+  }
+  async function syncOrgRole(id, role, user = fbAuth && fbAuth.currentUser) {
+    if (!user || !["owner","admin"].includes(role)) return;
+    const ref = orgMemberRef(user.uid), old = await fbm.getDoc(ref);
+    if (old.exists()) return;
+    await fbm.setDoc(ref, { role, uid: user.uid, email: user.email || "", name: user.displayName || "", sourceLedgerId: id, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+  }
+  async function syncBranchDirectory(id, info) {
+    if (!id || !isLedgerManager()) return;
+    const meta = info || await ledgerBranchInfo(id);
+    await fbm.setDoc(orgBranchRef(id), { ledgerId: id, companyName: meta.companyName || "Firma", branchName: meta.branchName || "", updatedAt: new Date().toISOString(), updatedBy: fbAuth.currentUser.uid });
+  }
+  async function syncUserLedgerIndex(id, userId, role, info) {
+    if (!id || !userId || !role) return;
+    const meta = info || await ledgerBranchInfo(id);
+    await fbm.setDoc(userLedgerIndexRef(userId, id), { ledgerId: id, role, companyName: meta.companyName || "Firma", branchName: meta.branchName || "", updatedAt: new Date().toISOString() });
+  }
+  async function accessibleLedgers() {
+    const user = fbAuth && fbAuth.currentUser;
+    if (!isGoogleUser(user)) return [];
+    if (!fbDb && !(await cloudInit())) throw new Error(diag.err || "Firebase başlatılamadı");
+    const globalSnap = await fbm.getDoc(orgMemberRef(user.uid)).catch(() => null);
+    const globalRole = globalSnap && globalSnap.exists() ? globalSnap.data().role : "";
+    const allBranchRole = isFixedAdmin(user) ? "admin" : ["owner","admin"].includes(globalRole) ? "admin" : globalRole === "accounting" ? "viewer" : "";
+    if (allBranchRole) {
+      const snap = await fbm.getDocs(orgBranchesRef());
+      return snap.docs.map(d => ({ id: d.id, ...d.data(), role: allBranchRole }));
+    }
+    if (["owner","admin"].includes(ledgerRole)) {
+      const snap = await fbm.getDocs(orgBranchesRef());
+      return snap.docs.map(d => ({ id: d.id, ...d.data(), role: "admin" }));
+    }
+    const snap = await fbm.getDocs(userLedgerIndex(user.uid));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+  async function openBranchSelector() {
+    try {
+      const branches = await accessibleLedgers();
+      const merged = new Map(branches.map(x => [x.id, x]));
+      if (DEFTER_ID && !merged.has(DEFTER_ID)) merged.set(DEFTER_ID, { id: DEFTER_ID, companyName: db.magaza, branchName: db.firma.sube || "", role: ledgerRole });
+      const list = [...merged.values()];
+      openSheet(`<div class="sheet-card full branch-picker"><div class="grab"></div><div style="display:flex;align-items:center;gap:8px"><div style="flex:1"><div class="meta">DÜNYA AMBALAJ · ŞUBELER</div><h2 style="font-size:20px">Defter seç</h2></div><button class="btn btn-ghost" id="branchPickerClose">Kapat</button></div><div class="branch-hero"><small>TAHSİLAT DEFTERİ</small><h3>İşiniz, tek yerde.</h3><p>Yetkiniz olan şubeler arasında güvenle geçiş yapın.</p></div><div>${list.map(x=>`<button class="branch-switch branch-card" data-branch-open="${esc(x.id)}"><span class="bs-icon">${icon("book")}</span><span class="bs-copy"><b>${esc(x.companyName || x.ad || "Firma")}</b><span>${esc(x.branchName ? x.branchName+" şubesi · " : "")}${esc(ROLE_LABEL[x.role] || "Yetkili üye")}</span></span>${x.id===DEFTER_ID?'<span class="branch-card bc-active">Açık</span>':icon("share")}</button>`).join("") || '<div class="empty">Henüz erişim verilen şube yok.</div>'}</div></div>`, true);
+      document.getElementById("branchPickerClose").onclick=closeSheet;
+      document.querySelectorAll("[data-branch-open]").forEach(b=>b.onclick=()=>openLedger(b.dataset.branchOpen));
+    } catch(e) { toast("Şube listesi alınamadı: "+fbErr(e)); }
   }
 
   async function ensureLedgerAccess(id) {
@@ -3341,6 +3433,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
         await fbm.setDoc(selfRef, { role: fixedRole, email: user.email || "", name: user.displayName || "", addedAt: new Date().toISOString(), addedBy: user.uid });
       }
       ledgerRole = fixedRole;
+      await syncBranchDirectory(id, await ledgerBranchInfo(id)).catch(e => console.warn("Şube kataloğu güncellenemedi:", e));
       return true;
     }
     const oref = ownerRef(id);
@@ -3362,9 +3455,18 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     if (ownerSnap.data().ownerUid === user.uid) {
       const self = await fbm.getDoc(memberRef(id, user.uid));
       if (!self.exists() || self.data().role !== "owner") {
-        await fbm.setDoc(memberRef(id, user.uid), { role: "owner", email: user.email || "", name: user.displayName || "", addedAt: new Date().toISOString() });
+        await fbm.setDoc(memberRef(id, user.uid), { role: "owner", email: user.email || "", name: user.displayName || "", firstName:"", lastName:"", department:"", addedAt: new Date().toISOString() });
       }
       ledgerRole = "owner";
+      await syncOrgRole(id, "owner", user);
+      await syncUserLedgerIndex(id, user.uid, "owner", await ledgerBranchInfo(id));
+      await syncBranchDirectory(id, await ledgerBranchInfo(id));
+      return true;
+    }
+    const globalSnap = await fbm.getDoc(orgMemberRef(user.uid));
+    if (globalSnap.exists() && ["owner","admin","accounting"].includes(globalSnap.data().role)) {
+      ledgerRole = globalSnap.data().role === "accounting" ? "viewer" : "admin";
+      await syncBranchDirectory(id, await ledgerBranchInfo(id)).catch(e => console.warn("Şube kataloğu güncellenemedi:", e));
       return true;
     }
     const member = await fbm.getDoc(memberRef(id, user.uid));
@@ -3374,7 +3476,48 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
       return false;
     }
     ledgerRole = member.data().role;
+    await syncUserLedgerIndex(id, user.uid, ledgerRole, await ledgerBranchInfo(id)).catch(e => console.warn("Şube erişimi dizine yazılamadı:", e));
+    if (["owner","admin"].includes(ledgerRole)) {
+      await syncOrgRole(id, ledgerRole, user);
+      await syncBranchDirectory(id, await ledgerBranchInfo(id)).catch(e => console.warn("Şube kataloğu güncellenemedi:", e));
+    }
     return true;
+  }
+
+  async function saveMemberRole(userId, newRole, currentRole) {
+    const batch=fbm.writeBatch(fbDb),now=new Date().toISOString(),info=await ledgerBranchInfo(DEFTER_ID),orgRef=orgMemberRef(userId),orgSnap=await fbm.getDoc(orgRef),oldOrg=orgSnap.exists()?orgSnap.data():null;
+    if(oldOrg?.role==="owner"&&newRole!=="admin")throw new Error("Bu kullanıcı şirket sahibidir; önce sahiplik aktarılmalı");
+    const memberRole=newRole==="accounting"?"viewer":newRole,department=newRole==="accounting"?"muhasebe":"";
+    if(["admin","accounting"].includes(newRole)){
+      batch.update(memberRef(DEFTER_ID,userId),{role:memberRole,department});
+      batch.set(userLedgerIndexRef(userId,DEFTER_ID),{ledgerId:DEFTER_ID,role:memberRole,companyName:info.companyName||"Firma",branchName:info.branchName||"",updatedAt:now});
+      batch.set(orgRef,{role:newRole,uid:userId,email:"",name:"",firstName:"",lastName:"",department,sourceLedgerId:DEFTER_ID,createdAt:oldOrg?.createdAt||now,updatedAt:now});
+    }else if(oldOrg&&["admin","accounting"].includes(oldOrg.role)){
+      const branches=await accessibleLedgers(),indexSnap=await fbm.getDocs(userLedgerIndex(userId)),ids=new Set([...branches.map(x=>x.id),...indexSnap.docs.map(d=>d.id),DEFTER_ID]);
+      for(const id of ids){
+        if(id===DEFTER_ID){
+          const snap=await fbm.getDoc(memberRef(id,userId));
+          if(snap.exists()){batch.update(memberRef(id,userId),{role:newRole,department:""});batch.set(userLedgerIndexRef(userId,id),{ledgerId:id,role:newRole,companyName:info.companyName||"Firma",branchName:info.branchName||"",updatedAt:now});}
+        }else{
+          batch.delete(memberRef(id,userId));batch.delete(userLedgerIndexRef(userId,id));
+        }
+      }
+      batch.delete(orgRef);
+    }else{
+      batch.update(memberRef(DEFTER_ID,userId),{role:memberRole,department});
+      batch.set(userLedgerIndexRef(userId,DEFTER_ID),{ledgerId:DEFTER_ID,role:memberRole,companyName:info.companyName||"Firma",branchName:info.branchName||"",updatedAt:now});
+    }
+    await batch.commit();
+  }
+  async function removeMemberAccess(userId, currentRole) {
+    const batch=fbm.writeBatch(fbDb),orgRef=orgMemberRef(userId),orgSnap=await fbm.getDoc(orgRef),org=orgSnap.exists()?orgSnap.data():null;
+    if(org?.role==="owner")throw new Error("Şirket sahibini kaldırmak için önce sahipliği devredin");
+    if(org&&["admin","accounting"].includes(org.role)){
+      const branches=await accessibleLedgers(),indexSnap=await fbm.getDocs(userLedgerIndex(userId)),ids=new Set([...branches.map(x=>x.id),...indexSnap.docs.map(d=>d.id),DEFTER_ID]);
+      for(const id of ids){const snap=await fbm.getDoc(memberRef(id,userId));if(snap.exists()&&snap.data().role!=="owner")batch.delete(memberRef(id,userId));batch.delete(userLedgerIndexRef(userId,id));}
+      batch.delete(orgRef);
+    }else{batch.delete(memberRef(DEFTER_ID,userId));batch.delete(userLedgerIndexRef(userId,DEFTER_ID));}
+    await batch.commit();
   }
 
   async function loadLedgerMembers(host) {
@@ -3394,20 +3537,20 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
         isFixedAdmin(fbAuth.currentUser) ? fbm.getDocs(fbm.collectionGroup(fbDb, "uyelikBasvurulari")) : Promise.resolve(null)
       ]);
       if (token !== memberLoadToken || !host.isConnected) return;
+      const branchChoices = await accessibleLedgers();
+      if (!branchChoices.some(x => x.id === DEFTER_ID)) branchChoices.unshift({ id: DEFTER_ID, companyName: db.magaza, branchName: db.firma.sube || "", role: ledgerRole });
+      const branchChecks = (selector, selectedId) => branchChoices.map(b => `<label class="branch-option ${b.id===selectedId?"on":""}"><input type="checkbox" ${selector} value="${esc(b.id)}" ${b.id===selectedId?"checked":""}><span>${esc(b.branchName || b.companyName || b.id)}</span></label>`).join("");
       const rows = [];
       members.forEach(d => {
         const m = d.data(), self = d.id === fbAuth.currentUser.uid;
         const canChange = !self && canAssignRole(m.role, m.role, d.id);
-        const roleControl = canChange
-          ? `<select class="inp" data-member-role="${esc(d.id)}" style="width:auto;min-width:132px;padding:7px">${roleOptions(m.role)}</select>`
-          : `<span class="dev-me">${esc(ROLE_LABEL[m.role] || "Üye")}${self ? " · siz" : ""}</span>`;
-        const removeControl = canRemoveMember(m.role, d.id)
-          ? `<button class="btn btn-ghost" data-member-remove="${esc(d.id)}" style="color:var(--red)">Kaldır</button>`
-          : "";
-        rows.push(`<div class="mini-day" style="align-items:center;gap:8px">
-          <div class="who" style="min-width:0;flex:1"><b>${esc(m.name || m.email || d.id)}</b><div class="meta">${esc(d.id)}</div></div>
-          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${roleControl}${removeControl}</div>
-        </div>`);
+        const roleControl = canChange ? `<select class="inp" data-member-role="${esc(d.id)}">${roleOptions(m.role)}</select>` : `<span class="member-role-badge">${esc(ROLE_LABEL[m.role] || "Üye")}${self ? " · siz" : ""}</span>`;
+        const removeControl = canRemoveMember(m.role, d.id) ? `<button class="btn btn-ghost" data-member-remove="${esc(d.id)}" style="color:var(--red)">Erişimi kaldır</button>` : "";
+        const transferControl = ledgerRole === "owner" && !self && ["admin","editor","viewer"].includes(m.role) ? `<button class="btn member-transfer" data-member-transfer="${esc(d.id)}">Sahipliği devret</button>` : "";
+        const branchAssign = ["editor","viewer"].includes(m.role) && branchChoices.length>1 ? `<details style="flex:1 0 100%"><summary class="meta" style="cursor:pointer;padding:5px 0">Diğer şubelere erişim ver</summary><div class="branch-options">${branchChoices.filter(b=>b.id!==DEFTER_ID).map(b=>`<label class="branch-option"><input type="checkbox" data-member-assign="${esc(d.id)}" value="${esc(b.id)}"><span>${esc(b.branchName||b.companyName||b.id)}</span></label>`).join("")}</div><button class="btn btn-ghost" data-member-assign-save="${esc(d.id)}" style="margin-top:6px">Seçili şubelere erişim ver</button></details>` : "";
+        const displayName = m.name || m.email || "İsimsiz üye";
+        const initials = String(displayName).trim().split(/\s+/).slice(0,2).map(x=>x[0]||"").join("").toLocaleUpperCase("tr");
+        rows.push(`<article class="member-card"><div class="member-avatar">${esc(initials || "Ü")}</div><div class="member-info"><div class="member-name">${esc(displayName)}${self ? ' <span class="dev-me">Siz</span>' : ""}</div><div class="member-email">${esc(m.email || "E-posta bilgisi yok")}</div><div class="member-meta">${m.department==="muhasebe"?"Departman: Muhasebe · tüm şubelerde görüntüleme":m.department?"Departman: "+esc(m.department):"Google UID"} · ${esc(d.id)}</div></div><div class="member-actions">${roleControl}${removeControl}${transferControl}${branchAssign}</div></article>`);
       });
 
       const pending = [];
@@ -3434,11 +3577,11 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
       const requests = pending.map(a => {
         const key = (a.ledgerId || DEFTER_ID) + "/" + (a.uid || a.id);
         return `<div class="mini-day" style="align-items:center;gap:8px">
-          <div class="who" style="min-width:0;flex:1"><b>${esc(a.name || a.email || a.uid || a.id)}</b>
-            <div class="meta">${esc(a.email || "")} · Defter: ${esc(String(a.ledgerId || DEFTER_ID).slice(0,10))}… · UID: ${esc(a.uid || a.id)}</div>
+          <div class="who" style="min-width:0;flex:1"><b>${esc(a.name || a.email || a.uid || a.id)}</b><div class="meta">${esc(a.email || "")} · Başvuru şubesi: ${esc(String(a.ledgerId || DEFTER_ID).slice(0,10))}…</div><div class="meta">UID: ${esc(a.uid || a.id)}</div>
+            ${branchChoices.length>1?`<div class="meta" style="margin-top:8px">Erişim verilecek şubeler</div><div class="branch-options">${branchChoices.map(b=>`<label class="branch-option ${(Array.isArray(a.requestedLedgers)?a.requestedLedgers:[a.ledgerId||DEFTER_ID]).includes(b.id)?"on":""}"><input type="checkbox" data-request-branch="${esc(key)}" value="${esc(b.id)}" ${(Array.isArray(a.requestedLedgers)?a.requestedLedgers:[a.ledgerId||DEFTER_ID]).includes(b.id)?"checked":""}><span>${esc(b.branchName||b.companyName||b.id)}</span></label>`).join("")}</div>`: `<input type="hidden" data-request-branch="${esc(key)}" value="${esc(a.ledgerId||DEFTER_ID)}">`}
           </div>
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-            <select class="inp" data-request-role="${esc(key)}" style="width:auto;min-width:126px;padding:7px">${roleOptions("editor")}</select>
+            <select class="inp" data-request-role="${esc(key)}" style="width:auto;min-width:126px;padding:7px">${roleOptions(a.requestedRole || (a.department==="muhasebe"?"accounting":"editor"))}</select>
             <button class="btn btn-gold" data-request-approve="${esc(key)}">Onayla</button>
             <button class="btn btn-ghost" data-request-reject="${esc(key)}">Reddet</button>
           </div>
@@ -3454,50 +3597,89 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
           <input class="inp" id="memberUid" placeholder="Google kullanıcı kodu" />
           <select class="inp" id="memberRole">${roleOptions("editor")}</select>
         </div>
-        <button class="btn btn-gold" id="memberAdd" style="width:100%;margin-top:8px">Seçilen rolle üye ekle</button>
+        <div class="meta" style="margin-top:10px">Erişim verilecek şubeler</div><div class="branch-options" id="memberBranchChoices">${branchChecks('data-member-branch', DEFTER_ID)}</div><button class="btn btn-gold" id="memberAdd" style="width:100%;margin-top:8px">Seçilen rolle üye ekle</button>
         ${managerNote}
-        <label class="fld" style="margin-top:12px">Defter üyeleri</label>
-        <div class="mini" style="margin-top:8px">${rows.join("") || '<div class="meta">Henüz başka üye yok.</div>'}</div>`;
+        <button class="member-launch" id="openMemberPanel" type="button"><span class="ml-icon">${icon("people")}</span><span class="ml-copy"><b>Üye yönetimini aç</b><span>Üye bilgileri, roller ve erişim ayarları</span></span><span class="ml-count">${members.size}</span></button>`;
       document.getElementById("memberAdd").onclick = async () => {
         const id = document.getElementById("memberUid").value.trim();
         const role = document.getElementById("memberRole").value;
         if (!/^[A-Za-z0-9_-]{20,}$/.test(id)) return toast("Geçerli Google kullanıcı kodu girin");
         if (!canAssignRole(role, "", id)) return toast("Bu rolü atama yetkiniz yok");
         try {
-          await fbm.setDoc(memberRef(DEFTER_ID, id), {
-            role, email: "", name: "", addedAt: new Date().toISOString(), addedBy: fbAuth.currentUser.uid
-          });
-          toast(`${ROLE_LABEL[role]} rolüyle üye eklendi`); loadLedgerMembers(host);
+          let selected = [...document.querySelectorAll("[data-member-branch]:checked")].map(x=>x.value);
+          if (!selected.includes(DEFTER_ID)) selected.unshift(DEFTER_ID);
+          if(["admin","accounting"].includes(role))selected=branchChoices.map(x=>x.id);
+          const memberRole=role==="accounting"?"viewer":role;
+          const batch=fbm.writeBatch(fbDb), now=new Date().toISOString();
+          for (const ledgerId of selected) {
+            const meta=branchChoices.find(x=>x.id===ledgerId)||await ledgerBranchInfo(ledgerId);
+            batch.set(memberRef(ledgerId,id),{role:memberRole,email:"",name:"",firstName:"",lastName:"",department:role==="accounting"?"muhasebe":"",addedAt:now,addedBy:fbAuth.currentUser.uid});
+            batch.set(userLedgerIndexRef(id,ledgerId),{ledgerId,role:memberRole,companyName:meta.companyName||"Firma",branchName:meta.branchName||"",updatedAt:now});
+          }
+          if(["admin","accounting"].includes(role)) batch.set(orgMemberRef(id),{role,uid:id,email:"",name:"",firstName:"",lastName:"",department:role==="accounting"?"muhasebe":"",sourceLedgerId:DEFTER_ID,createdAt:now,updatedAt:now});
+          await batch.commit();
+          toast(`${ROLE_LABEL[role]} rolüyle ${selected.length} şubeye üye eklendi`); loadLedgerMembers(host);
         } catch (e) { toast("Üye eklenemedi: " + fbErr(e)); }
       };
-      host.querySelectorAll("[data-member-role]").forEach(select => select.onchange = async () => {
-        const userId = select.dataset.memberRole;
-        const target = members.docs.find(d => d.id === userId);
-        const newRole = select.value;
-        if (!target || !canAssignRole(newRole, target.data().role, userId)) return loadLedgerMembers(host);
-        select.disabled = true;
-        try {
-          await fbm.updateDoc(memberRef(DEFTER_ID, userId), { role: newRole });
-          toast(`${ROLE_LABEL[newRole]} rolü kaydedildi`); loadLedgerMembers(host);
-        } catch (e) { toast("Rol değiştirilemedi: " + fbErr(e)); loadLedgerMembers(host); }
-      });
+      document.getElementById("openMemberPanel").onclick = () => {
+        openSheet(`<div class="sheet-card full member-sheet"><div class="grab"></div><div style="display:flex;align-items:center;gap:8px"><div style="flex:1"><div class="meta">DEFTER EKİBİ</div><h2 style="font-size:20px">Üyeler ve roller</h2></div><button class="btn btn-ghost" id="memberPanelClose">Kapat</button></div><div class="member-intro"><span class="eyebrow">Güvenli erişim yönetimi</span><b>${members.size} üye</b><p>Her kişinin defter erişimini ve yetki seviyesini buradan yönetin.</p></div><div class="member-list">${rows.join("") || '<div class="meta">Henüz üye yok.</div>'}</div></div>`, true);
+        document.getElementById("memberPanelClose").onclick = closeSheet;
+        const panel = document.querySelector("#sheet .member-sheet");
+        panel.querySelectorAll("[data-member-role]").forEach(select => select.onchange = async () => {
+          const userId=select.dataset.memberRole,target=members.docs.find(d=>d.id===userId),newRole=select.value;
+          if(!target||!canAssignRole(newRole,target.data().role,userId))return loadLedgerMembers(host);
+          select.disabled=true;
+          try{await saveMemberRole(userId,newRole,target.data().role);toast(`${ROLE_LABEL[newRole]} rolü ve şirket erişimi kaydedildi`);closeSheet();loadLedgerMembers(host)}
+          catch(e){toast("Rol değiştirilemedi: "+fbErr(e));loadLedgerMembers(host)}
+        });
+        panel.querySelectorAll("[data-member-remove]").forEach(button=>button.onclick=async()=>{
+          const id=button.dataset.memberRemove,target=members.docs.find(d=>d.id===id);
+          if(!target||!canRemoveMember(target.data().role,id))return toast("Bu üyeyi kaldırma yetkiniz yok");
+          if(!confirm("Bu kişinin defter erişimi kaldırılsın mı? Çevrimdışı kopyası cihazında kalmış olabilir."))return;
+          try{await removeMemberAccess(id,target.data().role);toast("Üyenin erişimi kaldırıldı");closeSheet();loadLedgerMembers(host)}
+          catch(e){toast("Üye kaldırılamadı: "+fbErr(e))}
+        });
+        panel.querySelectorAll("[data-member-assign-save]").forEach(button=>button.onclick=async()=>{
+          const userId=button.dataset.memberAssignSave,target=members.docs.find(d=>d.id===userId),selected=[...panel.querySelectorAll("[data-member-assign]:checked")].filter(x=>x.dataset.memberAssign===userId).map(x=>x.value);
+          if(!target||!selected.length)return toast("En az bir şube seçin");
+          button.disabled=true;
+          try{const batch=fbm.writeBatch(fbDb),now=new Date().toISOString(),data=target.data();
+            for(const ledgerId of selected){const info=branchChoices.find(x=>x.id===ledgerId)||await ledgerBranchInfo(ledgerId);batch.set(memberRef(ledgerId,userId),{role:data.role,email:data.email||"",name:data.name||"",addedAt:now,addedBy:fbAuth.currentUser.uid});batch.set(userLedgerIndexRef(userId,ledgerId),{ledgerId,role:data.role,companyName:info.companyName||"Firma",branchName:info.branchName||"",updatedAt:now});}
+            await batch.commit();toast(`Üyeye ${selected.length} şube erişimi verildi`);closeSheet();loadLedgerMembers(host);
+          }catch(e){button.disabled=false;toast("Şube erişimi verilemedi: "+fbErr(e))}
+        });
+        panel.querySelectorAll("[data-member-transfer]").forEach(button=>button.onclick=async()=>{
+          const newOwnerId=button.dataset.memberTransfer,target=members.docs.find(d=>d.id===newOwnerId);
+          if(ledgerRole!=="owner"||!target||!["admin","editor","viewer"].includes(target.data().role))return toast("Sahiplik yalnızca mevcut bir üyeye devredilebilir");
+          const targetName=target.data().name||target.data().email||newOwnerId;
+          if(!confirm(`Defter sahipliği ${targetName} kişisine devredilecek. Siz admin olarak kalacaksınız. Yeni sahip rol ve üyelik yetkilerini devralır. Devam edilsin mi?`))return;
+          button.disabled=true;
+          try{const batch=fbm.writeBatch(fbDb),now=new Date().toISOString(),info=await ledgerBranchInfo(DEFTER_ID),me=fbAuth.currentUser;batch.update(ownerRef(DEFTER_ID),{ownerUid:newOwnerId});batch.update(memberRef(DEFTER_ID,me.uid),{role:"admin"});batch.update(memberRef(DEFTER_ID,newOwnerId),{role:"owner"});batch.set(orgMemberRef(me.uid),{role:"admin",uid:me.uid,email:me.email||"",name:me.displayName||"",sourceLedgerId:DEFTER_ID,createdAt:now,updatedAt:now});batch.set(orgMemberRef(newOwnerId),{role:"owner",uid:newOwnerId,email:target.data().email||"",name:target.data().name||"",sourceLedgerId:DEFTER_ID,createdAt:now,updatedAt:now});batch.set(userLedgerIndexRef(me.uid,DEFTER_ID),{ledgerId:DEFTER_ID,role:"admin",companyName:info.companyName||"Firma",branchName:info.branchName||"",updatedAt:now});batch.set(userLedgerIndexRef(newOwnerId,DEFTER_ID),{ledgerId:DEFTER_ID,role:"owner",companyName:info.companyName||"Firma",branchName:info.branchName||"",updatedAt:now});await batch.commit();ledgerRole="admin";toast("Defter sahipliği devredildi; erişiminiz admin olarak sürüyor");closeSheet();loadLedgerMembers(host)}
+          catch(e){button.disabled=false;toast("Sahiplik devredilemedi: "+fbErr(e))}
+        });
+      };
       host.querySelectorAll("[data-request-approve]").forEach(button => button.onclick = async () => {
-        const key = button.dataset.requestApprove;
-        const req = pending.find(x => (x.ledgerId || DEFTER_ID) + "/" + (x.uid || x.id) === key);
-        if (!req) return;
-        const roleSelect = [...host.querySelectorAll("[data-request-role]")].find(x => x.dataset.requestRole === key);
-        const role = roleSelect ? roleSelect.value : "editor";
-        if (!canAssignRole(role, "", req.uid || req.id)) return toast("Bu rolü atama yetkiniz yok");
-        button.disabled = true;
-        try {
-          const now = new Date().toISOString(), ledgerId = req.ledgerId || DEFTER_ID, userId = req.uid || req.id;
-          const batch = fbm.writeBatch(fbDb);
-          batch.set(memberRef(ledgerId, userId), { role, email: req.email || "", name: req.name || "", addedAt: now, addedBy: fbAuth.currentUser.uid });
-          batch.update(memberApplicationRef(ledgerId, userId), { status: "approved", handledAt: now, handledBy: fbAuth.currentUser.uid });
-          if (req.globalId) batch.update(adminApplicationRef(req.globalId), { status: "approved", updatedAt: now, handledAt: now, handledBy: fbAuth.currentUser.uid });
-          await batch.commit();
-          toast(`Başvuru onaylandı; ${ROLE_LABEL[role]} erişimi açıldı`); loadLedgerMembers(host);
-        } catch (e) { button.disabled = false; toast("Başvuru onaylanamadı: " + fbErr(e)); }
+        const key=button.dataset.requestApprove, req=pending.find(x=>(x.ledgerId||DEFTER_ID)+"/"+(x.uid||x.id)===key);
+        if(!req)return;
+        const roleSelect=[...host.querySelectorAll("[data-request-role]")].find(x=>x.dataset.requestRole===key), role=roleSelect?roleSelect.value:"editor";
+        if(!canAssignRole(role,"",req.uid||req.id))return toast("Bu rolü atama yetkiniz yok");
+        let branchIds=[...host.querySelectorAll("[data-request-branch]")].filter(x=>x.dataset.requestBranch===key&&x.checked!==false).map(x=>x.value);
+        if(!branchIds.includes(req.ledgerId||DEFTER_ID))branchIds.unshift(req.ledgerId||DEFTER_ID);
+        if(["admin","accounting"].includes(role))branchIds=branchChoices.map(x=>x.id);
+        const memberRole=role==="accounting"?"viewer":role;
+        button.disabled=true;
+        try{
+          const now=new Date().toISOString(), userId=req.uid||req.id, batch=fbm.writeBatch(fbDb);
+          for(const ledgerId of [...new Set(branchIds)]){
+            const meta=branchChoices.find(x=>x.id===ledgerId)||await ledgerBranchInfo(ledgerId);
+            batch.set(memberRef(ledgerId,userId),{role:memberRole,email:req.email||"",name:req.name||"",firstName:req.firstName||"",lastName:req.lastName||"",department:req.department||"",addedAt:now,addedBy:fbAuth.currentUser.uid});
+            batch.set(userLedgerIndexRef(userId,ledgerId),{ledgerId,role:memberRole,companyName:meta.companyName||"Firma",branchName:meta.branchName||"",updatedAt:now});
+          }
+          if(["admin","accounting"].includes(role))batch.set(orgMemberRef(userId),{role,uid:userId,email:req.email||"",name:req.name||"",firstName:req.firstName||"",lastName:req.lastName||"",department:req.department||"",sourceLedgerId:req.ledgerId||DEFTER_ID,createdAt:now,updatedAt:now});
+          batch.update(memberApplicationRef(req.ledgerId||DEFTER_ID,userId),{status:"approved",handledAt:now,handledBy:fbAuth.currentUser.uid});
+          if(req.globalId)batch.update(adminApplicationRef(req.globalId),{status:"approved",updatedAt:now,handledAt:now,handledBy:fbAuth.currentUser.uid});
+          await batch.commit();toast(`Başvuru onaylandı; ${["admin","accounting"].includes(role)?"tüm defterlere":branchIds.length+" şubeye"} ${ROLE_LABEL[role]} erişimi açıldı`);loadLedgerMembers(host);
+        }catch(e){button.disabled=false;toast("Başvuru onaylanamadı: "+fbErr(e));}
       });
       host.querySelectorAll("[data-request-reject]").forEach(button => button.onclick = async () => {
         const key = button.dataset.requestReject;
@@ -3646,7 +3828,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
           if (remoteSet && sharedSettingsJson() !== remoteSet) return; /* yerelde bekleyen değişiklik */
           if (o.magaza) db.magaza = o.magaza;
           const f = o.firma || {};
-          db.firma = { ...db.firma, tel: f.tel || "", vergi: f.vergi || "", adres: f.adres || "" };
+          db.firma = { ...db.firma, tel: f.tel || "", vergi: f.vergi || "", adres: f.adres || "", sube: f.sube || "" };
           db.silmePin = o.silmePin || null;
           db.hedef = Number(o.hedef) || 0;
           db.mesai = o.mesai || null;
@@ -3861,19 +4043,28 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     location.hash = "d=" + m[1];
     location.reload();
   }
-  async function resolveAdminApplication(app, status, role, host, button) {
+  async function resolveAdminApplication(app, status, role, host, button, extraBranches = []) {
     if (!isFixedAdmin(fbAuth && fbAuth.currentUser)) return toast("Bu işlem sistem yöneticisine açıktır");
     if (status === "approved" && !canAssignRole(role, "", app.uid)) return toast("Seçilen rol atanamıyor");
     button.disabled = true;
     try {
       const now = new Date().toISOString(), batch = fbm.writeBatch(fbDb);
-      if (status === "approved") batch.set(memberRef(app.defterId, app.uid), {
-        role, email: app.email || "", name: app.name || "", addedAt: now, addedBy: fbAuth.currentUser.uid
-      });
-      batch.update(memberApplicationRef(app.defterId, app.uid), { status, handledAt: now, handledBy: fbAuth.currentUser.uid });
-      if (app.globalId) batch.update(adminApplicationRef(app.globalId), { status, updatedAt: now, handledAt: now, handledBy: fbAuth.currentUser.uid });
+      if (status === "approved") {
+        const branchChoices=await accessibleLedgers();
+        const ids = ["admin","accounting"].includes(role) ? branchChoices.map(x=>x.id) : [...new Set([app.defterId, ...extraBranches].filter(Boolean))];
+        const memberRole=role==="accounting"?"viewer":role;
+        for (const ledgerId of ids) {
+          const info = branchChoices.find(x=>x.id===ledgerId) || await ledgerBranchInfo(ledgerId);
+          batch.set(memberRef(ledgerId, app.uid), { role:memberRole, email:app.email||"", name:app.name||"", firstName:app.firstName||"", lastName:app.lastName||"", department:app.department||"", addedAt:now, addedBy:fbAuth.currentUser.uid });
+          batch.set(userLedgerIndexRef(app.uid, ledgerId), { ledgerId, role:memberRole, companyName:info.companyName||"Firma", branchName:info.branchName||"", updatedAt:now });
+        }
+        if (["admin","accounting"].includes(role)) batch.set(orgMemberRef(app.uid), { role, uid:app.uid, email:app.email||"", name:app.name||"", firstName:app.firstName||"", lastName:app.lastName||"", department:app.department||"", sourceLedgerId:app.defterId, createdAt:now, updatedAt:now });
+        batch.set(userProfileRef(app.uid),{uid:app.uid,email:app.email||"",firstName:app.firstName||"",lastName:app.lastName||"",fullName:app.name||"",department:app.department||"",updatedAt:now},{merge:true});
+      }
+      batch.update(memberApplicationRef(app.defterId, app.uid), { status, handledAt:now, handledBy:fbAuth.currentUser.uid });
+      if (app.globalId) batch.update(adminApplicationRef(app.globalId), { status, updatedAt:now, handledAt:now, handledBy:fbAuth.currentUser.uid });
       await batch.commit();
-      toast(status === "approved" ? `Başvuru onaylandı; ${ROLE_LABEL[role]} erişimi açıldı` : "Başvuru reddedildi");
+      toast(status === "approved" ? `Başvuru onaylandı; ${["admin","accounting"].includes(role)?"tüm defterlere":(1+extraBranches.length)+" şubeye"} ${ROLE_LABEL[role]} erişimi açıldı` : "Başvuru reddedildi");
       loadAdminInbox(host);
     } catch (e) {
       button.disabled = false;
@@ -3886,35 +4077,28 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     const token = ++adminInboxToken;
     host.innerHTML = '<div class="meta">Üyelik bildirimleri yükleniyor…</div>';
     try {
-      const snap = await fbm.getDocs(adminApplicationsRef());
+      const [snap, branchChoices] = await Promise.all([fbm.getDocs(adminApplicationsRef()), accessibleLedgers()]);
       if (token !== adminInboxToken || !host.isConnected) return;
       const pending = [];
       snap.forEach(d => { if (d.data().status === "pending") pending.push({ id: d.id, ...d.data() }); });
       pending.sort((a,b) => String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
-      host.innerHTML = pending.length ? pending.map((a,i) => `
-        <div class="mini-day" style="align-items:center;margin-top:8px">
-          <div class="who" style="min-width:0;overflow-wrap:anywhere">
-            <b>${esc(a.name || a.email || a.uid)}</b>
-            <div class="meta">${esc(a.email || "")} · Defter: ${esc(String(a.defterId || "").slice(0,10))}…</div>
-            <div class="meta">UID: ${esc(a.uid || "")}</div>
-          </div>
-          <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap">
-            <select class="inp" data-admin-role="${i}" style="width:auto;min-width:132px;padding:7px">${roleOptions("editor")}</select>
-            <button class="btn btn-gold" data-admin-approve="${i}">Onayla</button>
-            <button class="btn btn-ghost" data-admin-reject="${i}">Reddet</button>
-          </div>
-        </div>`).join("") : '<div class="meta">Bekleyen üyelik talebi yok.</div>';
+      host.innerHTML = pending.length ? pending.map((a,i) => {
+        const current = a.defterId;
+        const selectedBranches=Array.isArray(a.requestedLedgers)?a.requestedLedgers:[current];
+        const branchChecks = branchChoices.length > 1 ? `<div class="meta" style="margin-top:8px">Erişim verilecek şubeler</div><div class="branch-options">${branchChoices.map(b=>`<label class="branch-option ${selectedBranches.includes(b.id)?"on":""}"><input type="checkbox" data-admin-branch="${i}" value="${esc(b.id)}" ${selectedBranches.includes(b.id)?"checked":""}><span>${esc(b.branchName||b.companyName||b.id)}</span></label>`).join("")}</div>` : "";
+        return `<div class="mini-day" style="align-items:center;margin-top:8px"><div class="who" style="min-width:0;overflow-wrap:anywhere"><b>${esc(a.name || a.email || a.uid)}</b><div class="meta">${esc(a.email || "")} · Başvuru şubesi: ${esc(String(current||"").slice(0,10))}…</div><div class="meta">UID: ${esc(a.uid || "")}</div>${branchChecks}</div><div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap"><select class="inp" data-admin-role="${i}" style="width:auto;min-width:132px;padding:7px">${roleOptions(a.requestedRole || (a.department==="muhasebe"?"accounting":"editor"))}</select><button class="btn btn-gold" data-admin-approve="${i}">Onayla</button><button class="btn btn-ghost" data-admin-reject="${i}">Reddet</button></div></div>`;
+      }).join("") : '<div class="meta">Bekleyen üyelik talebi yok.</div>';
       host.querySelectorAll("[data-admin-approve]").forEach(button => {
-        const app = pending[Number(button.dataset.adminApprove)];
-        button.onclick = () => {
-          const select = host.querySelector(`[data-admin-role="${button.dataset.adminApprove}"]`);
-          const role = select ? select.value : "editor";
-          app && resolveAdminApplication(app, "approved", role, host, button);
+        const i=Number(button.dataset.adminApprove), app=pending[i];
+        button.onclick=()=>{
+          const select=host.querySelector(`[data-admin-role="${i}"]`), role=select?select.value:"editor";
+          const branches=[...host.querySelectorAll(`[data-admin-branch="${i}"]:checked`)].map(x=>x.value).filter(id=>id!==app?.defterId);
+          app && resolveAdminApplication(app,"approved",role,host,button,branches);
         };
       });
       host.querySelectorAll("[data-admin-reject]").forEach(button => {
-        const app = pending[Number(button.dataset.adminReject)];
-        button.onclick = () => app && resolveAdminApplication(app, "rejected", "editor", host, button);
+        const app=pending[Number(button.dataset.adminReject)];
+        button.onclick=()=>app&&resolveAdminApplication(app,"rejected","editor",host,button);
       });
     } catch (e) {
       if (token === adminInboxToken && host.isConnected) host.innerHTML = `<div class="meta" style="color:var(--red)">Üyelik bildirimleri okunamadı: ${esc(fbErr(e))}</div>`;
@@ -3958,7 +4142,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
           <h2 style="text-align:center;margin:8px 0 4px;font-size:20px">Ortak defter</h2>
           <p class="meta" style="text-align:center;margin-bottom:14px">Defter verileri Google hesabı ve yönetici onayıyla korunur.</p>
           <button class="btn btn-gold" id="wSignIn" style="width:100%">${isGoogleUser(fbAuth && fbAuth.currentUser) ? "Google hesabı bağlı · " + esc(fbAuth.currentUser.email || "") : "Google hesabıyla giriş yap"}</button>
-          ${isGoogleUser(fbAuth && fbAuth.currentUser) ? '<p class="meta" style="text-align:center;margin:8px 0">Kullanıcı kodunuz: <code>' + esc(fbAuth.currentUser.uid) + '</code></p>' : ""}
+          ${isGoogleUser(fbAuth && fbAuth.currentUser) ? '<p class="meta" style="text-align:center;margin:8px 0">Kullanıcı kodunuz: <code>' + esc(fbAuth.currentUser.uid) + '</code></p><button class="btn btn-ghost" id="wBranches" style="width:100%;margin-top:8px">Yetkili olduğum şubeleri göster</button>' : ""}
           <button class="btn btn-gold" id="wNew" style="width:100%;margin-top:8px" ${isGoogleUser(fbAuth && fbAuth.currentUser) ? "" : "disabled"}>Yeni ortak defter oluştur</button>
           ${n ? `<p class="meta" style="margin-top:6px;text-align:center">Bu cihazdaki <b>${n}</b> kayıt yeni defter içine aktarılacak.</p>` : ""}
           <div class="meta" style="margin:16px 0 6px;text-align:center">— ya da size gönderilen bağlantıyla katılın —</div>
@@ -3973,6 +4157,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
       try { await authenticateGoogle(); } catch (e) { authButton.disabled = false; toast("Google girişi yapılamadı: " + fbErr(e)); }
     };
     document.getElementById("wNew").onclick = createDefter;
+    document.getElementById("wBranches")?.addEventListener("click", openBranchSelector);
     document.getElementById("wJoin").onclick = () => joinDefter(document.getElementById("wLink").value);
     if (isFixedAdmin(fbAuth && fbAuth.currentUser)) {
       loadAdminInbox(document.getElementById("adminInbox"));
@@ -3989,88 +4174,35 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
   }
 
   /* ---- Ad sorma ---- */
+  async function saveRecorderProfile(firstName, lastName) {
+    const user=fbAuth&&fbAuth.currentUser, fullName=(firstName+" "+lastName).trim();
+    try { localStorage.setItem(FIRST_NAME_KEY,firstName);localStorage.setItem(LAST_NAME_KEY,lastName);localStorage.setItem(NAME_KEY,fullName); } catch(e) {}
+    if(!isGoogleUser(user)||!fbDb)return fullName;
+    const now=new Date().toISOString(),profile={uid:user.uid,email:user.email||"",firstName,lastName,fullName,department:"",updatedAt:now};
+    await fbm.setDoc(userProfileRef(user.uid),profile,{merge:true});
+    if(DEFTER_ID&&ledgerRole){
+      const patch={name:fullName,firstName,lastName,email:user.email||""};
+      await fbm.updateDoc(memberRef(DEFTER_ID,user.uid),patch).catch(()=>{});
+      await fbm.updateDoc(orgMemberRef(user.uid),{name:fullName,firstName,lastName,email:user.email||"",updatedAt:now}).catch(()=>{});
+    }
+    return fullName;
+  }
   function openNameSheet(force) {
+    let first="",last="";
+    try { first=localStorage.getItem(FIRST_NAME_KEY)||"";last=localStorage.getItem(LAST_NAME_KEY)||"";if(!first&&!last){const bits=ME().split(/\s+/);first=bits.shift()||"";last=bits.join(" ");} } catch(e) {}
     openSheet(`
-      <div class="sheet-card">
-        <div class="grab"></div>
-        <h2 style="font-size:18px">Adınız</h2>
-        <p class="meta" style="margin:6px 0 10px">Kayıtlarda “kim ekledi, kim tahsil etti” bilgisi için adınızı yazın (örn. Ahmet). Yalnızca ad yeterli, e-posta gerekmez.</p>
-        <input class="inp" id="nmIn" maxlength="24" placeholder="Adınız" value="${esc(ME())}" />
-        <button class="btn btn-gold" id="nmSave" style="width:100%;margin-top:12px">Kaydet</button>
+      <div class="sheet-card"><div class="grab"></div><div class="meta" style="letter-spacing:.13em;font-weight:800">EKİP PROFİLİ</div>
+        <h2 style="font-size:22px;margin-top:5px">Adınız ve soyadınız</h2>
+        <p class="meta" style="margin:7px 0 10px">Tahsilat kayıtlarında işlemi yapan kişi tam adıyla görünür. Bilgileriniz üyelik profilinizde saklanır.</p>
+        <label class="fld">Ad</label><input class="inp" id="nmFirst" maxlength="40" autocomplete="given-name" placeholder="Adınız" value="${esc(first)}" />
+        <label class="fld">Soyad</label><input class="inp" id="nmLast" maxlength="50" autocomplete="family-name" placeholder="Soyadınız" value="${esc(last)}" />
+        <button class="btn btn-gold" id="nmSave" style="width:100%;margin-top:12px">Profili kaydet</button>
         ${force ? "" : `<button class="btn btn-ghost" id="sheetClose" style="width:100%;margin-top:8px">Vazgeç</button>`}
       </div>`);
-    const inp = document.getElementById("nmIn");
-    const go = () => {
-      const v = inp.value.trim();
-      if (!v) return toast("Bir ad yazın");
-      try { localStorage.setItem(NAME_KEY, v); } catch (e) {}
-      registerDevice(true);
-      closeSheet(); toast("Merhaba " + v);
-    };
-    document.getElementById("nmSave").onclick = go;
-    inp.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
-    const c = document.getElementById("sheetClose"); if (c) c.onclick = closeSheet;
-    setTimeout(() => inp.focus(), 50);
+    const go=async()=>{const firstName=document.getElementById("nmFirst").value.trim(),lastName=document.getElementById("nmLast").value.trim();if(!firstName||!lastName)return toast("Ad ve soyad alanlarını doldurun");try{await saveRecorderProfile(firstName,lastName);registerDevice(true);closeSheet();toast("Profil kaydedildi: "+firstName+" "+lastName)}catch(e){toast("Profil kaydedildi ancak bulut profili güncellenemedi: "+fbErr(e))}};
+    document.getElementById("nmSave").onclick=go;document.getElementById("nmLast").addEventListener("keydown",e=>{if(e.key==="Enter")go()});const c=document.getElementById("sheetClose");if(c)c.onclick=closeSheet;
   }
 
-  /* ---- Çakışmasız tahsilat / erteleme ----
-     Bulut açıkken işlem Firestore'da "işlem (transaction)" olarak yapılır: aynı anda iki kişi aynı kayda
-     tahsilat girse bile tutarlar birbirinin üzerine yazılmaz, toplanır. İnternet yoksa yerelde yapılır. */
-  async function mutateRecord(id, label, fn, opts = {}) {
-    if (!canWriteLedger()) { if (!opts.auto) toast("Bu defterde salt görüntüleme yetkiniz var"); return false; }
-    const auto = !!opts.auto;
-    const local = db.kayitlar.find(x => x.id === id);
-    if (!local) { if (!auto) toast("Kayıt artık yok"); return false; }
-    const beforeJson = JSON.stringify(local);
-    const me = auto ? "Sistem" : (ME() || "Bilinmiyor");
-    if (cloudOn && navigator.onLine) {
-      try {
-        let result = null;
-        await fbm.runTransaction(fbDb, async tx => {
-          result = null;
-          const ref = docRef("kayitlar", id);
-          const snap = await tx.get(ref);
-          let cur;
-          if (snap.exists()) { cur = JSON.parse(snap.data().d); cur.id = id; normalizeRec(cur); }
-          else cur = JSON.parse(beforeJson);
-          const bo = JSON.parse(JSON.stringify(cur));
-          if (fn(cur) === false) return; /* koşul artık geçerli değil (başka cihaz yapmış) */
-          stampRec(cur, bo, me, new Date().toISOString());
-          tx.set(ref, { d: JSON.stringify(cur), u: fbm.serverTimestamp() });
-          result = cur;
-        });
-        if (!result) return false;
-        const i = db.kayitlar.findIndex(x => x.id === id);
-        if (i >= 0) db.kayitlar[i] = result; else db.kayitlar.push(result);
-        remoteRec.set(id, JSON.stringify(result));
-        if (!auto) {
-          undoStack.push({ label, before: new Map([[id, beforeJson]]), touched: [id] });
-          if (undoStack.length > 40) undoStack.shift();
-        }
-        cacheSave();
-        return true;
-      } catch (e) {
-        console.warn("işlem başarısız", e);
-        if (!/unavailable|offline|network|deadline/i.test(String((e && e.code) || e))) {
-          if (!auto) toast("İşlem gönderilemedi: " + fbErr(e));
-          return false;
-        }
-        /* internet yok: aşağıda yerelde uygulanır, bağlantı gelince otomatik gönderilir */
-      }
-    }
-    if (auto) {
-      if (fn(local) === false) return false;
-      stampRec(local, JSON.parse(beforeJson), "Sistem", new Date().toISOString());
-      cacheSave(); schedulePush();
-      return true;
-    }
-    pushUndo(label);
-    if (fn(local) === false) { pendingUndo = null; return false; }
-    save();
-    return true;
-  }
-
-  /* ---- Silinenler kutusu ---- */
   function openTrash() {
     const list = db.kayitlar.filter(k => k.silindi).sort((a, b) => String(b.sonT || "").localeCompare(String(a.sonT || "")));
     openSheet(`
@@ -4987,7 +5119,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     try { return JSON.parse(s.data().d); } catch (e) { return null; }
   }
   const writeGenel = (id, o) => fbm.setDoc(dRef(id, "ayar", "genel"), { d: JSON.stringify(o), u: fbm.serverTimestamp() });
-  const GENEL_BOS = ad => ({ magaza: ad, firma: { tel: "", vergi: "", adres: "" }, silmePin: null, hedef: 0, mesai: null, sablonlar: null, otoErt: true });
+  const GENEL_BOS = ad => ({ magaza: ad, firma: { tel: "", vergi: "", adres: "", sube: "" }, silmePin: null, hedef: 0, mesai: null, sablonlar: null, otoErt: true });
   async function setLedgerPin(id, verifier) { const o = (await readGenel(id)) || GENEL_BOS("Defter"); o.silmePin = verifier; await writeGenel(id, o); }
   /* Grup listesini şifreleyip gruptaki HER defterin kasasına yazar; istenirse yönetici şifresini tüm defterlere uygular */
   async function writeGroup(list, pw, opts) {
@@ -5033,7 +5165,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     location.hash = "d=" + id;
     location.reload();
   }
-  async function addNewLedger(ad) {
+  async function addNewLedger(branchName) {
     const { list, bozuk } = await loadGroup();
     if (bozuk) throw new Error("kasa çözülemedi");
     const id = newToken();
@@ -5041,9 +5173,13 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     if (!isGoogleUser(user)) throw new Error("Google hesabıyla giriş yapın");
     await fbm.setDoc(ownerRef(id), { ownerUid: user.uid, createdAt: new Date().toISOString() });
     await fbm.setDoc(memberRef(id, user.uid), { role: "owner", email: user.email || "", name: user.displayName || "", addedAt: new Date().toISOString() });
-    const o = GENEL_BOS(ad); o.silmePin = db.silmePin;
+    const companyName=db.magaza||"Firma", sube=String(branchName||"").trim(), o = GENEL_BOS(companyName); o.firma.sube=sube; o.silmePin = db.silmePin;
     await writeGenel(id, o);
-    list.push({ id, ad });
+    const now=new Date().toISOString(), info={companyName,branchName:sube};
+    await syncOrgRole(id,"owner",user);
+    await syncBranchDirectory(id,info);
+    await syncUserLedgerIndex(id,user.uid,"owner",info);
+    const ad=sube||companyName; list.push({ id, ad, branchName:sube, companyName });
     const fails = await writeGroup(list, adminPw);
     try { localStorage.setItem("kirtasiye_sahip_" + id, "1"); } catch (e) {}
     return { id, fails };
@@ -5170,6 +5306,13 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
       document.getElementById("gReset").onclick = async () => { if (!confirm("Defter listesi sıfırlansın mı? Defterlerin kendisi silinmez; yalnızca liste.")) return; await writeGroup([{ id: DEFTER_ID, ad: db.magaza }], adminPw); renderLedgers(host); };
       return;
     }
+    if (isLedgerManager()) {
+      for (const L of g.list) { try { const info = L.id===DEFTER_ID ? {companyName:db.magaza,branchName:db.firma.sube||""} : await ledgerBranchInfo(L.id); await syncBranchDirectory(L.id,info); } catch(e) {} }
+      const directory=await accessibleLedgers().catch(()=>[]);
+      if(directory.length)g.list=directory.map(x=>({...x,ad:x.companyName||x.ad}));
+    } else { const assigned=await accessibleLedgers().catch(()=>[]); g.list=assigned.map(x=>({...x,ad:x.companyName||x.ad})); }
+    if (!g.list.some(x=>x.id===DEFTER_ID)) g.list.unshift({id:DEFTER_ID,ad:db.magaza,companyName:db.magaza,branchName:db.firma.sube||"",role:ledgerRole});
+    const branchManager=isLedgerManager();
     const sums = await Promise.all(g.list.map(L => L.id === DEFTER_ID ? Promise.resolve(localSummary()) : ledgerSummary(L.id)));
     const tBak = round2(sums.reduce((a, s) => a + (s.bak || 0), 0)), tBug = round2(sums.reduce((a, s) => a + (s.bugun || 0), 0));
     host.innerHTML = `
@@ -5177,23 +5320,21 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
       <div class="ledger-list">
         ${g.list.map((L, i) => { const s = sums[i], cur = L.id === DEFTER_ID; return `
           <div class="ledger-row ${cur ? "cur" : ""}">
-            <div class="ledger-top"><b>${esc(s.ad || L.ad)}</b>${cur ? `<span class="dev-me">Bu defter</span>` : ""}</div>
+            <div class="ledger-top"><div><b>${esc(L.companyName || s.ad || L.ad)}</b>${L.branchName ? `<div class="branch-label">${esc(L.branchName)} şubesi</div>` : ""}</div>${cur ? `<span class="dev-me">Bu defter</span>` : ""}</div>
             <div class="meta">${s.err ? "Okunamadı: " + esc(s.err) : `${s.n} kayıt · açık <b>${money0(s.bak)}</b> · bugün tahsil <b>${money0(s.bugun)}</b> · ertelenen ${s.ert} · son işlem ${agoIso(s.son)}`}</div>
             <div class="tpl-acts">
-              ${cur ? "" : `<button class="btn btn-gold" data-lopen="${esc(L.id)}">Aç ve yönet</button>`}
-              <button class="btn btn-ghost" data-lren="${esc(L.id)}">Adı değiştir</button>
-              ${cur ? "" : `<button class="btn btn-ghost" data-ldel="${esc(L.id)}" style="color:var(--red)">Listeden çıkar</button>`}
+              ${cur ? "" : `<button class="btn btn-gold" data-lopen="${esc(L.id)}">Şubeyi aç</button>`}
+              ${branchManager ? `<button class="btn btn-ghost" data-lren="${esc(L.id)}">Şube adını değiştir</button>` : ""}
             </div>
           </div>`; }).join("")}
       </div>
       <div class="tpl-acts" style="margin-top:8px">
-        <button class="btn btn-leather" id="lNew">＋ Yeni defter</button>
-        <button class="btn btn-ghost" id="lAdd">🔗 Mevcut defteri ekle</button>
+        ${branchManager ? `<button class="btn btn-leather" id="lNew">＋ Yeni şube defteri</button><button class="btn btn-ghost" id="lAdd">🔗 Mevcut defteri ekle</button>` : ""}
       </div>
       <p class="meta" style="margin-top:8px">Defter listesi yönetici şifrenizle <b>şifrelenerek</b> saklanır; çalışanlar diğer defterlerin bağlantısını göremez. Tüm defterlerde aynı yönetici şifresi geçerlidir.</p>`;
     host.querySelectorAll("[data-lopen]").forEach(b => b.onclick = () => openLedger(b.dataset.lopen));
     host.querySelectorAll("[data-lren]").forEach(b => b.onclick = async () => {
-      const L = g.list.find(x => x.id === b.dataset.lren); const ad = prompt("Defter adı:", L.ad); if (!ad || !ad.trim()) return;
+      const L = g.list.find(x => x.id === b.dataset.lren); const ad = prompt("Şube adı:", L.branchName || L.ad); if (!ad || !ad.trim()) return;
       try { await renameLedger(L.id, ad.trim()); toast("Ad değiştirildi"); renderAdminPanel(); } catch (e) { toast("Değiştirilemedi: " + fbErr(e)); }
     });
     host.querySelectorAll("[data-ldel]").forEach(b => b.onclick = async () => {
@@ -5201,12 +5342,12 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
       if (!confirm(`“${L.ad}” listeden çıkarılsın mı? Defterin kendisi silinmez; yalnızca bu listeden kalkar.`)) return;
       try { await removeFromGroup(L.id); toast("Listeden çıkarıldı"); renderLedgers(host); } catch (e) { toast("Çıkarılamadı: " + fbErr(e)); }
     });
-    document.getElementById("lNew").onclick = async () => {
-      const ad = prompt("Yeni defterin adı (örn. Şube 2):"); if (!ad || !ad.trim()) return;
-      try { const r = await addNewLedger(ad.trim()); toast(r.fails.length ? "Oluşturuldu; kasa güncellenemedi: " + r.fails.join(", ") : "Defter oluşturuldu"); if (confirm(`“${ad.trim()}” defterine şimdi geçilsin mi?`)) openLedger(r.id); else renderLedgers(host); }
+    if (document.getElementById("lNew")) document.getElementById("lNew").onclick = async () => {
+      const ad = prompt("Yeni şube adı (örn. Alsancak, Bornova):"); if (!ad || !ad.trim()) return;
+      try { const r = await addNewLedger(ad.trim()); toast(r.fails.length ? "Şube oluşturuldu; kasa güncellenemedi: " + r.fails.join(", ") : "Şube defteri oluşturuldu"); if (confirm(`“${ad.trim()}” şubesine şimdi geçilsin mi?`)) openLedger(r.id); else renderLedgers(host); }
       catch (e) { toast("Oluşturulamadı: " + (e.message || fbErr(e))); }
     };
-    document.getElementById("lAdd").onclick = async () => {
+    if (document.getElementById("lAdd")) document.getElementById("lAdd").onclick = async () => {
       const link = prompt("Eklenecek defterin bağlantısını yapıştırın.\nNot: o defterin yönetici şifresi, sizinkiyle aynı yapılacaktır."); if (!link) return;
       try { const r = await addExistingLedger(link); toast("Eklendi: " + r.ad); renderLedgers(host); }
       catch (e) { toast("Eklenemedi: " + (e.message || fbErr(e))); }
@@ -5230,6 +5371,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
 
         <label class="fld">Firma bilgileri</label>
         <input class="inp" id="sAd" value="${esc(db.magaza)}" placeholder="Firma adı / unvan" />
+        <label class="fld">Şube</label><input class="inp" id="sSube" value="${esc(db.firma.sube || "")}" placeholder="Örn. Alsancak, Bornova, Merkez" />
         <div class="row2">
           <div><label class="fld">Telefon</label><input class="inp" id="sTel" inputmode="tel" value="${esc(db.firma.tel)}" placeholder="05xx" /></div>
           <div><label class="fld">Vergi no</label><input class="inp" id="sVergi" value="${esc(db.firma.vergi)}" placeholder="İsteğe bağlı" /></div>
@@ -5279,8 +5421,8 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     renderLedgers($("ledgerHost"));
     $("sSave").onclick = () => {
       db.magaza = $("sAd").value.trim() || db.magaza;
-      db.firma.tel = $("sTel").value.trim(); db.firma.vergi = $("sVergi").value.trim(); db.firma.adres = $("sAdres").value.trim();
-      save(); closeSheet(); render(); toast("Ayarlar kaydedildi");
+      db.firma.sube = $("sSube").value.trim(); db.firma.tel = $("sTel").value.trim(); db.firma.vergi = $("sVergi").value.trim(); db.firma.adres = $("sAdres").value.trim();
+      save(); if (cloudOn && isLedgerManager()) syncBranchDirectory(DEFTER_ID, { companyName: db.magaza, branchName: db.firma.sube }).catch(e => console.warn(e)); closeSheet(); render(); toast("Ayarlar kaydedildi");
     };
     $("sLogoBtn").onclick = () => $("sLogoFile").click();
     $("sLogoFile").onchange = e => { const f = e.target.files?.[0]; if (f) processLogo(f); };
