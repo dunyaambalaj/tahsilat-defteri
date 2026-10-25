@@ -131,7 +131,9 @@ service cloud.firestore {
           && ((request.resource.data.role in ['owner','admin'] && getAfter(ledgerMemberYolu(request.resource.data.sourceLedgerId, userId)).data.role == request.resource.data.role)
             || (request.resource.data.role == 'accounting' && getAfter(ledgerMemberYolu(request.resource.data.sourceLedgerId, userId)).data.role == 'viewer' && getAfter(ledgerMemberYolu(request.resource.data.sourceLedgerId, userId)).data.department == 'muhasebe'))
         );
-      allow update: if sabitAdmin() || (
+      allow update: if (girisli() && request.auth.uid == userId
+          && request.resource.data.role == resource.data.role
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'firstName', 'lastName', 'email', 'updatedAt'])) || sabitAdmin() || (
           orgManager(orgId)
           && request.resource.data.keys().hasOnly(['role', 'uid', 'email', 'name', 'firstName', 'lastName', 'department', 'sourceLedgerId', 'createdAt', 'updatedAt'])
           && request.resource.data.uid == userId
