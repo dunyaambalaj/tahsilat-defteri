@@ -3467,40 +3467,35 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
   }
 
   async function saveMemberRole(userId, newRole, currentRole) {
-    const batch=fbm.writeBatch(fbDb), now=new Date().toISOString(), info=await ledgerBranchInfo(DEFTER_ID);
-    const orgSnap=await fbm.getDoc(orgMemberRef(userId));
-    if(orgSnap.exists()&&orgSnap.data().role==="owner"&&newRole!=="admin") throw new Error("Bu kullanıcı şirket sahibidir; önce sahiplik aktarılmalı");
-    if(orgSnap.exists()&&orgSnap.data().role==="admin"&&newRole!=="admin"){
-      const branches=await accessibleLedgers();
-      for(const branchInfo of branches){
-        const snap=await fbm.getDoc(memberRef(branchInfo.id,userId));
-        if(!snap.exists()||snap.data().role!=="admin")continue;
-        batch.update(memberRef(branchInfo.id,userId),{role:newRole});
-        batch.set(userLedgerIndexRef(userId,branchInfo.id),{ledgerId:branchInfo.id,role:newRole,companyName:branchInfo.companyName||"Firma",branchName:branchInfo.branchName||"",updatedAt:now});
+    const batch=fbm.writeBatch(fbDb),now=new Date().toISOString(),info=await ledgerBranchInfo(DEFTER_ID),orgRef=orgMemberRef(userId),orgSnap=await fbm.getDoc(orgRef),oldOrg=orgSnap.exists()?orgSnap.data():null;
+    if(oldOrg?.role==="owner"&&newRole!=="admin")throw new Error("Bu kullanıcı şirket sahibidir; önce sahiplik aktarılmalı");
+    const memberRole=newRole==="accounting"?"viewer":newRole,department=newRole==="accounting"?"muhasebe":"";
+    if(["admin","accounting"].includes(newRole)){
+      batch.update(memberRef(DEFTER_ID,userId),{role:memberRole,department});
+      batch.set(userLedgerIndexRef(userId,DEFTER_ID),{ledgerId:DEFTER_ID,role:memberRole,companyName:info.companyName||"Firma",branchName:info.branchName||"",updatedAt:now});
+      batch.set(orgRef,{role:newRole,uid:userId,email:"",name:"",firstName:"",lastName:"",department,sourceLedgerId:DEFTER_ID,createdAt:oldOrg?.createdAt||now,updatedAt:now});
+    }else if(oldOrg&&["admin","accounting"].includes(oldOrg.role)){
+      const branches=await accessibleLedgers(),indexSnap=await fbm.getDocs(userLedgerIndex(userId)),ids=new Set([...branches.map(x=>x.id),...indexSnap.docs.map(d=>d.id),DEFTER_ID]);
+      for(const id of ids){
+        const snap=await fbm.getDoc(memberRef(id,userId));
+        if(snap.exists()&&["admin","viewer"].includes(snap.data().role)){batch.update(memberRef(id,userId),{role:newRole,department:""});const meta=branches.find(x=>x.id===id)||await ledgerBranchInfo(id);batch.set(userLedgerIndexRef(userId,id),{ledgerId:id,role:newRole,companyName:meta.companyName||"Firma",branchName:meta.branchName||"",updatedAt:now});}
+        else if(id!==DEFTER_ID)batch.delete(userLedgerIndexRef(userId,id));
       }
-      batch.delete(orgMemberRef(userId));
+      batch.delete(orgRef);
     }else{
-      batch.update(memberRef(DEFTER_ID,userId),{role:newRole});
-      batch.set(userLedgerIndexRef(userId,DEFTER_ID),{ledgerId:DEFTER_ID,role:newRole,companyName:info.companyName||"Firma",branchName:info.branchName||"",updatedAt:now});
-      if(newRole==="admin")batch.set(orgMemberRef(userId),{role:"admin",uid:userId,email:"",name:"",sourceLedgerId:DEFTER_ID,createdAt:now,updatedAt:now});
+      batch.update(memberRef(DEFTER_ID,userId),{role:memberRole,department});
+      batch.set(userLedgerIndexRef(userId,DEFTER_ID),{ledgerId:DEFTER_ID,role:memberRole,companyName:info.companyName||"Firma",branchName:info.branchName||"",updatedAt:now});
     }
     await batch.commit();
   }
   async function removeMemberAccess(userId, currentRole) {
-    const batch=fbm.writeBatch(fbDb), orgSnap=await fbm.getDoc(orgMemberRef(userId));
-    if(orgSnap.exists()&&orgSnap.data().role==="owner")throw new Error("Şirket sahibini kaldırmak için önce sahipliği devredin");
-    if(orgSnap.exists()&&orgSnap.data().role==="admin"){
-      const branches=await accessibleLedgers();
-      for(const branchInfo of branches){
-        const snap=await fbm.getDoc(memberRef(branchInfo.id,userId));
-        if(snap.exists()&&snap.data().role==="admin")batch.delete(memberRef(branchInfo.id,userId));
-        batch.delete(userLedgerIndexRef(userId,branchInfo.id));
-      }
-      batch.delete(orgMemberRef(userId));
-    }else{
-      batch.delete(memberRef(DEFTER_ID,userId));
-      batch.delete(userLedgerIndexRef(userId,DEFTER_ID));
-    }
+    const batch=fbm.writeBatch(fbDb),orgRef=orgMemberRef(userId),orgSnap=await fbm.getDoc(orgRef),org=orgSnap.exists()?orgSnap.data():null;
+    if(org?.role==="owner")throw new Error("Şirket sahibini kaldırmak için önce sahipliği devredin");
+    if(org&&["admin","accounting"].includes(org.role)){
+      const branches=await accessibleLedgers(),indexSnap=await fbm.getDocs(userLedgerIndex(userId)),ids=new Set([...branches.map(x=>x.id),...indexSnap.docs.map(d=>d.id),DEFTER_ID]);
+      for(const id of ids){const snap=await fbm.getDoc(memberRef(id,userId));if(snap.exists()&&snap.data().role!=="owner")batch.delete(memberRef(id,userId));batch.delete(userLedgerIndexRef(userId,id));}
+      batch.delete(orgRef);
+    }else{batch.delete(memberRef(DEFTER_ID,userId));batch.delete(userLedgerIndexRef(userId,DEFTER_ID));}
     await batch.commit();
   }
 
