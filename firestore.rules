@@ -9,6 +9,21 @@ service cloud.firestore {
           && request.auth.token.email_verified == true
           && request.auth.token.email == 'izmirdunyaambalaj@gmail.com';
     }
+    function orgMemberYolu(orgId, userId) {
+      return /databases/$(database)/documents/organizasyonlar/$(orgId)/uyeler/$(userId);
+    }
+    function ledgerMemberYolu(ledgerId, userId) {
+      return /databases/$(database)/documents/defterler/$(ledgerId)/uyeler/$(userId);
+    }
+    function orgManager(orgId) {
+      return girisli() && exists(orgMemberYolu(orgId, request.auth.uid))
+          && get(orgMemberYolu(orgId, request.auth.uid)).data.role in ['owner', 'admin'];
+    }
+    function branchManager(ledgerId) {
+      return sabitAdmin() || orgManager('dunyaambalaj')
+          || (girisli() && exists(ledgerMemberYolu(ledgerId, request.auth.uid))
+              && get(ledgerMemberYolu(ledgerId, request.auth.uid)).data.role in ['owner', 'admin']);
+    }
 
     // Sabit yönetici için defterler arası başvuru gelen kutusu.
     match /uyelikBildirimleri/{requestId} {
@@ -68,6 +83,66 @@ service cloud.firestore {
       allow list: if sabitAdmin();
     }
 
+    match /organizasyonlar/{orgId}/uyeler/{userId} {
+      allow get: if girisli() && (request.auth.uid == userId || sabitAdmin() || orgManager(orgId));
+      allow list: if sabitAdmin() || orgManager(orgId);
+      // Yönetici/sahip rolü, aynı organizasyondaki tüm şubelerde geçerlidir.
+      // Kullanıcı kendi rolünü yalnızca gerçekten admin/sahip olduğu bir defterden doğrulayabilir.
+      allow create: if sabitAdmin() || (
+          girisli()
+          && request.auth.uid == userId
+          && request.resource.data.keys().hasOnly(['role', 'uid', 'email', 'name', 'sourceLedgerId', 'createdAt', 'updatedAt'])
+          && request.resource.data.uid == userId
+          && request.resource.data.role in ['owner', 'admin']
+          && request.resource.data.sourceLedgerId is string
+          && get(ledgerMemberYolu(request.resource.data.sourceLedgerId, userId)).data.role == request.resource.data.role
+        ) || (
+          orgManager(orgId)
+          && request.resource.data.keys().hasOnly(['role', 'uid', 'email', 'name', 'sourceLedgerId', 'createdAt', 'updatedAt'])
+          && request.resource.data.uid == userId
+          && request.resource.data.role in ['owner', 'admin']
+          && request.resource.data.sourceLedgerId is string
+          && getAfter(ledgerMemberYolu(request.resource.data.sourceLedgerId, userId)).data.role == request.resource.data.role
+        );
+      allow update: if sabitAdmin() || (
+          orgManager(orgId)
+          && request.resource.data.keys().hasOnly(['role', 'uid', 'email', 'name', 'sourceLedgerId', 'createdAt', 'updatedAt'])
+          && request.resource.data.uid == userId
+          && request.resource.data.role in ['owner', 'admin']
+          && request.resource.data.sourceLedgerId is string
+          && getAfter(ledgerMemberYolu(request.resource.data.sourceLedgerId, userId)).data.role == request.resource.data.role
+        );
+      allow delete: if sabitAdmin() || (
+          orgManager(orgId)
+          && resource.data.sourceLedgerId is string
+          && getAfter(ledgerMemberYolu(resource.data.sourceLedgerId, userId)).data.role in ['editor', 'viewer']
+        );
+    }
+
+    match /organizasyonlar/{orgId}/defterler/{ledgerId} {
+      allow get, list: if sabitAdmin() || orgManager(orgId);
+      allow create, update: if branchManager(ledgerId)
+          && request.resource.data.keys().hasOnly(['ledgerId', 'companyName', 'branchName', 'updatedAt', 'updatedBy'])
+          && request.resource.data.ledgerId == ledgerId
+          && request.resource.data.companyName is string
+          && request.resource.data.branchName is string
+          && request.resource.data.updatedAt is string
+          && request.resource.data.updatedBy == request.auth.uid;
+      allow delete: if false;
+    }
+
+    match /kullaniciDefterleri/{userId}/defterler/{ledgerId} {
+      allow get, list: if girisli() && (request.auth.uid == userId || sabitAdmin() || orgManager('dunyaambalaj'));
+      allow create, update: if branchManager(ledgerId)
+          && request.resource.data.keys().hasOnly(['ledgerId', 'role', 'companyName', 'branchName', 'updatedAt'])
+          && request.resource.data.ledgerId == ledgerId
+          && request.resource.data.role == getAfter(ledgerMemberYolu(ledgerId, userId)).data.role
+          && request.resource.data.companyName is string
+          && request.resource.data.branchName is string
+          && request.resource.data.updatedAt is string;
+      allow delete: if branchManager(ledgerId);
+    }
+
     match /defterler/{defterId} {
       function uyeYolu(userId) {
         return /databases/$(database)/documents/defterler/$(defterId)/uyeler/$(userId);
@@ -80,15 +155,16 @@ service cloud.firestore {
       }
       function uye() {
         return girisli()
-            && exists(uyeYolu(request.auth.uid))
-            && get(uyeYolu(request.auth.uid)).data.role in ['owner', 'admin', 'editor', 'viewer'];
+            && (orgManager('dunyaambalaj')
+                || (exists(uyeYolu(request.auth.uid))
+                    && get(uyeYolu(request.auth.uid)).data.role in ['owner', 'admin', 'editor', 'viewer']));
       }
       function sahip() {
-        return sabitAdmin()
+        return sabitAdmin() || orgManager('dunyaambalaj')
             || (uye() && get(uyeYolu(request.auth.uid)).data.role in ['owner', 'admin']);
       }
       function kayitYazabilir() {
-        return sabitAdmin()
+        return sabitAdmin() || orgManager('dunyaambalaj')
             || (uye() && get(uyeYolu(request.auth.uid)).data.role in ['owner', 'admin', 'editor']);
       }
       function gecerliUyeVerisi() {
