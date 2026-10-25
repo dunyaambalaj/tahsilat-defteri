@@ -133,7 +133,7 @@ service cloud.firestore {
 
     match /kullaniciDefterleri/{userId}/defterler/{ledgerId} {
       allow get, list: if girisli() && (request.auth.uid == userId || sabitAdmin() || orgManager('dunyaambalaj'));
-      allow create, update: if branchManager(ledgerId)
+      allow create, update: if (branchManager(ledgerId) || (girisli() && request.auth.uid == userId))
           && request.resource.data.keys().hasOnly(['ledgerId', 'role', 'companyName', 'branchName', 'updatedAt'])
           && request.resource.data.ledgerId == ledgerId
           && request.resource.data.role == getAfter(ledgerMemberYolu(ledgerId, userId)).data.role
