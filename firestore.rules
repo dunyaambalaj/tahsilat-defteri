@@ -14,6 +14,9 @@ service cloud.firestore {
       function uyeYolu(userId) {
         return /databases/$(database)/documents/defterler/$(defterId)/uyeler/$(userId);
       }
+      function basvuruYolu(userId) {
+        return /databases/$(database)/documents/defterler/$(defterId)/uyelikBasvurulari/$(userId);
+      }
       function sahipYolu() {
         return /databases/$(database)/documents/defterler/$(defterId)/meta/owner;
       }
@@ -70,6 +73,35 @@ service cloud.firestore {
                 && request.resource.data.keys().hasOnly(['role', 'email', 'name', 'addedAt', 'addedBy']);
         allow delete: if sahip()
             && (sabitAdmin() || (userId != request.auth.uid && userId != get(sahipYolu()).data.ownerUid));
+      }
+
+      match /uyelikBasvurulari/{userId} {
+        allow get: if girisli() && (userId == request.auth.uid || sahip());
+        allow list: if sahip();
+        allow create: if girisli()
+            && request.auth.token.email_verified == true
+            && userId == request.auth.uid
+            && !exists(uyeYolu(userId))
+            && request.resource.data.uid == request.auth.uid
+            && request.resource.data.email == request.auth.token.email
+            && request.resource.data.status == 'pending'
+            && request.resource.data.keys().hasOnly(['uid', 'email', 'name', 'status', 'createdAt', 'updatedAt']);
+        allow update: if (
+            sahip()
+            && request.resource.data.status in ['approved', 'rejected']
+            && request.resource.data.handledBy == request.auth.uid
+            && request.resource.data.keys().hasOnly(['uid', 'email', 'name', 'status', 'createdAt', 'updatedAt', 'handledAt', 'handledBy'])
+          ) || (
+            girisli()
+            && request.auth.token.email_verified == true
+            && userId == request.auth.uid
+            && resource.data.status in ['approved', 'rejected']
+            && request.resource.data.status == 'pending'
+            && request.resource.data.uid == request.auth.uid
+            && request.resource.data.email == request.auth.token.email
+            && request.resource.data.keys().hasOnly(['uid', 'email', 'name', 'status', 'createdAt', 'updatedAt'])
+          );
+        allow delete: if false;
       }
 
       match /{koleksiyon}/{belgeId} {
