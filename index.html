@@ -59,41 +59,6 @@
       --input: #ffffff; --pill: #f0ddcf; --badge: #f3e4da; --ghost: #eddcd0;
       --stripe: rgba(190,140,120,.16);
     }
-    [data-theme="okyanus"] {
-      --leather: #123b49; --leather-2: #1e5967;
-      --gold: #63b9b0; --gold-dim: #378b85;
-      --paper: #eaf3f3; --sheet: #fbffff; --line: #d2e2e2; --mute: #526a6c;
-      --input: #ffffff; --pill: #deebeb; --badge: #e0efeb; --ghost: #e1eceb;
-      --stripe: rgba(56,120,125,.13);
-    }
-    [data-theme="adacayi"] {
-      --leather: #30483b; --leather-2: #486453;
-      --gold: #b99b62; --gold-dim: #90784b;
-      --paper: #edf1e8; --sheet: #fbfcf7; --line: #d8e1d3; --mute: #5e6e62;
-      --input: #ffffff; --pill: #e4eadf; --badge: #e2ebe2; --ghost: #e5ebdf;
-      --stripe: rgba(82,119,93,.12);
-    }
-    [data-theme="lavanta"] {
-      --leather: #383553; --leather-2: #504a71;
-      --gold: #ad95d5; --gold-dim: #7d679f;
-      --paper: #f0eff8; --sheet: #fcfbff; --line: #dedceb; --mute: #68647a;
-      --input: #ffffff; --pill: #e9e5f2; --badge: #e7e7f1; --ghost: #e7e5ef;
-      --stripe: rgba(112,100,153,.13);
-    }
-    [data-theme="gul"] {
-      --leather: #603b48; --leather-2: #82515e;
-      --gold: #d49aa1; --gold-dim: #a96f7b;
-      --paper: #f7edef; --sheet: #fff9fa; --line: #ead9de; --mute: #78636b;
-      --input: #ffffff; --pill: #f0e3e7; --badge: #f0e4e9; --ghost: #f2e7e9;
-      --stripe: rgba(160,92,113,.12);
-    }
-    [data-theme="kiremit"] {
-      --leather: #5a3b32; --leather-2: #795247;
-      --gold: #d3976f; --gold-dim: #ad7251;
-      --paper: #f5ece5; --sheet: #fffaf6; --line: #e7d8cd; --mute: #746056;
-      --input: #ffffff; --pill: #f0e4d9; --badge: #efe5dd; --ghost: #ede2d8;
-      --stripe: rgba(158,104,72,.14);
-    }
     [data-theme="gece"] {
       --ink: #ece7dd; --mute: #9aa5a1;
       --leather: #101a17; --leather-2: #16231f;
@@ -118,6 +83,7 @@
     [data-mode="dark"] .chip.on { background: #2a3d35; color: #f6edd8; border-color: #4f7a68; }
     [data-mode="dark"] .wk-day.on { background: #2a3d35; }
     [data-mode="dark"] .cal .d.on { background: #2a3d35; }
+    [data-mode="dark"] .share-sheet { background: #fff8ec; }
     [data-mode="dark"] .sheet { background: rgba(0,0,0,.66); }
     [data-mode="dark"] .card { border-color: var(--line); }
     [data-mode="dark"] .nav { background: #141a1c; }
@@ -147,8 +113,8 @@
     /* ---------- DERİ BAŞLIK (mobil/tablet) ---------- */
     .leather {
       background:
-        radial-gradient(1200px 220px at 20% -40%, color-mix(in srgb, var(--gold) 24%, transparent), transparent 50%),
-        linear-gradient(180deg, var(--leather-2) 0%, var(--leather) 100%);
+        radial-gradient(1200px 220px at 20% -40%, rgba(201,162,39,.22), transparent 50%),
+        linear-gradient(180deg, #1c3b32 0%, #142923 100%);
       color: #f6edd8;
       padding-top: calc(var(--safe-top) + 10px);
     }
@@ -179,10 +145,10 @@
       overflow: auto;
       overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
-      padding: 12px 14px calc(112px + var(--safe-bot));
+      padding: 12px 14px calc(92px + var(--safe-bot));
       background:
-        repeating-linear-gradient(0deg, transparent 0 31px, var(--stripe) 31px 32px),
-        linear-gradient(90deg, var(--gold) 0 7px, transparent 7px),
+        repeating-linear-gradient(0deg, transparent 0 31px, rgba(196,168,120,.18) 31px 32px),
+        linear-gradient(90deg, #d9b36a 0 7px, transparent 7px),
         var(--paper);
     }
     .page-inner { width: 100%; max-width: 720px; margin: 0 auto; min-width: 0; }
@@ -259,8 +225,6 @@
     /* ---------- KAYIT KARTLARI ---------- */
     .cards { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 10px; min-width: 0; }
     .card {
-      display: flex;
-      flex-direction: column;
       background: var(--sheet);
       border: 1px solid var(--line);
       border-radius: 16px;
@@ -270,10 +234,7 @@
       overflow: hidden;
       min-width: 0;
     }
-    .cards { align-items: stretch; }
     .cards .card { margin-bottom: 0; }
-    .card .acts { margin-top: auto; padding-top: 10px; }
-    .card .record-by { margin-top: 6px; }
     .card .spine { position: absolute; left: 0; top: 0; bottom: 0; width: 6px; }
     .spine.bekliyor { background: var(--bekle); }
     .spine.tahsil { background: var(--tahsil); }
@@ -299,11 +260,7 @@
     .stamp.kismi { color: var(--kismi); }
     .stamp.iptal { color: #777; }
     .amt { font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.02em; font-size: 17px; white-space: nowrap; }
-    .amt.sub { font-size: 12px; font-weight: 600; }
-    .amount-stack { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; min-width: 145px; }
-    .amount-stack .amount-caption { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; font-weight: 800; color: var(--tahsil); }
-    .amount-stack .amount-main { color: var(--ink); font-size: clamp(17px, 2vw, 21px); line-height: 1.15; }
-    .amount-stack .amount-detail { color: var(--mute); text-align: right; }
+    .amt.sub { font-size: 14px; font-weight: 700; }
     .meta { color: var(--mute); font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
     .type-pill {
       display: inline-flex; align-items: center; gap: 4px;
@@ -330,7 +287,7 @@
     .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
     /* ---------- MİNİ SATIRLAR ---------- */
-    .mini { display: grid; gap: 8px; }
+    .mini { display: grid; gap: 6px; }
     .mini-day {
       display: flex; align-items: baseline; gap: 8px;
       background: var(--sheet); border: 1px solid var(--line); border-radius: 12px;
@@ -342,35 +299,30 @@
 
     /* ---------- FAB ---------- */
     .fab {
-      flex: 0 0 56px; width: 56px; height: 56px; border-radius: 50%; border: 0;
-      margin: -18px 8px 0; position: relative; z-index: 34;
-      display: grid; place-items: center;
-      background: radial-gradient(120% 120% at 30% 18%, rgba(255,255,255,.9), color-mix(in srgb, var(--gold) 60%, #fff) 38%, var(--gold));
-      color: #1a1612; font-size: 32px; font-weight: 600; line-height: 1;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.92), inset 0 -3px 8px color-mix(in srgb, var(--gold-dim) 45%, transparent), 0 10px 24px color-mix(in srgb, var(--gold) 40%, transparent);
-      cursor: pointer; transition: transform .22s cubic-bezier(.3,1.5,.5,1), box-shadow .22s;
+      position: fixed; right: 16px; bottom: calc(76px + var(--safe-bot));
+      width: 58px; height: 58px; border-radius: 18px; border: 0;
+      background: linear-gradient(180deg, #d4b03a, #b8901e);
+      color: #1a1612; font-size: 32px; font-weight: 700;
+      box-shadow: 0 10px 24px rgba(180, 140, 30, .45);
+      z-index: 20;
     }
-    .fab:active { transform: scale(.94); }
 
     /* ---------- ALT GEZİNME ---------- */
     .nav {
       position: fixed; left: 0; right: 0; bottom: 0;
-      min-height: calc(68px + var(--safe-bot));
-      background: var(--sheet); border-top: 1px solid var(--line);
-      display: flex; align-items: center; justify-content: center;
-      padding: 7px 8px calc(8px + var(--safe-bot)); z-index: 30;
+      background: var(--sheet);
+      border-top: 1px solid var(--line);
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      padding: 6px 4px calc(8px + var(--safe-bot));
+      z-index: 30;
     }
-    .nav-group { display: flex; align-items: center; flex: 1 1 0; min-width: 0; }
-    .nav-group:first-of-type, .nav-group:last-of-type { width: calc((100% - 80px) / 2); }
-    .nav-group:first-of-type { margin-right: 2px; }
-    .nav-group:last-of-type { margin-left: 2px; }
-    .nav button:not(.fab) {
-      flex: 1 1 0; min-width: 0;
+    .nav button {
       background: none; border: 0; color: var(--mute);
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-      font-size: 9.5px; font-weight: 700; letter-spacing: .02em; padding: 6px 1px;
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      font-size: 9.5px; font-weight: 700; letter-spacing: .02em;
+      padding: 6px 0;
     }
-    .nav button.on:not(.fab) { color: var(--leather); }
+    .nav button.on { color: var(--leather); }
     .nav svg { width: 22px; height: 22px; }
 
     /* ---------- ALTLIK / DİYALOG ---------- */
@@ -440,6 +392,11 @@
     .search-wrap { position: relative; margin-bottom: 10px; min-width: 0; }
     .search-wrap svg { position: absolute; left: 12px; top: 12px; color: var(--mute); }
 
+    .share-sheet {
+      background: #fff; color: #111; border: 1px dashed #c9b48a;
+      border-radius: 8px; padding: 18px 16px; font-family: Georgia, serif;
+    }
+
     /* ---------- TOAST + GERİ AL ---------- */
     .toast {
       position: fixed; left: 50%; bottom: calc(90px + var(--safe-bot));
@@ -458,8 +415,8 @@
     .lockwrap {
       position: fixed; inset: 0; z-index: 140;
       background:
-        radial-gradient(900px 300px at 50% -10%, color-mix(in srgb, var(--gold) 20%, transparent), transparent 55%),
-        linear-gradient(180deg, var(--leather-2), var(--leather));
+        radial-gradient(900px 300px at 50% -10%, rgba(201,162,39,.16), transparent 55%),
+        linear-gradient(180deg, #1c3b32, #0f211c);
       display: flex; align-items: center; justify-content: center; padding: 20px;
     }
     .lockcard { width: min(320px, 92vw); text-align: center; color: #f6edd8; }
@@ -488,11 +445,6 @@
     h1,h2,h3 { margin: 0; }
 
     /* ---------- TABLET ---------- */
-    @media (max-width: 420px) {
-      .notify-row .mini-day { grid-template-columns: 44px minmax(0,1fr) auto; gap: 4px 6px; padding: 9px 8px; }
-      .notify-row .mini-day .v { max-width: 84px; font-size: 11.5px; }
-      .notify-wa { width: 36px; height: 38px; flex-basis: 36px; }
-    }
     @media (min-width: 760px) {
       .page-inner { max-width: 940px; }
       .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -512,22 +464,25 @@
 
     /* ---------- PC ---------- */
     @media (min-width: 1100px) {
-      .page { padding: 28px 32px 148px; }
+      .page { padding: 28px 32px 130px; }
       .page-inner { max-width: 1120px; }
       .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
     /* ---------- ALT MENÜ: tablet/PC'de hap biçiminde merkez bar ---------- */
     @media (min-width: 760px) {
-      .page { padding-bottom: 148px; }
+      .page { padding-bottom: 130px; }
       .nav {
         left: 50%; right: auto; bottom: calc(14px + var(--safe-bot));
-        transform: translateX(-50%); width: min(720px, 96vw); min-height: 76px;
-        border: 1px solid var(--line); border-radius: 24px;
-        box-shadow: 0 14px 34px rgba(15, 25, 20, .22); padding: 8px 12px;
+        transform: translateX(-50%);
+        width: min(620px, 94vw);
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        box-shadow: 0 14px 34px rgba(15, 25, 20, .22);
+        padding: 8px 10px;
       }
-      .nav button:not(.fab) { font-size: 11px; padding: 8px 0; }
+      .nav button { font-size: 11px; padding: 8px 0; }
       .nav svg { width: 24px; height: 24px; }
-      .nav .fab { margin-left: 12px; margin-right: 12px; }
+      .fab { right: 30px; bottom: 110px; }
     }
     /* ---------- BİLDİRİM ZİLİ + LOGO ---------- */
     .hdr-ico { position: relative; }
@@ -552,22 +507,9 @@
     }
     .brand-mark img { width: 100%; height: 100%; object-fit: cover; border-radius: 9px; display: block; }
     .theme-dot { width: 100%; height: 22px; border-radius: 7px; margin-bottom: 5px; border: 1px solid rgba(0,0,0,.12); }
-    .notify-row { display: grid; grid-template-columns: minmax(0,1fr) 40px; align-items: center; gap: 6px; min-width: 0; }
-    .notify-row .mini-day {
-      display: grid; grid-template-columns: 48px minmax(0,1fr) auto; align-items: center;
-      gap: 4px 8px; min-height: 56px; padding: 10px; flex: 1; min-width: 0;
-    }
-    .notify-row .mini-day .d { width: auto; flex: none; font-size: 12px; }
-    .notify-copy { display: grid; gap: 2px; min-width: 0; text-align: left; }
-    .notify-row .mini-day .who {
-      display: block; min-width: 0; white-space: normal; overflow: visible; text-overflow: clip;
-      overflow-wrap: anywhere; font-size: 13px; font-weight: 800; line-height: 1.28;
-    }
-    .notify-type { color: var(--mute); font-size: 11px; line-height: 1.25; overflow-wrap: anywhere; }
-    .notify-row .mini-day .v { white-space: nowrap; font-size: 12px; max-width: 100px; }
-    .notify-wa { width: 40px; height: 40px; border-radius: 13px; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 40px; }
-    .digest-list { grid-template-columns: 1fr; }
-    .reminder-sheet { max-height: min(92dvh, 920px); padding-bottom: calc(20px + var(--safe-bot)); }
+    .notify-row { display: flex; align-items: center; gap: 8px; }
+    .notify-row .mini-day { flex: 1; }
+    .notify-wa { width: 40px; height: 40px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 40px; }
 
 
     /* ===== ORTAK + KLASİK ===== */
@@ -657,14 +599,6 @@
     .dev-mid { flex: 1; min-width: 0; }
     .dev-mid b { font-size: 14px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .dev-mid > span { font-size: 12px; color: var(--mute); display: block; }
-    .branch-options{display:flex;gap:7px;overflow:auto;padding:5px 1px;scrollbar-width:thin}.branch-option{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:7px 10px;background:var(--sheet);font-size:11px;color:var(--ink);cursor:pointer;white-space:nowrap}.branch-option input{accent-color:var(--gold-dim);width:15px;height:15px;margin:0}.branch-option.on{border-color:var(--gold-dim);background:color-mix(in srgb,var(--gold) 14%,var(--sheet))}
-    .branch-label{display:inline-flex;align-items:center;gap:5px;margin-top:3px;padding:3px 8px;border-radius:999px;background:color-mix(in srgb,var(--gold) 22%,transparent);color:var(--gold);font-size:10px;font-weight:800;letter-spacing:.03em;vertical-align:middle}.branch-label:before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
-    .branch-switch{width:100%;display:flex;align-items:center;gap:14px;padding:16px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 15%,var(--sheet)),var(--sheet) 60%);color:var(--ink);text-align:left;box-shadow:0 14px 32px rgba(20,41,35,.09);cursor:pointer}.branch-switch .bs-icon{width:48px;height:48px;border-radius:17px;background:linear-gradient(145deg,var(--leather-2),var(--leather));color:#fff;display:grid;place-items:center}.branch-switch .bs-copy{flex:1;min-width:0}.branch-switch .bs-copy b,.branch-switch .bs-copy span{display:block}.branch-switch .bs-copy span{font-size:12px;color:var(--mute);margin-top:4px}.branch-card{padding:16px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,var(--sheet),color-mix(in srgb,var(--paper) 65%,var(--sheet)));box-shadow:0 10px 25px rgba(20,41,35,.06);margin-top:10px}.branch-card .bc-top{display:flex;align-items:center;gap:12px}.branch-card .bc-mark{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;background:var(--pill);color:var(--leather);font-weight:900}.branch-card .bc-info{flex:1;min-width:0}.branch-card .bc-info b{display:block;overflow-wrap:anywhere}.branch-card .bc-info span{display:block;font-size:12px;color:var(--mute);margin-top:3px}.branch-card .bc-active{font-size:10px;font-weight:800;color:var(--tahsil);padding:5px 8px;border-radius:999px;background:color-mix(in srgb,var(--tahsil) 13%,transparent)}
-    .branch-picker .branch-hero{padding:22px;border-radius:24px;color:#fff;background:radial-gradient(120% 160% at 100% 0%,color-mix(in srgb,var(--gold) 45%,transparent),transparent 48%),linear-gradient(135deg,var(--leather-2),var(--leather));margin:12px 0 16px}.branch-picker .branch-hero small{letter-spacing:.14em;font-size:10px;opacity:.72;font-weight:800}.branch-picker .branch-hero h3{font-size:25px;margin-top:7px}.branch-picker .branch-hero p{font-size:13px;opacity:.8;margin:6px 0 0}
-    .member-launch{width:100%;margin-top:12px;padding:16px;display:flex;align-items:center;gap:14px;text-align:left;border:1px solid var(--line);border-radius:18px;color:var(--ink);background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 14%,var(--sheet)),var(--sheet) 58%);box-shadow:0 10px 25px rgba(20,41,35,.08);cursor:pointer}.member-launch .ml-icon{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;color:#fff;background:linear-gradient(145deg,var(--leather-2),var(--leather));box-shadow:0 7px 16px color-mix(in srgb,var(--leather) 22%,transparent)}.member-launch .ml-copy{flex:1;min-width:0}.member-launch .ml-copy b,.member-launch .ml-copy span{display:block}.member-launch .ml-copy b{font-size:14px}.member-launch .ml-copy span{color:var(--mute);font-size:12px;margin-top:3px}.member-launch .ml-count{border-radius:999px;padding:5px 10px;background:var(--pill);font-size:12px;font-weight:800}
-.member-sheet .member-intro{margin:10px 0 16px;padding:16px;border-radius:20px;color:#fff;background:radial-gradient(120% 170% at 100% 0%,color-mix(in srgb,var(--gold) 45%,transparent),transparent 48%),linear-gradient(135deg,var(--leather-2),var(--leather));box-shadow:0 14px 28px color-mix(in srgb,var(--leather) 20%,transparent)}.member-sheet .member-intro .eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.14em;opacity:.72;font-weight:800}.member-sheet .member-intro b{display:block;font-size:22px;margin-top:4px}.member-sheet .member-intro p{margin:5px 0 0;font-size:12px;opacity:.8}.member-sheet .member-list{display:grid;gap:10px}
-.member-card{position:relative;overflow:hidden;display:grid;grid-template-columns:46px minmax(0,1fr);gap:12px;padding:14px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,var(--sheet),color-mix(in srgb,var(--paper) 58%,var(--sheet)));box-shadow:0 7px 18px rgba(20,41,35,.055)}.member-card:before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:0 4px 4px 0;background:linear-gradient(var(--gold),var(--gold-dim))}.member-avatar{width:46px;height:46px;display:grid;place-items:center;border-radius:16px;background:linear-gradient(145deg,color-mix(in srgb,var(--gold) 44%,var(--sheet)),var(--pill));color:var(--leather);font-size:15px;font-weight:900;letter-spacing:.04em}.member-info{min-width:0}.member-name{font-size:14px;font-weight:850;overflow-wrap:anywhere}.member-email{font-size:12px;color:var(--mute);margin-top:3px;overflow-wrap:anywhere}.member-meta{font-size:10px;color:var(--mute);margin-top:5px;overflow-wrap:anywhere;opacity:.82}.member-actions{grid-column:1/-1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--line)}.member-actions .inp{flex:1 1 160px;width:auto;min-width:150px;padding:9px 11px}.member-actions .btn{min-height:40px}.member-role-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:var(--badge);color:var(--leather);font-weight:800;font-size:11px}.member-role-badge:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--gold-dim)}.member-transfer{border:1px solid color-mix(in srgb,var(--gold-dim) 50%,var(--line));background:color-mix(in srgb,var(--gold) 12%,var(--sheet));color:var(--ink)}
-@media(min-width:760px){.member-sheet.sheet-card{width:min(760px,94vw)}.member-sheet .member-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
     .dev-me { display: inline-block; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: color-mix(in srgb, var(--gold) 28%, transparent); color: var(--gold-dim); margin-left: 6px; }
     .dev-del { border: 0; background: var(--ghost); color: var(--mute); font-size: 12px; font-weight: 700; padding: 6px 10px; border-radius: 999px; cursor: pointer; }
     .look-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -730,8 +664,8 @@
 html[data-look="cam"], html[data-look="cam"][data-theme] {
       --serif: "New York", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
       --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Avenir Next", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
-      --cream: color-mix(in srgb, var(--sheet) 92%, #fff);
-      --gold-hi: color-mix(in srgb, var(--gold) 54%, #fff);
+      --cream: #f6edd8;
+      --gold-hi: #efd679;
       --rim-hi: rgba(255,255,255,.95);
       --rim-lo: rgba(255,255,255,.10);
       --glass-a: color-mix(in srgb, var(--sheet) 74%, transparent);
@@ -1093,98 +1027,6 @@ html[data-look="cam"] .goal { border-radius: 24px; }
 html[data-look="cam"] .goal-top span { color: var(--gold-dim); }
 html[data-look="cam"] .goal-empty { color: var(--mute); box-shadow: var(--glass-inset), 0 0 0 1.5px color-mix(in srgb, var(--gold) 40%, transparent), var(--glass-shadow); }
 html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--leather) 7%, transparent); }
-  
-/* Final responsive navigation and reminder polish */
-.nav {
-  position: fixed !important;
-  left: 50% !important;
-  right: auto !important;
-  bottom: calc(10px + var(--safe-bot)) !important;
-  transform: translateX(-50%) !important;
-  width: min(720px, calc(100vw - 20px)) !important;
-  max-width: none !important;
-  margin: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 4px !important;
-  padding: 6px !important;
-  z-index: 40 !important;
-}
-.nav-group {
-  display: flex !important;
-  flex: 1 1 0 !important;
-  min-width: 0 !important;
-  align-items: center !important;
-  justify-content: space-around !important;
-}
-.nav-group button {
-  flex: 1 1 0 !important;
-  min-width: 0 !important;
-}
-.nav .fab {
-  position: relative !important;
-  inset: auto !important;
-  transform: none !important;
-  flex: 0 0 58px !important;
-  width: 58px !important;
-  height: 58px !important;
-  margin: -20px 5px 0 !important;
-  z-index: 2 !important;
-  display: grid !important;
-  place-items: center !important;
-}
-html[data-look="cam"] .nav { display: flex !important; }
-html[data-look="cam"] .nav button:not(.fab) { flex: 1 1 0; min-width: 0; }
-html[data-look="cam"] .fab {
-  position: relative !important;
-  inset: auto !important;
-  flex: 0 0 62px !important;
-  width: 62px !important;
-  height: 62px !important;
-  margin: -20px 5px 0 !important;
-  color: var(--leather) !important;
-  background: radial-gradient(120% 120% at 30% 18%, rgba(255,255,255,.9), color-mix(in srgb, var(--gold-hi) 78%, white) 40%, var(--gold)) !important;
-}
-html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 2px; }
-.page { padding-bottom: calc(118px + var(--safe-bot)) !important; }
-@media (min-width: 980px) {
-  html[data-look="cam"] .tb-nav { display: none !important; }
-  html[data-look="cam"] .tb-inner { display: flex !important; justify-content: space-between !important; }
-  html[data-look="cam"] .hbar { margin-left: auto; }
-  html[data-look="cam"] .page { padding-bottom: 138px !important; }
-}
-.notify-row { align-items: stretch; }
-.notify-row .mini-day {
-  display: grid !important;
-  grid-template-columns: auto minmax(0,1fr) auto !important;
-  align-items: center !important;
-  gap: 4px 9px !important;
-  min-width: 0 !important;
-  width: 100% !important;
-  min-height: 54px;
-}
-.notify-row .notify-copy { min-width: 0 !important; white-space: normal !important; overflow: visible !important; }
-.notify-row .who {
-  display: block !important;
-  min-width: 0 !important;
-  white-space: normal !important;
-  overflow: visible !important;
-  overflow-wrap: anywhere !important;
-  word-break: normal !important;
-  text-overflow: clip !important;
-  line-height: 1.25 !important;
-}
-.notify-row .notify-type { display: block; white-space: normal; line-height: 1.25; }
-.notify-row .v { white-space: nowrap; max-width: 34vw; }
-@media (max-width: 380px) {
-  .nav { width: calc(100vw - 12px) !important; gap: 1px !important; padding: 5px !important; }
-  .nav .fab { flex-basis: 52px !important; width: 52px !important; height: 52px !important; margin-left: 2px !important; margin-right: 2px !important; }
-  html[data-look="cam"] .fab { flex-basis: 54px !important; width: 54px !important; height: 54px !important; }
-  html[data-look="cam"] .nav button:not(.fab) { font-size: 9px !important; }
-  .notify-row .mini-day { gap: 4px 6px !important; }
-}
-
   </style>
 </head>
 <body>
@@ -1198,7 +1040,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
   const KEY = "kirtasiye_odeme_defteri_v1";
   const ID_KEY = "kirtasiye_ortak_defter_id";
   /* Ortak defter kodu: bağlantıdaki #d=KOD ya da bu cihazda daha önce kaydedilen kod.
-     Google hesabı ve üyelik gerekir. */
+     Bağlantıyı bilen HERKES okuyabilir ve düzenleyebilir. */
   const ID_RE = /^[A-Za-z0-9_-]{16,}$/;
   let DEFTER_ID = (() => {
     const h = (location.hash.match(/[#&]d=([A-Za-z0-9_-]{16,})/) || [])[1];
@@ -1206,7 +1048,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     try { const v = localStorage.getItem(ID_KEY); return ID_RE.test(v || "") ? v : null; } catch (e) { return null; }
   })();
   const cacheKey = () => DEFTER_ID ? KEY + ":" + DEFTER_ID : KEY;
-  const BUILD = "19";
+  const BUILD = "11";
   const FB_VERSIONS = ["13.0.0", "12.8.0", "12.2.1"]; /* sırayla denenir */
   /* Firebase web ayarları herkese açık bilgidir. firebase-config.js okunamazsa bu yedek kullanılır. */
   const FB_DEFAULT = {
@@ -1278,18 +1120,13 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     { id:"deri", ad:"Deri Yeşil", c1:"#142923", c2:"#c9a227", c3:"#f3ead8" },
     { id:"lacivert", ad:"Lacivert", c1:"#152238", c2:"#d2a83a", c3:"#e8edf4" },
     { id:"kahve", ad:"Kahve", c1:"#3a2718", c2:"#d1a33c", c3:"#f0e6d3" },
-    { id:"bordo", ad:"Bordo", c1:"#3f1622", c2:"#d4a73a", c3:"#f5ece2" },
-    { id:"okyanus", ad:"Okyanus", c1:"#123b49", c2:"#63b9b0", c3:"#eaf3f3" },
-    { id:"adacayi", ad:"Adaçayı", c1:"#30483b", c2:"#b99b62", c3:"#edf1e8" },
-    { id:"lavanta", ad:"Lavanta", c1:"#383553", c2:"#ad95d5", c3:"#f0eff8" },
-    { id:"gul", ad:"Gül Kurusu", c1:"#603b48", c2:"#d49aa1", c3:"#f7edef" },
-    { id:"kiremit", ad:"Kiremit", c1:"#5a3b32", c2:"#d3976f", c3:"#f5ece5" }
+      { id:"bordo", ad:"Bordo", c1:"#3f1622", c2:"#d4a73a", c3:"#f5ece2" }
   ];
   function defaultDB() {
     return {
       magaza: "Kırtasiye Toptan", pin: null, kayitlar: [],
       tema: "deri", karanlik: false,
-      firma: { tel: "", adres: "", vergi: "", logo: "", sube: "" },
+      firma: { tel: "", adres: "", vergi: "", logo: "" },
       ayar: { bildirim: true, sys: false },
       sonBildirim: "",
       olusturma: new Date().toISOString()
@@ -1303,8 +1140,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
       d.kayitlar = Array.isArray(d.kayitlar) ? d.kayitlar : [];
       d.magaza = d.magaza || "Kırtasiye Toptan";
       d.tema ||= "deri";
-      d.firma ||= { tel: "", adres: "", vergi: "", logo: "", sube: "" };
-      d.firma.sube ||= "";
+      d.firma ||= { tel: "", adres: "", vergi: "", logo: "" };
       d.firma.tel ||= "";
       d.firma.adres ||= "";
       d.firma.vergi ||= "";
@@ -1354,9 +1190,8 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
   let unlockDone = false;
 
   /* ---------- GERİ AL ---------- */
-  const NAME_KEY = "kirtasiye_kullanici", FIRST_NAME_KEY = "kirtasiye_ad", LAST_NAME_KEY = "kirtasiye_soyad";
+  const NAME_KEY = "kirtasiye_kullanici";
   const ME = () => { try { return (localStorage.getItem(NAME_KEY) || "").trim(); } catch (e) { return ""; } };
-  const hasFullName = () => { try { return !!localStorage.getItem(FIRST_NAME_KEY)?.trim() && !!localStorage.getItem(LAST_NAME_KEY)?.trim(); } catch(e) { return false; } };
   const DEV_ID = (() => {
     try { let v = localStorage.getItem("kirtasiye_cihaz"); if (!v) { v = Math.random().toString(36).slice(2, 10); localStorage.setItem("kirtasiye_cihaz", v); } return v; }
     catch (e) { return Math.random().toString(36).slice(2, 10); }
@@ -1394,7 +1229,6 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     pendingUndo = null;
   }
   function undoLast() {
-    if (!canWriteLedger()) return toast("Bu defterde salt görüntüleme yetkiniz var");
     const u = undoStack.pop();
     if (!u) return toast("Geri alınacak işlem yok");
     u.touched.forEach(id => {
@@ -1537,12 +1371,9 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
             <div style="flex:1;min-width:0">
               <div style="font-size:10px;letter-spacing:.18em;color:#c9a227;font-weight:700;">ÖDEME DEFTERİ · <span id="syncDot" data-short="1" style="color:${syncColor()};cursor:pointer;text-decoration:underline dotted" title="Bağlantı durumu">${esc(syncLabel(true))}</span></div>
               <div style="font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(db.magaza)}</div>
-              ${db.firma.sube ? `<div class="branch-label">${esc(db.firma.sube)} şubesi</div>` : ""}
             </div>
             <div class="hbar">
-              ${hbtn("btnBranches", "book", "Şubeler")}
-              ${hbtn("btnBranches", "book", "Şubeler")}
-            ${hbtn("btnThemeToggle", isDark ? "sun" : "moon", isDark ? "Aydınlık mod" : "Karanlık mod")}
+              ${hbtn("btnThemeToggle", isDark ? "sun" : "moon", isDark ? "Aydınlık mod" : "Karanlık mod")}
               ${hbtn("btnBell", "bell", "Bildirimler", nNot ? `<span class="bell-badge">${nNot > 9 ? "9+" : nNot}</span>` : "")}
               ${hbtn("btnShareTop", "share", "Paylaş")}
               ${hbtn("btnSettings", "gear", "Ayarlar")}
@@ -1567,7 +1398,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
             <div class="brand-mark">${logoHtml}</div>
             <div style="min-width:0">
               <div class="name">${esc(db.magaza)}</div>
-              <div class="sub">${db.firma.sube ? `<span class="branch-label">${esc(db.firma.sube)} şubesi</span> · ` : ""}<span id="syncDot" style="color:${syncColor()};cursor:pointer" title="Bağlantı durumu">${esc(syncLabel())}</span></div>
+              <div class="sub"><span id="syncDot" style="color:${syncColor()};cursor:pointer" title="Bağlantı durumu">${esc(syncLabel())}</span></div>
             </div>
           </div>
           <nav class="tb-nav"><i class="gi"></i>${VIEWS.map(([id, ad]) => `<button data-view="${id}" class="${view === id ? "on" : ""}">${ad}</button>`).join("")}</nav>
@@ -1596,7 +1427,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     return `<div class="notify-row">
       <button class="mini-day" data-setdate="${k.vade}">
         <span class="d">${fmtDate(k.vade).slice(0,5)}</span>
-        <span class="notify-copy"><span class="who">${esc(k.musteri)}</span><span class="notify-type">${esc(typeAd(k.tur, k))}</span></span>
+        <span class="who">${esc(k.musteri)} · ${esc(typeAd(k.tur, k))}</span>
         <span class="v">${fmtTRY(remaining(k))}</span>
       </button>
       ${wa ? `<a class="btn btn-wa notify-wa" href="${waLink(k)}" target="_blank" rel="noopener" data-wa="1" title="WhatsApp hatırlat">${icon("msg")}</a>` : ""}
@@ -1608,7 +1439,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     const sec = (title, color, arr, wa) => arr.length ? `
       <div class="sec-title" style="margin-top:14px;color:${color}">${title} <span class="cnt">${arr.length}</span></div>
       <div class="meta" style="margin:-4px 0 8px">Toplam ${fmtTRY(sumGroup(arr))}</div>
-      <div class="mini digest-list">${arr.map(k => digestRow(k, wa)).join("")}</div>` : "";
+      <div class="mini">${arr.map(k => digestRow(k, wa)).join("")}</div>` : "";
     openSheet(`
       <div class="sheet-card">
         <div class="grab"></div>
@@ -1654,9 +1485,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
   }
 
   function nav() {
-    const items = VIEWS.map(([id,ad,ic]) => `<button data-view="${id}" class="${view===id?"on":""}">${icon(ic)}<span>${ad}</span></button>`);
-    const addButton = canWriteLedger() ? '<button class="fab" id="fab" aria-label="Tahsilat ekle" title="Tahsilat ekle">+</button>' : "";
-    return `<nav class="nav" aria-label="Ana menü"><div class="nav-group nav-left">${items.slice(0,2).join("")}</div>${addButton}<div class="nav-group nav-right">${items.slice(2).join("")}</div></nav>`;
+    return `<nav class="nav">${db.gorunum === "klasik" ? "" : `<i class="gi"></i>`}${VIEWS.map(([id,ad,ic]) => `<button data-view="${id}" class="${view===id?"on":""}">${icon(ic)}<span>${ad}</span></button>`).join("")}</nav>`;
   }
 
   function waLink(k) {
@@ -1668,12 +1497,12 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
   function paymentCard(k) {
     const st = statusOf(k);
     const late = isLate(k);
-    const showActs = isOpen(k) && canWriteLedger();
+    const showActs = isOpen(k);
     const stamp = st !== "bekliyor" ? `<span class="stamp ${st}">${statusLabel(st)}</span>` : "";
     const rem = remaining(k);
     const amtLine = st === "kismi"
-      ? `<div class="amount-stack"><span class="amount-caption">Kalan tahsilat</span><strong class="amt amount-main">${fmtTRY(rem)}</strong><span class="meta amount-detail">Tahsil ${fmtTRY(k.tahsilTutar)} / ${fmtTRY(k.tutar)}</span></div>`
-      : `<div class="amount-stack"><strong class="amt amount-main">${fmtTRY(late ? rem : k.tutar)}</strong>${late ? '<span class="meta amount-detail">Kalan tahsilat</span>' : ''}</div>`;
+      ? `<div class="amt sub">${fmtTRY(k.tahsilTutar)} / ${fmtTRY(k.tutar)}</div><div class="meta">Kalan ${fmtTRY(rem)}</div>`
+      : `<div class="amt">${fmtTRY(late ? rem : k.tutar)}</div>`;
     return `
       <article class="card ${late?"late":""} ${isErt(k)?"ert":""}" data-open="${k.id}">
         <div class="spine ${st}"></div>
@@ -1684,7 +1513,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
           ${k.belgeNo ? ` · No: ${esc(k.belgeNo)}` : ""}
           ${k.turKayit === "soz" ? " · Ödeme sözü" : k.turKayit === "vade" ? " · Vadeli" : ""}
         </div>
-        <div class="payment-detail-row" style="display:flex;justify-content:space-between;gap:8px;margin-top:6px;align-items:flex-end;flex-wrap:wrap">
+        <div style="display:flex;justify-content:space-between;gap:8px;margin-top:6px;align-items:flex-end;flex-wrap:wrap">
           <div class="meta" style="min-width:0;flex:1 1 45%">
             Söz/vade: <b>${fmtDate(k.vade)}</b> · Kayıt: ${fmtDate(k.kayitTarihi)}
             ${k.tahsilTarihi ? ` · Tahsil: ${fmtDate(k.tahsilTarihi)}` : ""}
@@ -1698,7 +1527,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
           <button class="btn btn-erte" data-act="ertele" data-id="${k.id}">Ertele</button>
           <a class="btn btn-wa btn-icon" href="${waLink(k)}" target="_blank" rel="noopener" data-wa="1" data-wak="${k.id}" title="WhatsApp mesajı (şablon seç)">${icon("msg")}</a>
         </div>` : ""}
-        ${(k.olusturan || k.sonKim) ? `<div class="meta record-by" style="font-size:11px;opacity:.75">${k.olusturan ? "Ekleyen: " + esc(k.olusturan) : ""}${k.sonKim && k.sonKim !== k.olusturan ? ` · Son işlem: ${esc(k.sonKim)}` : ""}</div>` : ""}
+        ${(k.olusturan || k.sonKim) ? `<div class="meta" style="font-size:11px;opacity:.75;margin-top:6px">${k.olusturan ? "Ekleyen: " + esc(k.olusturan) : ""}${k.sonKim && k.sonKim !== k.olusturan ? ` · Son işlem: ${esc(k.sonKim)}` : ""}</div>` : ""}
       </article>`;
   }
   const cardsGrid = list => `<div class="cards">${list.map(paymentCard).join("")}</div>`;
@@ -1761,7 +1590,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
         </button>`).join("")
       ).join("")}</div>` : `<div class="panel meta" style="padding:14px">Önümüzdeki 7 günde vadeli alacak görünmüyor.</div>`}
       ${recentActivityHtml()}
-
+      <button class="fab" id="fab">+</button>
     `;
   }
 
@@ -1826,6 +1655,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
       ${selectedDate === todayISO() && overdueList().filter(k => !isErt(k)).length ? `
         <div class="sec-title" style="color:var(--red)">Geciken açık bakiyeler <span class="cnt">${overdueList().filter(k => !isErt(k)).length}</span></div>
         ${cardsGrid(overdueList().filter(k => !isErt(k)))}` : ""}
+      <button class="fab" id="fab">+</button>
     `;
   }
 
@@ -1983,7 +1813,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     } else {
       body = dayDetail(selectedDate, events, true);
     }
-    return head + body;
+    return head + body + `<button class="fab" id="fab">+</button>`;
   }
 
   /* ---------- MÜŞTERİ ---------- */
@@ -2037,6 +1867,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
           </div>
         </article>`).join("") : `<div class="empty">Müşteri bulunamadı.</div>`}
       </div>
+      <button class="fab" id="fab">+</button>
     `;
   }
 
@@ -2155,7 +1986,6 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
   function bind() {
     document.querySelectorAll("[data-view]").forEach(b => b.onclick = () => { view = b.dataset.view; render(); });
     document.getElementById("btnSettings")?.addEventListener("click", openSettings);
-    document.getElementById("btnBranches")?.addEventListener("click", openBranchSelector);
     document.getElementById("btnThemeToggle")?.addEventListener("click", () => {
       db.karanlik = !db.karanlik;
       save();
@@ -2165,7 +1995,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     });
     document.getElementById("btnBell")?.addEventListener("click", openNotifCenter);
     document.getElementById("btnShareTop")?.addEventListener("click", () => openShare(selectedDate, ofDate(selectedDate), fmtLong(selectedDate)));
-    document.getElementById("fab")?.addEventListener("click", () => canWriteLedger() ? openForm() : toast("Bu defterde salt görüntüleme yetkiniz var"));
+    document.getElementById("fab")?.addEventListener("click", () => openForm());
     document.getElementById("goalOpen")?.addEventListener("click", openGoalSheet);
     document.getElementById("actAll")?.addEventListener("click", openActivity);
     const pgEl = document.querySelector(".page"), tbEl = document.querySelector(".topbar");
@@ -2215,7 +2045,6 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     document.querySelectorAll("[data-cust]").forEach(b => b.onclick = () => openCustomer(b.dataset.cust));
     document.querySelectorAll("[data-act]").forEach(b => b.onclick = e => {
       e.stopPropagation();
-      if (!canWriteLedger()) return toast("Bu defterde salt görüntüleme yetkiniz var");
       const k = kayitlar().find(x => x.id === b.dataset.id);
       if (!k) return;
       if (b.dataset.act === "tahsil") openTahsil(k);
@@ -2254,8 +2083,6 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
 
   /* ---------- KAYIT FORMU ---------- */
   function openForm(edit, prefill) {
-    if (!canWriteLedger()) return toast("Bu defterde salt görüntüleme yetkiniz var");
-    if (!hasFullName()) { openNameSheet(true); return; }
     const k = edit || {
       id: uid(), musteri: (prefill && prefill.musteri) || "", telefon: "", tutar: "", tur: "nakit", turKayit: "soz",
       taksitSayisi: 1,
@@ -2374,7 +2201,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
 
   /* ---------- DETAY ---------- */
   function openDetail(k) {
-    const st = statusOf(k), canEdit = canWriteLedger();
+    const st = statusOf(k);
     openSheet(`
       <div class="sheet-card">
         <div class="grab"></div>
@@ -2395,24 +2222,21 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
         ${authorLine(k)}
         ${(k.ertelemeGecmisi||[]).length ? `<label class="fld">Erteleme geçmişi</label><ul class="hist">${k.ertelemeGecmisi.map(e => `<li>${fmtDate(e.eski)} → ${fmtDate(e.yeni)}${e.neden ? ` · ${esc(e.neden)}` : ""}${e.k ? ` · ${esc(e.k)}` : ""}</li>`).join("")}</ul>` : ""}
         ${(k.gecmis||[]).length ? `<label class="fld">Hareket geçmişi</label><ul class="hist">${(k.gecmis||[]).slice().reverse().map(h => `<li>${esc(ACT_AD[h.a] || h.a)} · ${esc(h.d)}<br/><span>${new Date(h.t).toLocaleString("tr-TR")}${h.k ? " · " + esc(h.k) : ""}</span></li>`).join("")}</ul>` : ""}
-${canEdit && st!=="tahsil" && st!=="iptal" ? `<div class="acts" style="margin-top:14px">
+        ${st!=="tahsil" && st!=="iptal" ? `<div class="acts" style="margin-top:14px">
           <button class="btn btn-tahsil" id="dTahsil">Tahsil</button>
           <button class="btn btn-erte" id="dErtele">Ertele</button>
         </div>
         <a class="btn btn-wa owner" style="width:100%;margin-top:8px" href="${waLink(k)}" target="_blank" rel="noopener" data-wak="${k.id}">${icon("msg")} WhatsApp hatırlat</a>` : ""}
-        ${canEdit ? `<div class="g2" style="margin-top:8px">
+        <div class="g2" style="margin-top:8px">
           <button class="btn btn-ghost" id="dEdit">Düzenle</button>
           <button class="btn btn-ghost" id="dDel" style="color:#8b2e2e">Sil</button>
-        </div>` : ""}
+        </div>
       </div>`);
     document.getElementById("sheetClose").onclick = closeSheet;
     document.getElementById("dTahsil")?.addEventListener("click", () => openTahsil(k));
     document.getElementById("dErtele")?.addEventListener("click", () => openErtele(k));
-    const editButton = document.getElementById("dEdit");
-    if (editButton) editButton.onclick = () => openForm(k);
-    const deleteButton = document.getElementById("dDel");
-    if (deleteButton) deleteButton.onclick = async () => {
-      if (!canWriteLedger()) return toast("Bu defterde salt görüntüleme yetkiniz var");
+    document.getElementById("dEdit").onclick = () => openForm(k);
+    document.getElementById("dDel").onclick = async () => {
       if (!confirm("Bu kayıt silinsin mi?")) return;
       if (!(await guardDelete())) return;
       pushUndo("Silme");
@@ -2424,7 +2248,6 @@ ${canEdit && st!=="tahsil" && st!=="iptal" ? `<div class="acts" style="margin-to
 
   /* ---------- TAHSİL ---------- */
   function openTahsil(k) {
-    if (!canWriteLedger()) return toast("Bu defterde salt görüntüleme yetkiniz var");
     const kalan = remaining(k);
     const mVal = liveMask(String(kalan).replace(".",","));
     openSheet(`
@@ -2499,7 +2322,6 @@ ${canEdit && st!=="tahsil" && st!=="iptal" ? `<div class="acts" style="margin-to
 
   /* ---------- ERTELE ---------- */
   function openErtele(k) {
-    if (!canWriteLedger()) return toast("Bu defterde salt görüntüleme yetkiniz var");
     openSheet(`
       <div class="sheet-card">
         <div class="grab"></div>
@@ -2573,7 +2395,6 @@ ${canEdit && st!=="tahsil" && st!=="iptal" ? `<div class="acts" style="margin-to
     document.getElementById("cAdd").onclick = () => { closeSheet(); openForm(null, { musteri: ad }); };
     document.querySelectorAll("[data-act]").forEach(b => b.onclick = e => {
       e.stopPropagation();
-      if (!canWriteLedger()) return toast("Bu defterde salt görüntüleme yetkiniz var");
       const k = kayitlar().find(x => x.id === b.dataset.id);
       if (b.dataset.act === "tahsil") openTahsil(k);
       if (b.dataset.act === "ertele") openErtele(k);
@@ -2662,8 +2483,8 @@ ${canEdit && st!=="tahsil" && st!=="iptal" ? `<div class="acts" style="margin-to
   }
   function openSettings() {
     const temaHtml = TEMALAR.map(x => `
-      <button class="type-opt ${db.tema===x.id?"on":""}" data-tema="${x.id}" aria-label="Tema: ${x.ad}" title="${x.ad}" style="padding:8px 6px">
-        <span class="theme-dot" style="background:linear-gradient(90deg, ${x.c1} 42%, ${x.c2} 42% 68%, ${x.c3} 68%)"></span>
+      <button class="type-opt ${db.tema===x.id?"on":""}" data-tema="${x.id}" style="padding:8px 6px">
+        <span class="theme-dot" style="background:linear-gradient(90deg, ${x.c1} 58%, ${x.c2} 58%)"></span>
         <span style="font-size:11px">${x.ad}</span>
       </button>`).join("");
     openSheet(`
@@ -2694,7 +2515,7 @@ ${canEdit && st!=="tahsil" && st!=="iptal" ? `<div class="acts" style="margin-to
         <div class="chips" id="btChips">${Object.keys(KIND_AD).map(k => `<button class="chip ${btPref(k) ? "on" : ""}" data-bt="${k}">${KIND_AD[k]}</button>`).join("")}</div>
         <p class="meta" style="margin:6px 2px">Seçili türlerdeki işlemler için uyarı gelir; zil düğmesindeki Bildirimler ekranında hepsi listelenir.</p>
 
-        <label class="fld">Ortak defter · rol bazlı erişim</label>
+        <label class="fld">Ortak defter (herkes ekleyip düzenleyebilir)</label>
         <div id="shareHost"></div>
 
         <label class="fld">Cihaz kilidi (yalnızca bu cihaza özel PIN)</label>
@@ -2704,12 +2525,9 @@ ${canEdit && st!=="tahsil" && st!=="iptal" ? `<div class="acts" style="margin-to
         </div>
         ${db.pin ? `<button class="btn btn-ghost" id="sLockNow" style="width:100%;margin-top:8px">${icon("lock")} Şimdi kilitle</button>` : ""}
 
-${isLedgerManager() ? `<label class="fld">Yönetici</label>
+        <label class="fld">Yönetici</label>
         <button class="btn btn-gold" id="sAdmin" style="width:100%">🛡 Yönetici paneli ${db.silmePin ? "🔒" : ""}</button>
-        <p class="meta" style="margin:6px 2px">Firma bilgileri, defterler, aylık hedef, mesai saatleri, WhatsApp şablonları, cihaz yönetimi, silinenler, yedekleme ve şifre ayarları yönetici şifresiyle açılır.</p>` : ""}
-
-        <label class="fld">Defter erişimi · ${esc(ROLE_LABEL[ledgerRole] || ledgerRole || "üyelik bekleniyor")}</label>
-        <div id="memberHost" class="panel" style="padding:10px"></div>
+        <p class="meta" style="margin:6px 2px">Firma bilgileri, defterler, aylık hedef, mesai saatleri, WhatsApp şablonları, cihaz yönetimi, silinenler, yedekleme ve şifre ayarları yönetici şifresiyle açılan panelde.</p>
 
         <label class="fld">Kullanıcı adı (bu cihaz)</label>
         <button class="btn btn-ghost" id="sName" style="width:100%">✎ ${ME() ? esc(ME()) : "Adınızı girin"} · değiştir</button>
@@ -2719,11 +2537,10 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
         <div data-devhost></div>
 
         <button class="btn btn-ghost" id="sUndo" style="width:100%;margin-top:10px">${icon("undo")} Son işlemi geri al</button>
-        <p class="meta" style="margin-top:12px">Kayıtlar ortak defterde (bulutta) saklanır; Google hesabı eklenmiş üyeler aynı anda görür ve düzenler. İnternet yokken yapılan işlemler bağlantı gelince otomatik gönderilir. Tema, karanlık mod, PIN ve bildirim ayarları yalnızca bu cihaza aittir. “Ana ekrana ekle” ile uygulama gibi kullanın.</p>
+        <p class="meta" style="margin-top:12px">Kayıtlar ortak defterde (bulutta) saklanır; bağlantıya sahip herkes aynı anda görür ve düzenler. İnternet yokken yapılan işlemler bağlantı gelince otomatik gönderilir. Tema, karanlık mod, PIN ve bildirim ayarları yalnızca bu cihaza aittir. “Ana ekrana ekle” ile uygulama gibi kullanın.</p>
       </div>`, true);
     document.getElementById("sheetClose").onclick = closeSheet;
     renderShare();
-    loadLedgerMembers(document.getElementById("memberHost"));
     document.getElementById("sName").onclick = () => openNameSheet(false);
     document.getElementById("sAdmin").onclick = openAdminPanel;
     document.querySelectorAll("[data-bt]").forEach(b => b.onclick = () => { const k = b.dataset.bt; db.ayar.bt = db.ayar.bt || {}; db.ayar.bt[k] = !btPref(k); save(); b.classList.toggle("on", btPref(k)); render(); });
@@ -2975,17 +2792,9 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     const c = document.createElement("canvas");
     c.width = W; c.height = H;
     const ctx = c.getContext("2d");
-    const css = getComputedStyle(document.documentElement);
-    const color = (key, fallback) => css.getPropertyValue(key).trim() || fallback;
-    const C = {
-      ink: color("--ink", "#1a1612"), primary: color("--leather", "#142923"),
-      accent: color("--gold", "#c9a227"), paper: color("--paper", "#f3ead8"),
-      sheet: color("--sheet", "#fff8ec"), line: color("--line", "#e4d5b8"),
-      mute: color("--mute", "#6b5e4a")
-    };
-    ctx.fillStyle = C.paper; ctx.fillRect(0,0,W,H);
-    ctx.fillStyle = C.primary; ctx.fillRect(0,0,W,210);
-    ctx.fillStyle = C.accent; ctx.fillRect(0,210,W,6);
+    ctx.fillStyle = "#f3ead8"; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle = "#142923"; ctx.fillRect(0,0,W,210);
+    ctx.fillStyle = "#c9a227"; ctx.fillRect(0,210,W,6);
     let tx = 64;
     if (logoImg) {
       try {
@@ -2998,49 +2807,49 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
         tx = 184;
       } catch(e) { tx = 64; }
     }
-    ctx.font = "700 20px sans-serif"; ctx.fillStyle = C.accent;
+    ctx.font = "700 20px sans-serif"; ctx.fillStyle = "#c9a227";
     ctx.fillText("ÖDEME DEFTERİ", tx, 62);
-    ctx.fillStyle = "#fff"; ctx.font = "800 38px sans-serif";
+    ctx.fillStyle = "#fff8ec"; ctx.font = "800 38px sans-serif";
     ctx.fillText(db.magaza.slice(0, 30), tx, 106);
-    ctx.font = "600 17px sans-serif"; ctx.fillStyle = "rgba(255,255,255,.76)";
+    ctx.font = "600 17px sans-serif"; ctx.fillStyle = "#b9c9c0";
     if (db.firma.tel) ctx.fillText(("Tel: " + db.firma.tel).slice(0, 46), tx, 134);
-    ctx.font = "600 26px sans-serif"; ctx.fillStyle = "#fff";
+    ctx.font = "600 26px sans-serif"; ctx.fillStyle = "#ead889";
     ctx.fillText(title.slice(0, 50), 64, 182);
-    ctx.fillStyle = C.ink; ctx.font = "700 22px sans-serif";
+    ctx.fillStyle = "#1a1612"; ctx.font = "700 22px sans-serif";
     ctx.fillText("Müşteri · Ödeme türü · Vade", 64, 262);
     ctx.textAlign = "right"; ctx.fillText("Tutar", W-64, 262); ctx.textAlign = "left";
     rows.forEach((k, i) => {
       const y = head + i * rowH;
-      ctx.fillStyle = i % 2 ? C.sheet : C.paper;
+      ctx.fillStyle = i % 2 ? "#fff8ec" : "#fffdf7";
       rr(ctx, 48, y, W-96, rowH-12, 14); ctx.fill();
-      ctx.fillStyle = C.ink; ctx.font = "700 27px sans-serif";
+      ctx.fillStyle = "#1a1612"; ctx.font = "700 27px sans-serif";
       ctx.fillText((k.musteri || "").slice(0, 28), 72, y + 36);
       const tl = typeAd(k.tur, k);
       ctx.font = "700 19px sans-serif";
       const tw = ctx.measureText(tl).width + 26;
-      ctx.fillStyle = C.line; rr(ctx, 72, y + 50, tw, 32, 16); ctx.fill();
-      ctx.fillStyle = C.primary; ctx.fillText(tl, 85, y + 73);
-      ctx.fillStyle = C.mute; ctx.font = "500 19px sans-serif";
+      ctx.fillStyle = "#e4d5b8"; rr(ctx, 72, y + 50, tw, 32, 16); ctx.fill();
+      ctx.fillStyle = "#142923"; ctx.fillText(tl, 85, y + 73);
+      ctx.fillStyle = "#6b5e4a"; ctx.font = "500 19px sans-serif";
       ctx.fillText(`${statusLabel(statusOf(k))}  ·  Vade ${fmtDate(k.vade)}`, 72 + tw + 14, y + 73);
-      ctx.fillStyle = C.ink; ctx.font = "800 26px sans-serif";
+      ctx.fillStyle = "#1a1612"; ctx.font = "800 26px sans-serif";
       ctx.textAlign = "right"; ctx.fillText(fmtTRY(k.tutar), W-72, y + 40);
       if ((k.tahsilTutar || 0) > 0 && statusOf(k) !== "tahsil") {
-        ctx.font = "600 18px sans-serif"; ctx.fillStyle = C.mute;
+        ctx.font = "600 18px sans-serif"; ctx.fillStyle = "#6b5e4a";
         ctx.fillText(`Kalan ${fmtTRY(remaining(k))}`, W-72, y + 68);
       }
       ctx.textAlign = "left";
     });
     if (list.length > 12) {
-      ctx.fillStyle = C.mute; ctx.font = "600 20px sans-serif";
+      ctx.fillStyle = "#6b5e4a"; ctx.font = "600 20px sans-serif";
       ctx.fillText(`ve ${list.length - 12} kayıt daha…`, 64, head + rows.length * rowH + 4);
     }
     const fy = H - 170;
-    ctx.fillStyle = C.primary; ctx.fillRect(48, fy, W-96, 120);
-    ctx.fillStyle = C.accent; ctx.font = "700 20px sans-serif";
+    ctx.fillStyle = "#142923"; ctx.fillRect(48, fy, W-96, 120);
+    ctx.fillStyle = "#ead889"; ctx.font = "700 20px sans-serif";
     ctx.fillText("Bekleyen", 80, fy+40); ctx.fillText("Tahsil", 420, fy+40); ctx.fillText("Ertelenen", 760, fy+40);
-    ctx.fillStyle = "#fff"; ctx.font = "800 27px sans-serif";
+    ctx.fillStyle = "#fff8ec"; ctx.font = "800 27px sans-serif";
     ctx.fillText(fmtTRY(s.bek), 80, fy+84); ctx.fillText(fmtTRY(s.tah), 420, fy+84); ctx.fillText(fmtTRY(s.ert), 760, fy+84);
-    ctx.fillStyle = C.mute; ctx.font = "500 16px sans-serif";
+    ctx.fillStyle = "#6b5e4a"; ctx.font = "500 16px sans-serif";
     ctx.fillText("Ortak defter · " + new Date().toLocaleString("tr-TR"), 64, H - 28);
     return c;
   }
@@ -3057,6 +2866,30 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
             <div style="display:flex;align-items:center;gap:8px">
               <h2 style="flex:1;font-size:18px">Görsel paylaşım</h2>
               <button class="btn btn-ghost" id="sheetClose">Kapat</button>
+            </div>
+            <div class="share-sheet">
+              <div style="display:flex;gap:12px;align-items:center">
+                ${db.firma.logo ? `<img src="${db.firma.logo}" style="width:44px;height:44px;object-fit:cover;border-radius:10px;flex:0 0 44px">` : ""}
+                <div style="min-width:0">
+                  <div style="letter-spacing:.2em;font-size:11px;color:#7a6a4e">ÖDEME FİŞİ</div>
+                  <div style="font-weight:800;font-size:20px">${esc(db.magaza)}</div>
+                  ${db.firma.tel ? `<div style="font-size:12px;color:#7a6a4e">${esc(db.firma.tel)}</div>` : ""}
+                </div>
+              </div>
+              <div style="margin:4px 0 10px">${esc(title)}</div>
+              <div style="border-top:1px dashed #c9b48a;padding-top:8px">
+                ${list.slice(0,12).map(k => `<div style="display:flex;justify-content:space-between;gap:8px;margin:6px 0;font-size:13px">
+                  <span style="min-width:0"><b>${esc(k.musteri)}</b><br/><span style="color:#7a6a4e">${esc(typeAd(k.tur, k))} · ${statusLabel(statusOf(k))}</span></span>
+                  <span style="font-weight:800;white-space:nowrap">${fmtTRY(k.tutar)}</span>
+                </div>`).join("") || "<div>Kayıt yok</div>"}
+                ${list.length>12 ? `<div style="color:#7a6a4e;font-size:12px">ve ${list.length-12} kayıt daha</div>` : ""}
+              </div>
+              <div style="border-top:1px dashed #c9b48a;margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;gap:8px;font-size:13px">
+                <span>Bekleyen<br/><b>${fmtTRY(s.bek)}</b></span>
+                <span>Tahsil<br/><b>${fmtTRY(s.tah)}</b></span>
+                <span>Ertelenen<br/><b>${fmtTRY(s.ert)}</b></span>
+              </div>
+              ${db.firma.adres ? `<div style="margin-top:8px;font-size:11px;color:#7a6a4e">${esc(db.firma.adres)}</div>` : ""}
             </div>
             <p class="meta" style="margin:10px 0">“Görseli paylaş” ile fişi doğrudan WhatsApp ve diğer uygulamalara gönderin ya da “PNG indir” ile kaydedin.</p>
             <img src="${url}" alt="rapor" style="width:100%;border-radius:12px;border:1px solid var(--line)" />
@@ -3107,7 +2940,6 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
      Kayıtlar asla fiziksel silinmez (silindi:true işaretlenir). Tema, karanlık mod, PIN, bildirim: yalnızca bu cihazda. */
   const SEED_PREFIX = "kirtasiye_aktar_";
   let fbm = null, fbAuth = null, fbDb = null, fbInitP = null;
-  let ledgerRole = null, memberLoadToken = 0;
   let syncState = "baglaniyor", syncDetail = "";
   let remoteRec = new Map(), remoteSet = "", remoteLogo = null;
   let cloudOn = false, cloudStarting = false;
@@ -3161,7 +2993,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   }
   const shareLink = () => `${location.origin}${location.pathname}#d=${DEFTER_ID}`;
-  const sharedSettingsJson = () => JSON.stringify({ magaza: db.magaza, firma: { tel: db.firma.tel, vergi: db.firma.vergi, adres: db.firma.adres, sube: db.firma.sube || "" }, silmePin: db.silmePin || null, hedef: Number(db.hedef) || 0, mesai: db.mesai || null, sablonlar: db.sablonlar || null, otoErt: db.otoErt === false ? false : true });
+  const sharedSettingsJson = () => JSON.stringify({ magaza: db.magaza, firma: { tel: db.firma.tel, vergi: db.firma.vergi, adres: db.firma.adres }, silmePin: db.silmePin || null, hedef: Number(db.hedef) || 0, mesai: db.mesai || null, sablonlar: db.sablonlar || null, otoErt: db.otoErt === false ? false : true });
 
   async function loadSdk() {
     let last;
@@ -3196,536 +3028,6 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
   }
   const colRef = name => fbm.collection(fbDb, "defterler", DEFTER_ID, name);
   const docRef = (name, id) => fbm.doc(fbDb, "defterler", DEFTER_ID, name, id);
-  const ownerRef = id => fbm.doc(fbDb, "defterler", id, "meta", "owner");
-  const memberRef = (id, userId) => fbm.doc(fbDb, "defterler", id, "uyeler", userId);
-  const memberApplicationRef = (id, userId) => fbm.doc(fbDb, "defterler", id, "uyelikBasvurulari", userId);
-  const memberApplicationsRef = id => fbm.collection(fbDb, "defterler", id, "uyelikBasvurulari");
-  const adminApplicationsRef = () => fbm.collection(fbDb, "uyelikBildirimleri");
-  const adminApplicationRef = id => fbm.doc(fbDb, "uyelikBildirimleri", id);
-  const adminApplicationId = (ledgerId, userId) => ledgerId + "__" + userId;
-  const ORG_ID = "dunyaambalaj";
-  const orgMemberRef = userId => fbm.doc(fbDb, "organizasyonlar", ORG_ID, "uyeler", userId);
-  const orgBranchesRef = () => fbm.collection(fbDb, "organizasyonlar", ORG_ID, "defterler");
-  const orgBranchRef = id => fbm.doc(fbDb, "organizasyonlar", ORG_ID, "defterler", id);
-  const userLedgerIndexRef = (userId, id) => fbm.doc(fbDb, "kullaniciDefterleri", userId, "defterler", id);
-  const userLedgerIndex = userId => fbm.collection(fbDb, "kullaniciDefterleri", userId, "defterler");
-  const userProfileRef = userId => fbm.doc(fbDb, "kullaniciProfilleri", userId);
-  let applicationWatcher = null, applicationWatcherKey = "";
-  let ownRoleWatcher = null, ownRoleWatcherKey = "";
-  let adminApplicationsWatcher = null, adminApplicationsWatcherUid = "", adminInboxToken = 0;
-  const ADMIN_EMAIL = "izmirdunyaambalaj@gmail.com";
-  const isGoogleUser = user => !!user && !user.isAnonymous;
-  const isFixedAdmin = user => isGoogleUser(user)
-    && !!user.emailVerified
-    && String(user.email || "").toLowerCase() === ADMIN_EMAIL;
-  const ROLE_LABEL = { owner: "Sahip", admin: "Admin", accounting: "Muhasebe · tüm şubeler · görüntüleme", editor: "Düzenleme", viewer: "Salt görüntüleme" };
-  const isLedgerManager = () => isFixedAdmin(fbAuth && fbAuth.currentUser) || ["owner", "admin"].includes(ledgerRole);
-  const canAssignAdminRole = () => isFixedAdmin(fbAuth && fbAuth.currentUser) || ledgerRole === "owner";
-  const canWriteLedger = () => !DEFTER_ID || ["owner", "admin", "editor"].includes(ledgerRole);
-  const canManageSharedSettings = () => !DEFTER_ID || ["owner", "admin"].includes(ledgerRole) || isFixedAdmin(fbAuth && fbAuth.currentUser);
-  const canAssignRole = (role, targetRole = "", targetUid = "") => {
-    const user = fbAuth && fbAuth.currentUser;
-    if (!["admin", "accounting", "editor", "viewer"].includes(role) || targetUid === (user && user.uid)) return false;
-    if (isFixedAdmin(user) || ledgerRole === "owner") return targetRole !== "owner";
-    return ledgerRole === "admin"
-      && ["accounting", "editor", "viewer"].includes(role)
-      && (!targetRole || ["editor", "viewer"].includes(targetRole));
-  };
-  const canRemoveMember = (targetRole, targetUid) => {
-    const user = fbAuth && fbAuth.currentUser;
-    if (targetUid === (user && user.uid) || targetRole === "owner") return false;
-    if (isFixedAdmin(user) || ledgerRole === "owner") return true;
-    return ledgerRole === "admin" && ["editor", "viewer"].includes(targetRole);
-  };
-  const roleOptions = (selected = "editor", forAdmin = canAssignAdminRole()) => {
-    const roles = forAdmin ? ["admin", "accounting", "editor", "viewer"] : ["accounting", "editor", "viewer"];
-    return roles.map(role => `<option value="${role}" ${role === selected ? "selected" : ""}>${ROLE_LABEL[role]}</option>`).join("");
-  };
-
-  async function authenticateGoogle() {
-    const ok = await cloudInit();
-    if (!ok) throw new Error(diag.err || "Firebase yüklenemedi");
-    await fbAuth.authStateReady();
-    const provider = new fbm.GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: "select_account" });
-    try {
-      if (fbAuth.currentUser && fbAuth.currentUser.isAnonymous) {
-        await fbm.linkWithPopup(fbAuth.currentUser, provider);
-      } else if (!fbAuth.currentUser) {
-        await fbm.signInWithPopup(fbAuth, provider);
-      }
-    } catch (e) {
-      if (e.code === "auth/credential-already-in-use" || e.code === "auth/account-exists-with-different-credential") {
-        await fbm.signInWithPopup(fbAuth, provider);
-      } else throw e;
-    }
-    const user = fbAuth.currentUser;
-    diag.uid = user ? user.uid : "";
-    diag.email = user ? (user.email || "") : "";
-    if (ME() === "" && user && user.displayName) {
-      try { localStorage.setItem(NAME_KEY, user.displayName.slice(0, 24)); } catch (e) {}
-    }
-    if (DEFTER_ID) {
-      ledgerRole = null;
-      cloudOn = false;
-      cloudStarting = false;
-      await startCloud();
-    } else welcomeStart();
-    return user;
-  }
-
-  function showAccountGate(message = "") {
-    const user = fbAuth && fbAuth.currentUser;
-    const uidValue = isGoogleUser(user) ? user.uid : "";
-    document.getElementById("app").innerHTML = `
-      <div style="min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px">
-        <div class="panel" style="max-width:460px;width:100%;padding:24px">
-          <div style="font-size:11px;letter-spacing:.18em;color:var(--mute);font-weight:700;text-align:center">ÖDEME DEFTERİ · GÜVENLİ GİRİŞ</div>
-          <h2 style="text-align:center;margin:8px 0 4px;font-size:20px">${uidValue ? "Üyelik bekleniyor" : "Google hesabınızla giriş yapın"}</h2>
-          <p class="meta" style="text-align:center;margin:12px 0">${esc(message || (uidValue ? "Bu Google hesabı henüz bu deftere eklenmemiş. Defter yöneticisine kullanıcı kodunuzu iletin." : "Hesabınız, defter erişim yetkinizi belirlemek için kullanılır."))}</p>
-          ${uidValue ? `<label class="fld">Google kullanıcı kodunuz</label><input class="inp" id="authUid" readonly value="${esc(uidValue)}" /><button class="btn btn-ghost" id="authCopy" style="width:100%;margin-top:8px">Kullanıcı kodunu kopyala</button>` : ""}
-          <button class="btn btn-gold" id="authGoogle" style="width:100%;margin-top:12px">${user && user.isAnonymous ? "Google hesabını bağla" : uidValue ? "Üyeliği yeniden kontrol et" : "Google ile giriş yap"}</button>
-          ${uidValue && DEFTER_ID ? '<button class="btn btn-ghost" id="membershipRequest" style="width:100%;margin-top:8px">Bu deftere üyelik başvurusu gönder</button>' : ""}
-          <p class="meta" style="margin-top:12px;text-align:center">Erişim, defter sahibinin veya sistem yöneticisinin başvurunuzu onaylamasıyla açılır.</p>
-        </div>
-      </div>`;
-    const copy = document.getElementById("authCopy");
-    if (copy) copy.onclick = async () => {
-      try { await navigator.clipboard.writeText(uidValue); toast("Kullanıcı kodu kopyalandı"); }
-      catch (e) { prompt("Kullanıcı kodunuzu kopyalayın:", uidValue); }
-    };
-    const button = document.getElementById("authGoogle");
-    if (button) button.onclick = async () => {
-      button.disabled = true;
-      try { await authenticateGoogle(); }
-      catch (e) { button.disabled = false; toast("Giriş yapılamadı: " + fbErr(e)); }
-    };
-    const requestButton=document.getElementById("membershipRequest");
-    if(requestButton)requestButton.onclick=()=>openMembershipApplication(requestButton);
-  }
-
-  async function openMembershipApplication(trigger) {
-    const user=fbAuth&&fbAuth.currentUser;if(!isGoogleUser(user)||!DEFTER_ID)return toast("Önce Google hesabıyla giriş yapıp bir defter bağlantısı açın");
-    try {
-      const [branchSnap,profileSnap]=await Promise.all([fbm.getDocs(orgBranchesRef()),fbm.getDoc(userProfileRef(user.uid)).catch(()=>null)]);
-      const branches=branchSnap.docs.map(d=>({id:d.id,...d.data()}));
-      if(!branches.some(b=>b.id===DEFTER_ID))branches.unshift({id:DEFTER_ID,companyName:"Bu defter",branchName:"Bağlantıdaki şube"});
-      const profile=profileSnap&&profileSnap.exists()?profileSnap.data():{};
-      const storedFirst=localStorage.getItem(FIRST_NAME_KEY)||profile.firstName||"",storedLast=localStorage.getItem(LAST_NAME_KEY)||profile.lastName||"";
-      const existingApplication=await fbm.getDoc(memberApplicationRef(DEFTER_ID,user.uid));
-      const requestedLedgers=existingApplication.exists()?existingApplication.data().requestedLedgers:null;
-      const selected=Array.isArray(requestedLedgers)?requestedLedgers:[DEFTER_ID];
-      openSheet(`<div class="sheet-card full branch-picker"><div class="grab"></div><div style="display:flex;align-items:center;gap:8px"><div style="flex:1"><div class="meta">ÜYELİK BAŞVURUSU</div><h2 style="font-size:21px">Şube erişimi iste</h2></div><button class="btn btn-ghost" id="appClose">Kapat</button></div><div class="branch-hero"><small>EKİBİNİZE KATILIN</small><h3>Doğru şubeler, doğru erişim.</h3><p>Ad soyadınızı ve erişmek istediğiniz defterleri seçin.</p></div><label class="fld">Ad</label><input class="inp" id="appFirst" maxlength="40" autocomplete="given-name" value="${esc(storedFirst)}" placeholder="Adınız"><label class="fld">Soyad</label><input class="inp" id="appLast" maxlength="50" autocomplete="family-name" value="${esc(storedLast)}" placeholder="Soyadınız"><label class="fld">Departman</label><select class="inp" id="appDepartment"><option value="satis">Satış</option><option value="operasyon">Operasyon</option><option value="muhasebe">Muhasebe</option><option value="diger">Diğer</option></select><label class="fld">Talep edilen erişim</label><select class="inp" id="appRole"><option value="viewer">Salt görüntüleme</option><option value="editor">Düzenleme</option><option value="admin">Admin · tüm defterler</option></select><p class="meta" id="appRoleNote" style="margin:6px 0">Admin veya Muhasebe erişimi onaylanırsa tüm defterler açılır. Erişim onay bekler.</p><label class="fld">Erişim istediğiniz şubeler</label><div class="branch-options" style="flex-wrap:wrap;overflow:visible">${branches.map(b=>`<label class="branch-option ${selected.includes(b.id)?"on":""}"><input type="checkbox" data-app-ledger value="${esc(b.id)}" ${selected.includes(b.id)?"checked":""}><span>${esc(b.companyName||"Firma")}${b.branchName?" · "+esc(b.branchName):""}</span></label>`).join("")}</div><div class="meta" style="margin-top:8px">Google hesabı · <b>${esc(user.email||"")}</b></div><button class="btn btn-gold" id="appSubmit" style="width:100%;margin-top:14px">Başvuruyu gönder</button></div>`,true);
-      document.getElementById("appClose").onclick=closeSheet;
-      const dep=document.getElementById("appDepartment"),role=document.getElementById("appRole"),note=document.getElementById("appRoleNote");
-      if(profile.department)dep.value=profile.department;
-      const updateRole=()=>{const accounting=dep.value==="muhasebe";if(accounting){role.value="viewer";role.disabled=true;note.textContent="Muhasebe departmanı tüm defterleri salt görüntüleme yetkisiyle görür."}else{role.disabled=false;note.textContent=role.value==="admin"?"Admin yetkisi onaylanırsa tüm defterlere erişim otomatik verilir.":"Seçtiğiniz şube erişimleri yönetici onayına gönderilir."}};
-      dep.onchange=updateRole;role.onchange=updateRole;updateRole();
-      document.getElementById("appSubmit").onclick=async()=>{
-        const button=document.getElementById("appSubmit"),firstName=document.getElementById("appFirst").value.trim(),lastName=document.getElementById("appLast").value.trim();
-        if(!firstName||!lastName)return toast("Ad ve soyad zorunludur");
-        const selectedIds=[...document.querySelectorAll("[data-app-ledger]:checked")].map(x=>x.value);
-        if(!selectedIds.includes(DEFTER_ID))selectedIds.unshift(DEFTER_ID);
-        button.disabled=true;
-        try{
-          const now=new Date().toISOString(),ref=memberApplicationRef(DEFTER_ID,user.uid),current=await fbm.getDoc(ref);
-          const roleRequest=dep.value==="muhasebe"?"accounting":role.value,fullName=firstName+" "+lastName;
-          const application={uid:user.uid,email:user.email||"",name:fullName,firstName,lastName,department:dep.value,requestedRole:roleRequest,requestedLedgers:[...new Set(selectedIds)],status:"pending",createdAt:current.exists()?(current.data().createdAt||now):now,updatedAt:now};
-          const batch=fbm.writeBatch(fbDb);batch.set(ref,application);batch.set(adminApplicationRef(adminApplicationId(DEFTER_ID,user.uid)),{...application,defterId:DEFTER_ID});
-          batch.set(userProfileRef(user.uid),{uid:user.uid,email:user.email||"",firstName,lastName,fullName,department:dep.value,updatedAt:now},{merge:true});
-          await batch.commit();
-          try{localStorage.setItem(FIRST_NAME_KEY,firstName);localStorage.setItem(LAST_NAME_KEY,lastName);localStorage.setItem(NAME_KEY,fullName)}catch(e){}
-          closeSheet();if(trigger){trigger.textContent="Başvuru gönderildi";trigger.disabled=true}toast("Başvurunuz seçtiğiniz şubeler ve erişim rolüyle iletildi");
-        }catch(e){button.disabled=false;toast("Başvuru gönderilemedi: "+fbErr(e))}
-      };
-    } catch(e) { toast("Şubeler yüklenemedi: "+fbErr(e)); }
-  }
-
-  function watchOwnLedgerRole(id) {
-    const user = fbAuth && fbAuth.currentUser;
-    if (!isGoogleUser(user) || isFixedAdmin(user)) return;
-    const key = id + ":" + user.uid;
-    if (ownRoleWatcherKey === key) return;
-    if (ownRoleWatcher) ownRoleWatcher();
-    ownRoleWatcherKey = key;
-    let localRole = null, globalRole = null, denied = false;
-    const applyRole = () => {
-      const role = localRole === "owner" ? "owner" : (["owner","admin"].includes(globalRole) ? "admin" : globalRole === "accounting" ? "viewer" : localRole);
-      if (!role || !["owner","admin","editor","viewer"].includes(role)) {
-        if (denied) return;
-        denied = true; ledgerRole = null; cloudOn = false;
-        showAccountGate("Bu defterdeki erişiminiz kaldırıldı. Yöneticiyle iletişime geçin.");
-        return;
-      }
-      denied = false;
-      if (role !== ledgerRole) { ledgerRole = role; closeSheet(); render(); toast("Defter rolünüz güncellendi: " + (ROLE_LABEL[role] || role)); }
-    };
-    const a = fbm.onSnapshot(memberRef(id, user.uid), snap => { localRole = snap.exists() ? snap.data().role : null; applyRole(); }, e => console.warn("Defter üyeliği izlenemedi:", e));
-    const b = fbm.onSnapshot(orgMemberRef(user.uid), snap => { globalRole = snap.exists() ? snap.data().role : null; applyRole(); }, e => console.warn("Şirket rolü izlenemedi:", e));
-    ownRoleWatcher = () => { a(); b(); };
-  }
-
-  async function ledgerBranchInfo(id) {
-    if (id === DEFTER_ID) return { companyName: db.magaza || "Firma", branchName: db.firma.sube || "" };
-    const g = await readGenel(id);
-    return { companyName: g?.magaza || "Defter", branchName: g?.firma?.sube || "" };
-  }
-  async function syncOrgRole(id, role, user = fbAuth && fbAuth.currentUser) {
-    if (!user || !["owner","admin"].includes(role)) return;
-    const ref = orgMemberRef(user.uid), old = await fbm.getDoc(ref);
-    if (old.exists()) return;
-    await fbm.setDoc(ref, { role, uid: user.uid, email: user.email || "", name: user.displayName || "", sourceLedgerId: id, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
-  }
-  async function syncBranchDirectory(id, info) {
-    if (!id || !isLedgerManager()) return;
-    const meta = info || await ledgerBranchInfo(id);
-    await fbm.setDoc(orgBranchRef(id), { ledgerId: id, companyName: meta.companyName || "Firma", branchName: meta.branchName || "", updatedAt: new Date().toISOString(), updatedBy: fbAuth.currentUser.uid });
-  }
-  async function syncUserLedgerIndex(id, userId, role, info) {
-    if (!id || !userId || !role) return;
-    const meta = info || await ledgerBranchInfo(id);
-    await fbm.setDoc(userLedgerIndexRef(userId, id), { ledgerId: id, role, companyName: meta.companyName || "Firma", branchName: meta.branchName || "", updatedAt: new Date().toISOString() });
-  }
-  async function accessibleLedgers() {
-    const user = fbAuth && fbAuth.currentUser;
-    if (!isGoogleUser(user)) return [];
-    if (!fbDb && !(await cloudInit())) throw new Error(diag.err || "Firebase başlatılamadı");
-    const globalSnap = await fbm.getDoc(orgMemberRef(user.uid)).catch(() => null);
-    const globalRole = globalSnap && globalSnap.exists() ? globalSnap.data().role : "";
-    const allBranchRole = isFixedAdmin(user) ? "admin" : ["owner","admin"].includes(globalRole) ? "admin" : globalRole === "accounting" ? "viewer" : "";
-    if (allBranchRole) {
-      const snap = await fbm.getDocs(orgBranchesRef());
-      return snap.docs.map(d => ({ id: d.id, ...d.data(), role: allBranchRole }));
-    }
-    if (["owner","admin"].includes(ledgerRole)) {
-      const snap = await fbm.getDocs(orgBranchesRef());
-      return snap.docs.map(d => ({ id: d.id, ...d.data(), role: "admin" }));
-    }
-    const snap = await fbm.getDocs(userLedgerIndex(user.uid));
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  }
-  async function openBranchSelector() {
-    try {
-      const branches = await accessibleLedgers();
-      const merged = new Map(branches.map(x => [x.id, x]));
-      if (DEFTER_ID && !merged.has(DEFTER_ID)) merged.set(DEFTER_ID, { id: DEFTER_ID, companyName: db.magaza, branchName: db.firma.sube || "", role: ledgerRole });
-      const list = [...merged.values()];
-      openSheet(`<div class="sheet-card full branch-picker"><div class="grab"></div><div style="display:flex;align-items:center;gap:8px"><div style="flex:1"><div class="meta">DÜNYA AMBALAJ · ŞUBELER</div><h2 style="font-size:20px">Defter seç</h2></div><button class="btn btn-ghost" id="branchPickerClose">Kapat</button></div><div class="branch-hero"><small>TAHSİLAT DEFTERİ</small><h3>İşiniz, tek yerde.</h3><p>Yetkiniz olan şubeler arasında güvenle geçiş yapın.</p></div><div>${list.map(x=>`<button class="branch-switch branch-card" data-branch-open="${esc(x.id)}"><span class="bs-icon">${icon("book")}</span><span class="bs-copy"><b>${esc(x.companyName || x.ad || "Firma")}</b><span>${esc(x.branchName ? x.branchName+" şubesi · " : "")}${esc(ROLE_LABEL[x.role] || "Yetkili üye")}</span></span>${x.id===DEFTER_ID?'<span class="branch-card bc-active">Açık</span>':icon("share")}</button>`).join("") || '<div class="empty">Henüz erişim verilen şube yok.</div>'}</div></div>`, true);
-      document.getElementById("branchPickerClose").onclick=closeSheet;
-      document.querySelectorAll("[data-branch-open]").forEach(b=>b.onclick=()=>openLedger(b.dataset.branchOpen));
-    } catch(e) { toast("Şube listesi alınamadı: "+fbErr(e)); }
-  }
-
-  async function ensureLedgerAccess(id) {
-    const user = fbAuth && fbAuth.currentUser;
-    if (!isGoogleUser(user)) return false;
-    if (isFixedAdmin(user)) {
-      const oref = ownerRef(id);
-      let ownerSnap = await fbm.getDoc(oref);
-      if (!ownerSnap.exists()) {
-        await fbm.setDoc(oref, { ownerUid: user.uid, createdAt: new Date().toISOString() });
-        ownerSnap = await fbm.getDoc(oref);
-      }
-      const fixedRole = ownerSnap.exists() && ownerSnap.data().ownerUid === user.uid ? "owner" : "admin";
-      const selfRef = memberRef(id, user.uid);
-      const self = await fbm.getDoc(selfRef);
-      if (!self.exists() || self.data().role !== fixedRole) {
-        await fbm.setDoc(selfRef, { role: fixedRole, email: user.email || "", name: user.displayName || "", addedAt: new Date().toISOString(), addedBy: user.uid });
-      }
-      ledgerRole = fixedRole;
-      await syncBranchDirectory(id, await ledgerBranchInfo(id)).catch(e => console.warn("Şube kataloğu güncellenemedi:", e));
-      return true;
-    }
-    const oref = ownerRef(id);
-    let ownerSnap = await fbm.getDoc(oref);
-    if (!ownerSnap.exists()) {
-      let ownsThisDevice = false;
-      try { ownsThisDevice = localStorage.getItem("kirtasiye_sahip_" + id) === "1"; } catch (e) {}
-      if (!ownsThisDevice) {
-        ledgerRole = null;
-        showAccountGate("Defter sahibi önce kendi oluşturduğu cihazdan Google girişi yapmalı. Bu tamamlanınca sahibi sizi ekleyebilir.");
-        return false;
-      }
-      try {
-        await fbm.setDoc(oref, { ownerUid: user.uid, createdAt: new Date().toISOString() });
-      } catch (e) { /* another first user may have claimed it */ }
-      ownerSnap = await fbm.getDoc(oref);
-    }
-    if (!ownerSnap.exists()) throw new Error("defter sahibi kaydı oluşturulamadı");
-    if (ownerSnap.data().ownerUid === user.uid) {
-      const self = await fbm.getDoc(memberRef(id, user.uid));
-      if (!self.exists() || self.data().role !== "owner") {
-        await fbm.setDoc(memberRef(id, user.uid), { role: "owner", email: user.email || "", name: user.displayName || "", firstName:"", lastName:"", department:"", addedAt: new Date().toISOString() });
-      }
-      ledgerRole = "owner";
-      await syncOrgRole(id, "owner", user);
-      await syncUserLedgerIndex(id, user.uid, "owner", await ledgerBranchInfo(id));
-      await syncBranchDirectory(id, await ledgerBranchInfo(id));
-      return true;
-    }
-    const globalSnap = await fbm.getDoc(orgMemberRef(user.uid));
-    if (globalSnap.exists() && ["owner","admin","accounting"].includes(globalSnap.data().role)) {
-      ledgerRole = globalSnap.data().role === "accounting" ? "viewer" : "admin";
-      await syncBranchDirectory(id, await ledgerBranchInfo(id)).catch(e => console.warn("Şube kataloğu güncellenemedi:", e));
-      return true;
-    }
-    const member = await fbm.getDoc(memberRef(id, user.uid));
-    if (!member.exists() || !["admin", "editor", "viewer"].includes(member.data().role)) {
-      ledgerRole = null;
-      showAccountGate("Bu Google hesabı bu deftere henüz üye değil. Defter bağlantısından üyelik başvurusu gönderebilirsiniz.");
-      return false;
-    }
-    ledgerRole = member.data().role;
-    await syncUserLedgerIndex(id, user.uid, ledgerRole, await ledgerBranchInfo(id)).catch(e => console.warn("Şube erişimi dizine yazılamadı:", e));
-    if (["owner","admin"].includes(ledgerRole)) {
-      await syncOrgRole(id, ledgerRole, user);
-      await syncBranchDirectory(id, await ledgerBranchInfo(id)).catch(e => console.warn("Şube kataloğu güncellenemedi:", e));
-    }
-    return true;
-  }
-
-  async function saveMemberRole(userId, newRole, currentRole) {
-    const batch=fbm.writeBatch(fbDb),now=new Date().toISOString(),info=await ledgerBranchInfo(DEFTER_ID),orgRef=orgMemberRef(userId),orgSnap=await fbm.getDoc(orgRef),oldOrg=orgSnap.exists()?orgSnap.data():null;
-    if(oldOrg?.role==="owner"&&newRole!=="admin")throw new Error("Bu kullanıcı şirket sahibidir; önce sahiplik aktarılmalı");
-    const memberRole=newRole==="accounting"?"viewer":newRole,department=newRole==="accounting"?"muhasebe":"";
-    if(["admin","accounting"].includes(newRole)){
-      batch.update(memberRef(DEFTER_ID,userId),{role:memberRole,department});
-      batch.set(userLedgerIndexRef(userId,DEFTER_ID),{ledgerId:DEFTER_ID,role:memberRole,companyName:info.companyName||"Firma",branchName:info.branchName||"",updatedAt:now});
-      batch.set(orgRef,{role:newRole,uid:userId,email:"",name:"",firstName:"",lastName:"",department,sourceLedgerId:DEFTER_ID,createdAt:oldOrg?.createdAt||now,updatedAt:now});
-    }else if(oldOrg&&["admin","accounting"].includes(oldOrg.role)){
-      const branches=await accessibleLedgers(),indexSnap=await fbm.getDocs(userLedgerIndex(userId)),ids=new Set([...branches.map(x=>x.id),...indexSnap.docs.map(d=>d.id),DEFTER_ID]);
-      for(const id of ids){
-        if(id===DEFTER_ID){
-          const snap=await fbm.getDoc(memberRef(id,userId));
-          if(snap.exists()){batch.update(memberRef(id,userId),{role:newRole,department:""});batch.set(userLedgerIndexRef(userId,id),{ledgerId:id,role:newRole,companyName:info.companyName||"Firma",branchName:info.branchName||"",updatedAt:now});}
-        }else{
-          batch.delete(memberRef(id,userId));batch.delete(userLedgerIndexRef(userId,id));
-        }
-      }
-      batch.delete(orgRef);
-    }else{
-      batch.update(memberRef(DEFTER_ID,userId),{role:memberRole,department});
-      batch.set(userLedgerIndexRef(userId,DEFTER_ID),{ledgerId:DEFTER_ID,role:memberRole,companyName:info.companyName||"Firma",branchName:info.branchName||"",updatedAt:now});
-    }
-    await batch.commit();
-  }
-  async function removeMemberAccess(userId, currentRole) {
-    const batch=fbm.writeBatch(fbDb),orgRef=orgMemberRef(userId),orgSnap=await fbm.getDoc(orgRef),org=orgSnap.exists()?orgSnap.data():null;
-    if(org?.role==="owner")throw new Error("Şirket sahibini kaldırmak için önce sahipliği devredin");
-    if(org&&["admin","accounting"].includes(org.role)){
-      const branches=await accessibleLedgers(),indexSnap=await fbm.getDocs(userLedgerIndex(userId)),ids=new Set([...branches.map(x=>x.id),...indexSnap.docs.map(d=>d.id),DEFTER_ID]);
-      for(const id of ids){const snap=await fbm.getDoc(memberRef(id,userId));if(snap.exists()&&snap.data().role!=="owner")batch.delete(memberRef(id,userId));batch.delete(userLedgerIndexRef(userId,id));}
-      batch.delete(orgRef);
-    }else{batch.delete(memberRef(DEFTER_ID,userId));batch.delete(userLedgerIndexRef(userId,DEFTER_ID));}
-    await batch.commit();
-  }
-
-  async function loadLedgerMembers(host) {
-    if (!host || !DEFTER_ID || !isGoogleUser(fbAuth && fbAuth.currentUser)) return;
-    const token = ++memberLoadToken;
-    if (!isLedgerManager()) {
-      const user = fbAuth.currentUser;
-      host.innerHTML = `<div class="meta">Bu defterdeki rolünüz: <b>${esc(ROLE_LABEL[ledgerRole] || "üye")}</b>. Kullanıcı kodunuz: <code>${esc(user.uid)}</code>. Üye ve başvuru yönetimi defter yöneticilerine açıktır.</div>`;
-      return;
-    }
-    host.innerHTML = '<div class="meta">Üyeler ve başvurular yükleniyor…</div>';
-    try {
-      const [members, applications, globalApplications, legacyApplications] = await Promise.all([
-        fbm.getDocs(fbm.collection(fbDb, "defterler", DEFTER_ID, "uyeler")),
-        fbm.getDocs(memberApplicationsRef(DEFTER_ID)),
-        isFixedAdmin(fbAuth.currentUser) ? fbm.getDocs(adminApplicationsRef()) : Promise.resolve(null),
-        isFixedAdmin(fbAuth.currentUser) ? fbm.getDocs(fbm.collectionGroup(fbDb, "uyelikBasvurulari")) : Promise.resolve(null)
-      ]);
-      if (token !== memberLoadToken || !host.isConnected) return;
-      const branchChoices = await accessibleLedgers();
-      if (!branchChoices.some(x => x.id === DEFTER_ID)) branchChoices.unshift({ id: DEFTER_ID, companyName: db.magaza, branchName: db.firma.sube || "", role: ledgerRole });
-      const branchChecks = (selector, selectedId) => branchChoices.map(b => `<label class="branch-option ${b.id===selectedId?"on":""}"><input type="checkbox" ${selector} value="${esc(b.id)}" ${b.id===selectedId?"checked":""}><span>${esc(b.branchName || b.companyName || b.id)}</span></label>`).join("");
-      const rows = [];
-      members.forEach(d => {
-        const m = d.data(), self = d.id === fbAuth.currentUser.uid;
-        const canChange = !self && canAssignRole(m.role, m.role, d.id);
-        const roleControl = canChange ? `<select class="inp" data-member-role="${esc(d.id)}">${roleOptions(m.role)}</select>` : `<span class="member-role-badge">${esc(ROLE_LABEL[m.role] || "Üye")}${self ? " · siz" : ""}</span>`;
-        const removeControl = canRemoveMember(m.role, d.id) ? `<button class="btn btn-ghost" data-member-remove="${esc(d.id)}" style="color:var(--red)">Erişimi kaldır</button>` : "";
-        const transferControl = ledgerRole === "owner" && !self && ["admin","editor","viewer"].includes(m.role) ? `<button class="btn member-transfer" data-member-transfer="${esc(d.id)}">Sahipliği devret</button>` : "";
-        const branchAssign = ["editor","viewer"].includes(m.role) && branchChoices.length>1 ? `<details style="flex:1 0 100%"><summary class="meta" style="cursor:pointer;padding:5px 0">Diğer şubelere erişim ver</summary><div class="branch-options">${branchChoices.filter(b=>b.id!==DEFTER_ID).map(b=>`<label class="branch-option"><input type="checkbox" data-member-assign="${esc(d.id)}" value="${esc(b.id)}"><span>${esc(b.branchName||b.companyName||b.id)}</span></label>`).join("")}</div><button class="btn btn-ghost" data-member-assign-save="${esc(d.id)}" style="margin-top:6px">Seçili şubelere erişim ver</button></details>` : "";
-        const displayName = m.name || m.email || "İsimsiz üye";
-        const initials = String(displayName).trim().split(/\s+/).slice(0,2).map(x=>x[0]||"").join("").toLocaleUpperCase("tr");
-        rows.push(`<article class="member-card"><div class="member-avatar">${esc(initials || "Ü")}</div><div class="member-info"><div class="member-name">${esc(displayName)}${self ? ' <span class="dev-me">Siz</span>' : ""}</div><div class="member-email">${esc(m.email || "E-posta bilgisi yok")}</div><div class="member-meta">${m.department==="muhasebe"?"Departman: Muhasebe · tüm şubelerde görüntüleme":m.department?"Departman: "+esc(m.department):"Google UID"} · ${esc(d.id)}</div></div><div class="member-actions">${roleControl}${removeControl}${transferControl}${branchAssign}</div></article>`);
-      });
-
-      const pending = [];
-      applications.forEach(d => {
-        if (d.data().status === "pending") pending.push({ id: d.id, uid: d.id, ledgerId: DEFTER_ID, ...d.data() });
-      });
-      if (globalApplications) globalApplications.forEach(d => {
-        const a = d.data();
-        if (a.status !== "pending") return;
-        const local = pending.find(x => x.ledgerId === a.defterId && x.uid === a.uid);
-        if (local) { local.globalId = d.id; local.source = "global"; }
-        else pending.push({ ...a, id: d.id, globalId: d.id, source: "global", ledgerId: a.defterId, uid: a.uid });
-      });
-      // Sabit yönetici için eski sürümlerde yalnız defter altına yazılmış başvuruları da geriye dönük tara.
-      if (legacyApplications) legacyApplications.forEach(d => {
-        const ledgerId = d.ref.parent.parent && d.ref.parent.parent.id;
-        const a = d.data(), uid = a.uid || d.id;
-        if (!ledgerId || a.status !== "pending") return;
-        const existing = pending.find(x => x.ledgerId === ledgerId && x.uid === uid);
-        if (existing) { existing.source ||= "legacy"; return; }
-        pending.push({ ...a, id: d.id, source: "legacy", ledgerId, uid });
-      });
-      pending.sort((a,b) => String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
-      const requests = pending.map(a => {
-        const key = (a.ledgerId || DEFTER_ID) + "/" + (a.uid || a.id);
-        return `<div class="mini-day" style="align-items:center;gap:8px">
-          <div class="who" style="min-width:0;flex:1"><b>${esc(a.name || a.email || a.uid || a.id)}</b><div class="meta">${esc(a.email || "")} · Başvuru şubesi: ${esc(String(a.ledgerId || DEFTER_ID).slice(0,10))}…</div><div class="meta">UID: ${esc(a.uid || a.id)}</div>
-            ${branchChoices.length>1?`<div class="meta" style="margin-top:8px">Erişim verilecek şubeler</div><div class="branch-options">${branchChoices.map(b=>`<label class="branch-option ${(Array.isArray(a.requestedLedgers)?a.requestedLedgers:[a.ledgerId||DEFTER_ID]).includes(b.id)?"on":""}"><input type="checkbox" data-request-branch="${esc(key)}" value="${esc(b.id)}" ${(Array.isArray(a.requestedLedgers)?a.requestedLedgers:[a.ledgerId||DEFTER_ID]).includes(b.id)?"checked":""}><span>${esc(b.branchName||b.companyName||b.id)}</span></label>`).join("")}</div>`: `<input type="hidden" data-request-branch="${esc(key)}" value="${esc(a.ledgerId||DEFTER_ID)}">`}
-          </div>
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-            <select class="inp" data-request-role="${esc(key)}" style="width:auto;min-width:126px;padding:7px">${roleOptions(a.requestedRole || (a.department==="muhasebe"?"accounting":"editor"))}</select>
-            <button class="btn btn-gold" data-request-approve="${esc(key)}">Onayla</button>
-            <button class="btn btn-ghost" data-request-reject="${esc(key)}">Reddet</button>
-          </div>
-        </div>`;
-      }).join("");
-      const managerNote = ledgerRole === "admin" && !isFixedAdmin(fbAuth.currentUser)
-        ? '<p class="meta" style="margin-top:8px">Admin rolü diğer adminleri ve sahipleri değiştiremez; yeni üyeleri düzenleyici veya salt görüntüleyici olarak ekleyebilir.</p>' : "";
-      host.innerHTML = `
-        <label class="fld">Yeni üyelik başvuruları ${pending.length ? `· ${pending.length}` : ""}</label>
-        <div class="mini">${requests || '<div class="meta">Bekleyen başvuru yok.</div>'}</div>
-        <label class="fld" style="margin-top:12px">Google kullanıcı koduyla üye ekle</label>
-        <div class="g2">
-          <input class="inp" id="memberUid" placeholder="Google kullanıcı kodu" />
-          <select class="inp" id="memberRole">${roleOptions("editor")}</select>
-        </div>
-        <div class="meta" style="margin-top:10px">Erişim verilecek şubeler</div><div class="branch-options" id="memberBranchChoices">${branchChecks('data-member-branch', DEFTER_ID)}</div><button class="btn btn-gold" id="memberAdd" style="width:100%;margin-top:8px">Seçilen rolle üye ekle</button>
-        ${managerNote}
-        <button class="member-launch" id="openMemberPanel" type="button"><span class="ml-icon">${icon("people")}</span><span class="ml-copy"><b>Üye yönetimini aç</b><span>Üye bilgileri, roller ve erişim ayarları</span></span><span class="ml-count">${members.size}</span></button>`;
-      document.getElementById("memberAdd").onclick = async () => {
-        const id = document.getElementById("memberUid").value.trim();
-        const role = document.getElementById("memberRole").value;
-        if (!/^[A-Za-z0-9_-]{20,}$/.test(id)) return toast("Geçerli Google kullanıcı kodu girin");
-        if (!canAssignRole(role, "", id)) return toast("Bu rolü atama yetkiniz yok");
-        try {
-          let selected = [...document.querySelectorAll("[data-member-branch]:checked")].map(x=>x.value);
-          if (!selected.includes(DEFTER_ID)) selected.unshift(DEFTER_ID);
-          if(["admin","accounting"].includes(role))selected=branchChoices.map(x=>x.id);
-          const memberRole=role==="accounting"?"viewer":role;
-          const batch=fbm.writeBatch(fbDb), now=new Date().toISOString();
-          for (const ledgerId of selected) {
-            const meta=branchChoices.find(x=>x.id===ledgerId)||await ledgerBranchInfo(ledgerId);
-            batch.set(memberRef(ledgerId,id),{role:memberRole,email:"",name:"",firstName:"",lastName:"",department:role==="accounting"?"muhasebe":"",addedAt:now,addedBy:fbAuth.currentUser.uid});
-            batch.set(userLedgerIndexRef(id,ledgerId),{ledgerId,role:memberRole,companyName:meta.companyName||"Firma",branchName:meta.branchName||"",updatedAt:now});
-          }
-          if(["admin","accounting"].includes(role)) batch.set(orgMemberRef(id),{role,uid:id,email:"",name:"",firstName:"",lastName:"",department:role==="accounting"?"muhasebe":"",sourceLedgerId:DEFTER_ID,createdAt:now,updatedAt:now});
-          await batch.commit();
-          toast(`${ROLE_LABEL[role]} rolüyle ${selected.length} şubeye üye eklendi`); loadLedgerMembers(host);
-        } catch (e) { toast("Üye eklenemedi: " + fbErr(e)); }
-      };
-      document.getElementById("openMemberPanel").onclick = () => {
-        openSheet(`<div class="sheet-card full member-sheet"><div class="grab"></div><div style="display:flex;align-items:center;gap:8px"><div style="flex:1"><div class="meta">DEFTER EKİBİ</div><h2 style="font-size:20px">Üyeler ve roller</h2></div><button class="btn btn-ghost" id="memberPanelClose">Kapat</button></div><div class="member-intro"><span class="eyebrow">Güvenli erişim yönetimi</span><b>${members.size} üye</b><p>Her kişinin defter erişimini ve yetki seviyesini buradan yönetin.</p></div><div class="member-list">${rows.join("") || '<div class="meta">Henüz üye yok.</div>'}</div></div>`, true);
-        document.getElementById("memberPanelClose").onclick = closeSheet;
-        const panel = document.querySelector("#sheet .member-sheet");
-        panel.querySelectorAll("[data-member-role]").forEach(select => select.onchange = async () => {
-          const userId=select.dataset.memberRole,target=members.docs.find(d=>d.id===userId),newRole=select.value;
-          if(!target||!canAssignRole(newRole,target.data().role,userId))return loadLedgerMembers(host);
-          select.disabled=true;
-          try{await saveMemberRole(userId,newRole,target.data().role);toast(`${ROLE_LABEL[newRole]} rolü ve şirket erişimi kaydedildi`);closeSheet();loadLedgerMembers(host)}
-          catch(e){toast("Rol değiştirilemedi: "+fbErr(e));loadLedgerMembers(host)}
-        });
-        panel.querySelectorAll("[data-member-remove]").forEach(button=>button.onclick=async()=>{
-          const id=button.dataset.memberRemove,target=members.docs.find(d=>d.id===id);
-          if(!target||!canRemoveMember(target.data().role,id))return toast("Bu üyeyi kaldırma yetkiniz yok");
-          if(!confirm("Bu kişinin defter erişimi kaldırılsın mı? Çevrimdışı kopyası cihazında kalmış olabilir."))return;
-          try{await removeMemberAccess(id,target.data().role);toast("Üyenin erişimi kaldırıldı");closeSheet();loadLedgerMembers(host)}
-          catch(e){toast("Üye kaldırılamadı: "+fbErr(e))}
-        });
-        panel.querySelectorAll("[data-member-assign-save]").forEach(button=>button.onclick=async()=>{
-          const userId=button.dataset.memberAssignSave,target=members.docs.find(d=>d.id===userId),selected=[...panel.querySelectorAll("[data-member-assign]:checked")].filter(x=>x.dataset.memberAssign===userId).map(x=>x.value);
-          if(!target||!selected.length)return toast("En az bir şube seçin");
-          button.disabled=true;
-          try{const batch=fbm.writeBatch(fbDb),now=new Date().toISOString(),data=target.data();
-            for(const ledgerId of selected){const info=branchChoices.find(x=>x.id===ledgerId)||await ledgerBranchInfo(ledgerId);batch.set(memberRef(ledgerId,userId),{role:data.role,email:data.email||"",name:data.name||"",addedAt:now,addedBy:fbAuth.currentUser.uid});batch.set(userLedgerIndexRef(userId,ledgerId),{ledgerId,role:data.role,companyName:info.companyName||"Firma",branchName:info.branchName||"",updatedAt:now});}
-            await batch.commit();toast(`Üyeye ${selected.length} şube erişimi verildi`);closeSheet();loadLedgerMembers(host);
-          }catch(e){button.disabled=false;toast("Şube erişimi verilemedi: "+fbErr(e))}
-        });
-        panel.querySelectorAll("[data-member-transfer]").forEach(button=>button.onclick=async()=>{
-          const newOwnerId=button.dataset.memberTransfer,target=members.docs.find(d=>d.id===newOwnerId);
-          if(ledgerRole!=="owner"||!target||!["admin","editor","viewer"].includes(target.data().role))return toast("Sahiplik yalnızca mevcut bir üyeye devredilebilir");
-          const targetName=target.data().name||target.data().email||newOwnerId;
-          if(!confirm(`Defter sahipliği ${targetName} kişisine devredilecek. Siz admin olarak kalacaksınız. Yeni sahip rol ve üyelik yetkilerini devralır. Devam edilsin mi?`))return;
-          button.disabled=true;
-          try{const batch=fbm.writeBatch(fbDb),now=new Date().toISOString(),info=await ledgerBranchInfo(DEFTER_ID),me=fbAuth.currentUser;batch.update(ownerRef(DEFTER_ID),{ownerUid:newOwnerId});batch.update(memberRef(DEFTER_ID,me.uid),{role:"admin"});batch.update(memberRef(DEFTER_ID,newOwnerId),{role:"owner"});batch.set(orgMemberRef(me.uid),{role:"admin",uid:me.uid,email:me.email||"",name:me.displayName||"",sourceLedgerId:DEFTER_ID,createdAt:now,updatedAt:now});batch.set(orgMemberRef(newOwnerId),{role:"owner",uid:newOwnerId,email:target.data().email||"",name:target.data().name||"",sourceLedgerId:DEFTER_ID,createdAt:now,updatedAt:now});batch.set(userLedgerIndexRef(me.uid,DEFTER_ID),{ledgerId:DEFTER_ID,role:"admin",companyName:info.companyName||"Firma",branchName:info.branchName||"",updatedAt:now});batch.set(userLedgerIndexRef(newOwnerId,DEFTER_ID),{ledgerId:DEFTER_ID,role:"owner",companyName:info.companyName||"Firma",branchName:info.branchName||"",updatedAt:now});await batch.commit();ledgerRole="admin";toast("Defter sahipliği devredildi; erişiminiz admin olarak sürüyor");closeSheet();loadLedgerMembers(host)}
-          catch(e){button.disabled=false;toast("Sahiplik devredilemedi: "+fbErr(e))}
-        });
-      };
-      host.querySelectorAll("[data-request-approve]").forEach(button => button.onclick = async () => {
-        const key=button.dataset.requestApprove, req=pending.find(x=>(x.ledgerId||DEFTER_ID)+"/"+(x.uid||x.id)===key);
-        if(!req)return;
-        const roleSelect=[...host.querySelectorAll("[data-request-role]")].find(x=>x.dataset.requestRole===key), role=roleSelect?roleSelect.value:"editor";
-        if(!canAssignRole(role,"",req.uid||req.id))return toast("Bu rolü atama yetkiniz yok");
-        let branchIds=[...host.querySelectorAll("[data-request-branch]")].filter(x=>x.dataset.requestBranch===key&&x.checked!==false).map(x=>x.value);
-        if(!branchIds.includes(req.ledgerId||DEFTER_ID))branchIds.unshift(req.ledgerId||DEFTER_ID);
-        if(["admin","accounting"].includes(role))branchIds=branchChoices.map(x=>x.id);
-        const memberRole=role==="accounting"?"viewer":role;
-        button.disabled=true;
-        try{
-          const now=new Date().toISOString(), userId=req.uid||req.id, batch=fbm.writeBatch(fbDb);
-          for(const ledgerId of [...new Set(branchIds)]){
-            const meta=branchChoices.find(x=>x.id===ledgerId)||await ledgerBranchInfo(ledgerId);
-            batch.set(memberRef(ledgerId,userId),{role:memberRole,email:req.email||"",name:req.name||"",firstName:req.firstName||"",lastName:req.lastName||"",department:req.department||"",addedAt:now,addedBy:fbAuth.currentUser.uid});
-            batch.set(userLedgerIndexRef(userId,ledgerId),{ledgerId,role:memberRole,companyName:meta.companyName||"Firma",branchName:meta.branchName||"",updatedAt:now});
-          }
-          if(["admin","accounting"].includes(role))batch.set(orgMemberRef(userId),{role,uid:userId,email:req.email||"",name:req.name||"",firstName:req.firstName||"",lastName:req.lastName||"",department:req.department||"",sourceLedgerId:req.ledgerId||DEFTER_ID,createdAt:now,updatedAt:now});
-          batch.update(memberApplicationRef(req.ledgerId||DEFTER_ID,userId),{status:"approved",handledAt:now,handledBy:fbAuth.currentUser.uid});
-          if(req.globalId)batch.update(adminApplicationRef(req.globalId),{status:"approved",updatedAt:now,handledAt:now,handledBy:fbAuth.currentUser.uid});
-          await batch.commit();toast(`Başvuru onaylandı; ${["admin","accounting"].includes(role)?"tüm defterlere":branchIds.length+" şubeye"} ${ROLE_LABEL[role]} erişimi açıldı`);loadLedgerMembers(host);
-        }catch(e){button.disabled=false;toast("Başvuru onaylanamadı: "+fbErr(e));}
-      });
-      host.querySelectorAll("[data-request-reject]").forEach(button => button.onclick = async () => {
-        const key = button.dataset.requestReject;
-        const req = pending.find(x => (x.ledgerId || DEFTER_ID) + "/" + (x.uid || x.id) === key);
-        if (!req) return;
-        button.disabled = true;
-        try {
-          const now = new Date().toISOString(), ledgerId = req.ledgerId || DEFTER_ID, userId = req.uid || req.id;
-          const batch = fbm.writeBatch(fbDb);
-          batch.update(memberApplicationRef(ledgerId, userId), { status: "rejected", handledAt: now, handledBy: fbAuth.currentUser.uid });
-          if (req.globalId) batch.update(adminApplicationRef(req.globalId), { status: "rejected", updatedAt: now, handledAt: now, handledBy: fbAuth.currentUser.uid });
-          await batch.commit();
-          toast("Başvuru reddedildi"); loadLedgerMembers(host);
-        } catch (e) { button.disabled = false; toast("Başvuru reddedilemedi: " + fbErr(e)); }
-      });
-      host.querySelectorAll("[data-member-remove]").forEach(button => button.onclick = async () => {
-        const id = button.dataset.memberRemove;
-        const target = members.docs.find(d => d.id === id);
-        if (!target || !canRemoveMember(target.data().role, id)) return toast("Bu üyeyi kaldırma yetkiniz yok");
-        if (!confirm("Bu kişinin defter erişimi kaldırılsın mı? Çevrimdışı kopyası cihazında kalmış olabilir.")) return;
-        try { await fbm.deleteDoc(memberRef(DEFTER_ID, id)); toast("Üyenin erişimi kaldırıldı"); loadLedgerMembers(host); }
-        catch (e) { toast("Üye kaldırılamadı: " + fbErr(e)); }
-      });
-    } catch (e) {
-      if (token === memberLoadToken && host.isConnected) host.innerHTML = `<div class="meta" style="color:var(--red)">Üyeler okunamadı: ${esc(fbErr(e))}</div>`;
-    }
-  }
-
-  function watchMembershipApplications() {
-    const user = fbAuth && fbAuth.currentUser;
-    if (!DEFTER_ID || !isGoogleUser(user) || !isLedgerManager()) return;
-    const key = DEFTER_ID + ":" + user.uid;
-    if (applicationWatcherKey === key) return;
-    if (applicationWatcher) applicationWatcher();
-    applicationWatcherKey = key;
-    applicationWatcher = fbm.onSnapshot(memberApplicationsRef(DEFTER_ID), snap => {
-      snap.docChanges().forEach(change => {
-        if (change.type !== "added") return;
-        const data = change.doc.data();
-        if (data.status !== "pending" || change.doc.id === user.uid) return;
-        toast("Yeni üyelik başvurusu geldi", { label: "Başvuruları gör", fn: () => openSettings() }, 8000);
-      });
-      const host = document.getElementById("memberHost");
-      if (host && host.isConnected) loadLedgerMembers(host);
-    }, e => console.warn("Üyelik başvuruları dinlenemedi:", e));
-  }
 
   /* Başkasından gelen değişiklikte ekranı yenile (yazı yazarken bozma, kaydırmayı koru) */
   function scheduleRender() {
@@ -3749,23 +3051,11 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     if (!ok) { cloudStarting = false; return setSyncState(navigator.onLine ? "hata" : "cevrimdisi", diag.err || "bulut yüklenemedi"); }
     try {
       await fbAuth.authStateReady();
-      const user = fbAuth.currentUser;
-      if (!isGoogleUser(user)) {
-        cloudStarting = false;
-        showAccountGate();
-        return;
-      }
-      diag.uid = user.uid;
-      diag.email = user.email || "";
-      if (!(await ensureLedgerAccess(DEFTER_ID))) { cloudStarting = false; return; }
-      watchOwnLedgerRole(DEFTER_ID);
-      watchMembershipApplications();
-      watchAdminApplications();
+      if (!fbAuth.currentUser) await fbm.signInAnonymously(fbAuth);
+      diag.uid = fbAuth.currentUser ? fbAuth.currentUser.uid : "";
     } catch (e) {
       console.warn(e); cloudStarting = false;
-      if (String(e.code || "").includes("permission-denied")) showAccountGate("Erişim reddedildi. Üyelik kurallarını ve defter davetinizi kontrol edin.");
-      else setSyncState(navigator.onLine ? "hata" : "cevrimdisi", fbErr(e));
-      return;
+      return setSyncState(navigator.onLine ? "hata" : "cevrimdisi", fbErr(e));
     }
 
     try {
@@ -3828,7 +3118,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
           if (remoteSet && sharedSettingsJson() !== remoteSet) return; /* yerelde bekleyen değişiklik */
           if (o.magaza) db.magaza = o.magaza;
           const f = o.firma || {};
-          db.firma = { ...db.firma, tel: f.tel || "", vergi: f.vergi || "", adres: f.adres || "", sube: f.sube || "" };
+          db.firma = { ...db.firma, tel: f.tel || "", vergi: f.vergi || "", adres: f.adres || "" };
           db.silmePin = o.silmePin || null;
           db.hedef = Number(o.hedef) || 0;
           db.mesai = o.mesai || null;
@@ -3880,7 +3170,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
   }
 
   function schedulePush() {
-    if (!cloudOn || !canWriteLedger()) return;
+    if (!cloudOn) return;
     clearTimeout(pushTimer);
     pushTimer = setTimeout(pushNow, 400);
   }
@@ -3889,7 +3179,6 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
   async function pushNow() {
     clearTimeout(pushTimer);
     if (!cloudOn) return false;
-    if (!canWriteLedger()) { setSyncState("hazir"); return false; }
     const jobs = [];
     const track = (p, undo) => jobs.push(p.catch(e => { undo(); throw e; }));
     db.kayitlar.forEach(k => {
@@ -3898,17 +3187,15 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
       remoteRec.set(k.id, json);
       track(fbm.setDoc(docRef("kayitlar", k.id), { d: json, u: fbm.serverTimestamp() }), () => remoteRec.delete(k.id));
     });
-    if (canManageSharedSettings()) {
-      const sj = sharedSettingsJson();
-      if (remoteSet !== sj) {
-        const old = remoteSet; remoteSet = sj;
-        track(fbm.setDoc(docRef("ayar", "genel"), { d: sj, u: fbm.serverTimestamp() }), () => { remoteSet = old; });
-      }
-      const lg = db.firma.logo || "";
-      if (remoteLogo !== lg) {
-        const old = remoteLogo; remoteLogo = lg;
-        track(fbm.setDoc(docRef("ayar", "logo"), { d: lg, u: fbm.serverTimestamp() }), () => { remoteLogo = old; });
-      }
+    const sj = sharedSettingsJson();
+    if (remoteSet !== sj) {
+      const old = remoteSet; remoteSet = sj;
+      track(fbm.setDoc(docRef("ayar", "genel"), { d: sj, u: fbm.serverTimestamp() }), () => { remoteSet = old; });
+    }
+    const lg = db.firma.logo || "";
+    if (remoteLogo !== lg) {
+      const old = remoteLogo; remoteLogo = lg;
+      track(fbm.setDoc(docRef("ayar", "logo"), { d: lg, u: fbm.serverTimestamp() }), () => { remoteLogo = old; });
     }
     if (!jobs.length) return true;
     try { await Promise.all(jobs); return true; }
@@ -3935,7 +3222,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
         <div class="meta" id="shareStatus" style="margin-top:8px">${esc(statusText())}</div>
         <button class="btn btn-ghost" id="pDiag" style="width:100%;margin-top:8px">Bağlantı durumu ve tanı</button>
         <button class="btn btn-ghost" id="pLeave" style="width:100%;margin-top:8px">Bu cihazı defterden ayır</button>
-        <p class="meta" style="margin-top:8px">Bağlantı tek başına erişim vermez. Her kullanıcı Google hesabıyla giriş yapıp deftere üye olarak eklenmelidir.</p>
+        <p class="meta" style="margin-top:8px">Bağlantıyı yalnızca güvendiğiniz kişilere verin. Bağlantıyı bilen herkes defterin tamamına erişir.</p>
       </div>`;
   }
   function renderShare() {
@@ -3964,8 +3251,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
       ["Firebase ayarı", cloudReady() ? "okundu (" + (c.projectId || "?") + ")" : "OKUNAMADI"],
       ["Defter kodu", DEFTER_ID ? DEFTER_ID.slice(0, 6) + "…" : "YOK (cihaz bir defterle bağlı değil)"],
       ["Firebase SDK", diag.sdk || "yüklenmedi"],
-      ["Google hesabı", diag.email || (diag.uid ? "oturum açık" : "giriş yapılmadı")],
-      ["Defter rolü", ledgerRole || "üyelik bekleniyor"],
+      ["Anonim giriş", diag.uid ? "tamam" : "yok"],
       ["Canlı dinleme", diag.snaps ? diag.snaps + " güncelleme · son: " + diag.lastSnap : "henüz veri gelmedi"],
       ["Düzenleme göstergesi", diag.aktifErr ? "kapalı (" + diag.aktifErr + ")" : "açık"],
       ["Cihaz listesi", diag.cihazErr ? "kapalı (" + diag.cihazErr + ")" : "açık"],
@@ -3991,7 +3277,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
         </div>
         <p class="meta" style="margin:8px 0">Durum: <b id="shareStatus" style="color:${syncColor()}">${esc(syncLabel())}</b></p>
         ${link ? `
-        <p class="meta" style="margin:0 0 8px">Bağlantı defteri tanımlar; erişim için Google hesabının yönetici tarafından eklenmesi gerekir.</p>
+        <p class="meta" style="margin:0 0 8px">Bu bağlantıyı açan <b>herkes</b> aynı defteri canlı görür, kayıt ekleyip düzenleyebilir.</p>
         <input class="inp" id="pLink" readonly value="${esc(link)}" onclick="this.select()" />
         <div class="g2" style="margin-top:8px">
           <button class="btn btn-gold" id="pCopy">Bağlantıyı kopyala</button>
@@ -4019,8 +3305,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
   document.addEventListener("click", e => { if (e.target.closest && e.target.closest("#syncDot")) openStatusSheet(); });
 
   /* ---------- Karşılama ekranı (cihaz henüz bir defterle bağlı değilse) ---------- */
-  async function createDefter() {
-    if (!isGoogleUser(fbAuth && fbAuth.currentUser)) return toast("Önce Google hesabınızla giriş yapın");
+  function createDefter() {
     const id = newToken();
     try {
       const legacy = localStorage.getItem(KEY);
@@ -4035,7 +3320,6 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     location.reload();
   }
   function joinDefter(text) {
-    if (!isGoogleUser(fbAuth && fbAuth.currentUser)) return toast("Önce Google hesabınızla giriş yapın");
     const t = String(text || "").trim();
     const m = t.match(/[#&?]d=([A-Za-z0-9_-]{16,})/) || t.match(/^([A-Za-z0-9_-]{16,})$/);
     if (!m) return toast("Geçerli bir defter bağlantısı değil");
@@ -4043,95 +3327,6 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     location.hash = "d=" + m[1];
     location.reload();
   }
-  async function resolveAdminApplication(app, status, role, host, button, extraBranches = []) {
-    if (!isFixedAdmin(fbAuth && fbAuth.currentUser)) return toast("Bu işlem sistem yöneticisine açıktır");
-    if (status === "approved" && !canAssignRole(role, "", app.uid)) return toast("Seçilen rol atanamıyor");
-    button.disabled = true;
-    try {
-      const now = new Date().toISOString(), batch = fbm.writeBatch(fbDb);
-      if (status === "approved") {
-        const branchChoices=await accessibleLedgers();
-        const ids = ["admin","accounting"].includes(role) ? branchChoices.map(x=>x.id) : [...new Set([app.defterId, ...extraBranches].filter(Boolean))];
-        const memberRole=role==="accounting"?"viewer":role;
-        for (const ledgerId of ids) {
-          const info = branchChoices.find(x=>x.id===ledgerId) || await ledgerBranchInfo(ledgerId);
-          batch.set(memberRef(ledgerId, app.uid), { role:memberRole, email:app.email||"", name:app.name||"", firstName:app.firstName||"", lastName:app.lastName||"", department:app.department||"", addedAt:now, addedBy:fbAuth.currentUser.uid });
-          batch.set(userLedgerIndexRef(app.uid, ledgerId), { ledgerId, role:memberRole, companyName:info.companyName||"Firma", branchName:info.branchName||"", updatedAt:now });
-        }
-        if (["admin","accounting"].includes(role)) batch.set(orgMemberRef(app.uid), { role, uid:app.uid, email:app.email||"", name:app.name||"", firstName:app.firstName||"", lastName:app.lastName||"", department:app.department||"", sourceLedgerId:app.defterId, createdAt:now, updatedAt:now });
-        batch.set(userProfileRef(app.uid),{uid:app.uid,email:app.email||"",firstName:app.firstName||"",lastName:app.lastName||"",fullName:app.name||"",department:app.department||"",updatedAt:now},{merge:true});
-      }
-      batch.update(memberApplicationRef(app.defterId, app.uid), { status, handledAt:now, handledBy:fbAuth.currentUser.uid });
-      if (app.globalId) batch.update(adminApplicationRef(app.globalId), { status, updatedAt:now, handledAt:now, handledBy:fbAuth.currentUser.uid });
-      await batch.commit();
-      toast(status === "approved" ? `Başvuru onaylandı; ${["admin","accounting"].includes(role)?"tüm defterlere":(1+extraBranches.length)+" şubeye"} ${ROLE_LABEL[role]} erişimi açıldı` : "Başvuru reddedildi");
-      loadAdminInbox(host);
-    } catch (e) {
-      button.disabled = false;
-      toast("Başvuru işlenemedi: " + fbErr(e));
-    }
-  }
-
-  async function loadAdminInbox(host) {
-    if (!host || !isFixedAdmin(fbAuth && fbAuth.currentUser)) return;
-    const token = ++adminInboxToken;
-    host.innerHTML = '<div class="meta">Üyelik bildirimleri yükleniyor…</div>';
-    try {
-      const [snap, branchChoices] = await Promise.all([fbm.getDocs(adminApplicationsRef()), accessibleLedgers()]);
-      if (token !== adminInboxToken || !host.isConnected) return;
-      const pending = [];
-      snap.forEach(d => { if (d.data().status === "pending") pending.push({ id: d.id, ...d.data() }); });
-      pending.sort((a,b) => String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
-      host.innerHTML = pending.length ? pending.map((a,i) => {
-        const current = a.defterId;
-        const selectedBranches=Array.isArray(a.requestedLedgers)?a.requestedLedgers:[current];
-        const branchChecks = branchChoices.length > 1 ? `<div class="meta" style="margin-top:8px">Erişim verilecek şubeler</div><div class="branch-options">${branchChoices.map(b=>`<label class="branch-option ${selectedBranches.includes(b.id)?"on":""}"><input type="checkbox" data-admin-branch="${i}" value="${esc(b.id)}" ${selectedBranches.includes(b.id)?"checked":""}><span>${esc(b.branchName||b.companyName||b.id)}</span></label>`).join("")}</div>` : "";
-        return `<div class="mini-day" style="align-items:center;margin-top:8px"><div class="who" style="min-width:0;overflow-wrap:anywhere"><b>${esc(a.name || a.email || a.uid)}</b><div class="meta">${esc(a.email || "")} · Başvuru şubesi: ${esc(String(current||"").slice(0,10))}…</div><div class="meta">UID: ${esc(a.uid || "")}</div>${branchChecks}</div><div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap"><select class="inp" data-admin-role="${i}" style="width:auto;min-width:132px;padding:7px">${roleOptions(a.requestedRole || (a.department==="muhasebe"?"accounting":"editor"))}</select><button class="btn btn-gold" data-admin-approve="${i}">Onayla</button><button class="btn btn-ghost" data-admin-reject="${i}">Reddet</button></div></div>`;
-      }).join("") : '<div class="meta">Bekleyen üyelik talebi yok.</div>';
-      host.querySelectorAll("[data-admin-approve]").forEach(button => {
-        const i=Number(button.dataset.adminApprove), app=pending[i];
-        button.onclick=()=>{
-          const select=host.querySelector(`[data-admin-role="${i}"]`), role=select?select.value:"editor";
-          const branches=[...host.querySelectorAll(`[data-admin-branch="${i}"]:checked`)].map(x=>x.value).filter(id=>id!==app?.defterId);
-          app && resolveAdminApplication(app,"approved",role,host,button,branches);
-        };
-      });
-      host.querySelectorAll("[data-admin-reject]").forEach(button => {
-        const app=pending[Number(button.dataset.adminReject)];
-        button.onclick=()=>app&&resolveAdminApplication(app,"rejected","editor",host,button);
-      });
-    } catch (e) {
-      if (token === adminInboxToken && host.isConnected) host.innerHTML = `<div class="meta" style="color:var(--red)">Üyelik bildirimleri okunamadı: ${esc(fbErr(e))}</div>`;
-    }
-  }
-
-  function watchAdminApplications() {
-    const user = fbAuth && fbAuth.currentUser;
-    if (!isFixedAdmin(user) || !fbDb) return;
-    if (adminApplicationsWatcherUid === user.uid) return;
-    if (adminApplicationsWatcher) adminApplicationsWatcher();
-    adminApplicationsWatcherUid = user.uid;
-    let initial = true;
-    adminApplicationsWatcher = fbm.onSnapshot(adminApplicationsRef(), snap => {
-      const added = [];
-      snap.docChanges().forEach(change => {
-        const app = change.doc.data();
-        if (change.type === "added" && app.status === "pending") added.push(app);
-      });
-      const host = document.getElementById("adminInbox");
-      if (host && host.isConnected) loadAdminInbox(host);
-      if (!initial && added.length) {
-        toast(added.length === 1 ? "Yeni üyelik başvurusu geldi" : added.length + " yeni üyelik başvurusu geldi",
-          { label: "Başvuruları gör", fn: () => {
-            const inbox = document.getElementById("adminInbox");
-            if (inbox) inbox.scrollIntoView({ behavior: "smooth", block: "center" });
-            else openSettings();
-          } }, 9000);
-      }
-      initial = false;
-    }, e => console.warn("Genel üyelik bildirimleri dinlenemedi:", e));
-  }
-
   function welcomeStart() {
     let n = 0;
     try { const r = JSON.parse(localStorage.getItem(KEY) || "null"); n = r && Array.isArray(r.kayitlar) ? r.kayitlar.filter(k => !k.silindi).length : 0; } catch (e) {}
@@ -4140,30 +3335,16 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
         <div class="panel" style="max-width:440px;width:100%;padding:24px">
           <div style="font-size:11px;letter-spacing:.18em;color:var(--mute);font-weight:700;text-align:center">ÖDEME DEFTERİ</div>
           <h2 style="text-align:center;margin:8px 0 4px;font-size:20px">Ortak defter</h2>
-          <p class="meta" style="text-align:center;margin-bottom:14px">Defter verileri Google hesabı ve yönetici onayıyla korunur.</p>
-          <button class="btn btn-gold" id="wSignIn" style="width:100%">${isGoogleUser(fbAuth && fbAuth.currentUser) ? "Google hesabı bağlı · " + esc(fbAuth.currentUser.email || "") : "Google hesabıyla giriş yap"}</button>
-          ${isGoogleUser(fbAuth && fbAuth.currentUser) ? '<p class="meta" style="text-align:center;margin:8px 0">Kullanıcı kodunuz: <code>' + esc(fbAuth.currentUser.uid) + '</code></p><button class="btn btn-ghost" id="wBranches" style="width:100%;margin-top:8px">Yetkili olduğum şubeleri göster</button>' : ""}
-          <button class="btn btn-gold" id="wNew" style="width:100%;margin-top:8px" ${isGoogleUser(fbAuth && fbAuth.currentUser) ? "" : "disabled"}>Yeni ortak defter oluştur</button>
+          <p class="meta" style="text-align:center;margin-bottom:14px">Bağlantıya sahip herkes aynı defteri canlı görür ve düzenler.</p>
+          <button class="btn btn-gold" id="wNew" style="width:100%">Yeni ortak defter oluştur</button>
           ${n ? `<p class="meta" style="margin-top:6px;text-align:center">Bu cihazdaki <b>${n}</b> kayıt yeni defter içine aktarılacak.</p>` : ""}
           <div class="meta" style="margin:16px 0 6px;text-align:center">— ya da size gönderilen bağlantıyla katılın —</div>
           <input class="inp" id="wLink" placeholder="Defter bağlantısını buraya yapıştırın" />
-          <button class="btn btn-ghost" id="wJoin" style="width:100%;margin-top:8px" ${isGoogleUser(fbAuth && fbAuth.currentUser) ? "" : "disabled"}>Bağlantıyla katıl</button>
-          ${isFixedAdmin(fbAuth && fbAuth.currentUser) ? '<div class="panel" style="margin-top:14px;padding:12px"><b style="font-size:14px">Tüm defterlerden üyelik talepleri</b><div id="adminInbox" style="margin-top:8px"></div></div>' : ""}
+          <button class="btn btn-ghost" id="wJoin" style="width:100%;margin-top:8px">Bağlantıyla katıl</button>
         </div>
       </div>`;
-    const authButton = document.getElementById("wSignIn");
-    authButton.onclick = async () => {
-      authButton.disabled = true;
-      try { await authenticateGoogle(); } catch (e) { authButton.disabled = false; toast("Google girişi yapılamadı: " + fbErr(e)); }
-    };
     document.getElementById("wNew").onclick = createDefter;
-    document.getElementById("wBranches")?.addEventListener("click", openBranchSelector);
     document.getElementById("wJoin").onclick = () => joinDefter(document.getElementById("wLink").value);
-    if (isFixedAdmin(fbAuth && fbAuth.currentUser)) {
-      loadAdminInbox(document.getElementById("adminInbox"));
-      watchAdminApplications();
-    }
-    cloudInit();
   }
 
   /* ================= KİM YAPTI · ÇAKIŞMASIZ İŞLEM · SİLİNENLER · SİLME PIN'İ · CANLI BİLDİRİM · DÜZENLEME GÖSTERGESİ ================= */
@@ -4174,35 +3355,87 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
   }
 
   /* ---- Ad sorma ---- */
-  async function saveRecorderProfile(firstName, lastName) {
-    const user=fbAuth&&fbAuth.currentUser, fullName=(firstName+" "+lastName).trim();
-    try { localStorage.setItem(FIRST_NAME_KEY,firstName);localStorage.setItem(LAST_NAME_KEY,lastName);localStorage.setItem(NAME_KEY,fullName); } catch(e) {}
-    if(!isGoogleUser(user)||!fbDb)return fullName;
-    const now=new Date().toISOString(),profile={uid:user.uid,email:user.email||"",firstName,lastName,fullName,department:"",updatedAt:now};
-    await fbm.setDoc(userProfileRef(user.uid),profile,{merge:true});
-    if(DEFTER_ID&&ledgerRole){
-      const patch={name:fullName,firstName,lastName,email:user.email||""};
-      await fbm.updateDoc(memberRef(DEFTER_ID,user.uid),patch).catch(()=>{});
-      await fbm.updateDoc(orgMemberRef(user.uid),{name:fullName,firstName,lastName,email:user.email||"",updatedAt:now}).catch(()=>{});
-    }
-    return fullName;
-  }
   function openNameSheet(force) {
-    let first="",last="";
-    try { first=localStorage.getItem(FIRST_NAME_KEY)||"";last=localStorage.getItem(LAST_NAME_KEY)||"";if(!first&&!last){const bits=ME().split(/\s+/);first=bits.shift()||"";last=bits.join(" ");} } catch(e) {}
     openSheet(`
-      <div class="sheet-card"><div class="grab"></div><div class="meta" style="letter-spacing:.13em;font-weight:800">EKİP PROFİLİ</div>
-        <h2 style="font-size:22px;margin-top:5px">Adınız ve soyadınız</h2>
-        <p class="meta" style="margin:7px 0 10px">Tahsilat kayıtlarında işlemi yapan kişi tam adıyla görünür. Bilgileriniz üyelik profilinizde saklanır.</p>
-        <label class="fld">Ad</label><input class="inp" id="nmFirst" maxlength="40" autocomplete="given-name" placeholder="Adınız" value="${esc(first)}" />
-        <label class="fld">Soyad</label><input class="inp" id="nmLast" maxlength="50" autocomplete="family-name" placeholder="Soyadınız" value="${esc(last)}" />
-        <button class="btn btn-gold" id="nmSave" style="width:100%;margin-top:12px">Profili kaydet</button>
+      <div class="sheet-card">
+        <div class="grab"></div>
+        <h2 style="font-size:18px">Adınız</h2>
+        <p class="meta" style="margin:6px 0 10px">Kayıtlarda “kim ekledi, kim tahsil etti” bilgisi için adınızı yazın (örn. Ahmet). Yalnızca ad yeterli, e-posta gerekmez.</p>
+        <input class="inp" id="nmIn" maxlength="24" placeholder="Adınız" value="${esc(ME())}" />
+        <button class="btn btn-gold" id="nmSave" style="width:100%;margin-top:12px">Kaydet</button>
         ${force ? "" : `<button class="btn btn-ghost" id="sheetClose" style="width:100%;margin-top:8px">Vazgeç</button>`}
       </div>`);
-    const go=async()=>{const firstName=document.getElementById("nmFirst").value.trim(),lastName=document.getElementById("nmLast").value.trim();if(!firstName||!lastName)return toast("Ad ve soyad alanlarını doldurun");try{await saveRecorderProfile(firstName,lastName);registerDevice(true);closeSheet();toast("Profil kaydedildi: "+firstName+" "+lastName)}catch(e){toast("Profil kaydedildi ancak bulut profili güncellenemedi: "+fbErr(e))}};
-    document.getElementById("nmSave").onclick=go;document.getElementById("nmLast").addEventListener("keydown",e=>{if(e.key==="Enter")go()});const c=document.getElementById("sheetClose");if(c)c.onclick=closeSheet;
+    const inp = document.getElementById("nmIn");
+    const go = () => {
+      const v = inp.value.trim();
+      if (!v) return toast("Bir ad yazın");
+      try { localStorage.setItem(NAME_KEY, v); } catch (e) {}
+      registerDevice(true);
+      closeSheet(); toast("Merhaba " + v);
+    };
+    document.getElementById("nmSave").onclick = go;
+    inp.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+    const c = document.getElementById("sheetClose"); if (c) c.onclick = closeSheet;
+    setTimeout(() => inp.focus(), 50);
   }
 
+  /* ---- Çakışmasız tahsilat / erteleme ----
+     Bulut açıkken işlem Firestore'da "işlem (transaction)" olarak yapılır: aynı anda iki kişi aynı kayda
+     tahsilat girse bile tutarlar birbirinin üzerine yazılmaz, toplanır. İnternet yoksa yerelde yapılır. */
+  async function mutateRecord(id, label, fn, opts = {}) {
+    const auto = !!opts.auto;
+    const local = db.kayitlar.find(x => x.id === id);
+    if (!local) { if (!auto) toast("Kayıt artık yok"); return false; }
+    const beforeJson = JSON.stringify(local);
+    const me = auto ? "Sistem" : (ME() || "Bilinmiyor");
+    if (cloudOn && navigator.onLine) {
+      try {
+        let result = null;
+        await fbm.runTransaction(fbDb, async tx => {
+          result = null;
+          const ref = docRef("kayitlar", id);
+          const snap = await tx.get(ref);
+          let cur;
+          if (snap.exists()) { cur = JSON.parse(snap.data().d); cur.id = id; normalizeRec(cur); }
+          else cur = JSON.parse(beforeJson);
+          const bo = JSON.parse(JSON.stringify(cur));
+          if (fn(cur) === false) return; /* koşul artık geçerli değil (başka cihaz yapmış) */
+          stampRec(cur, bo, me, new Date().toISOString());
+          tx.set(ref, { d: JSON.stringify(cur), u: fbm.serverTimestamp() });
+          result = cur;
+        });
+        if (!result) return false;
+        const i = db.kayitlar.findIndex(x => x.id === id);
+        if (i >= 0) db.kayitlar[i] = result; else db.kayitlar.push(result);
+        remoteRec.set(id, JSON.stringify(result));
+        if (!auto) {
+          undoStack.push({ label, before: new Map([[id, beforeJson]]), touched: [id] });
+          if (undoStack.length > 40) undoStack.shift();
+        }
+        cacheSave();
+        return true;
+      } catch (e) {
+        console.warn("işlem başarısız", e);
+        if (!/unavailable|offline|network|deadline/i.test(String((e && e.code) || e))) {
+          if (!auto) toast("İşlem gönderilemedi: " + fbErr(e));
+          return false;
+        }
+        /* internet yok: aşağıda yerelde uygulanır, bağlantı gelince otomatik gönderilir */
+      }
+    }
+    if (auto) {
+      if (fn(local) === false) return false;
+      stampRec(local, JSON.parse(beforeJson), "Sistem", new Date().toISOString());
+      cacheSave(); schedulePush();
+      return true;
+    }
+    pushUndo(label);
+    if (fn(local) === false) { pendingUndo = null; return false; }
+    save();
+    return true;
+  }
+
+  /* ---- Silinenler kutusu ---- */
   function openTrash() {
     const list = db.kayitlar.filter(k => k.silindi).sort((a, b) => String(b.sonT || "").localeCompare(String(a.sonT || "")));
     openSheet(`
@@ -5119,7 +4352,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     try { return JSON.parse(s.data().d); } catch (e) { return null; }
   }
   const writeGenel = (id, o) => fbm.setDoc(dRef(id, "ayar", "genel"), { d: JSON.stringify(o), u: fbm.serverTimestamp() });
-  const GENEL_BOS = ad => ({ magaza: ad, firma: { tel: "", vergi: "", adres: "", sube: "" }, silmePin: null, hedef: 0, mesai: null, sablonlar: null, otoErt: true });
+  const GENEL_BOS = ad => ({ magaza: ad, firma: { tel: "", vergi: "", adres: "" }, silmePin: null, hedef: 0, mesai: null, sablonlar: null, otoErt: true });
   async function setLedgerPin(id, verifier) { const o = (await readGenel(id)) || GENEL_BOS("Defter"); o.silmePin = verifier; await writeGenel(id, o); }
   /* Grup listesini şifreleyip gruptaki HER defterin kasasına yazar; istenirse yönetici şifresini tüm defterlere uygular */
   async function writeGroup(list, pw, opts) {
@@ -5165,21 +4398,13 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     location.hash = "d=" + id;
     location.reload();
   }
-  async function addNewLedger(branchName) {
+  async function addNewLedger(ad) {
     const { list, bozuk } = await loadGroup();
     if (bozuk) throw new Error("kasa çözülemedi");
     const id = newToken();
-    const user = fbAuth && fbAuth.currentUser;
-    if (!isGoogleUser(user)) throw new Error("Google hesabıyla giriş yapın");
-    await fbm.setDoc(ownerRef(id), { ownerUid: user.uid, createdAt: new Date().toISOString() });
-    await fbm.setDoc(memberRef(id, user.uid), { role: "owner", email: user.email || "", name: user.displayName || "", addedAt: new Date().toISOString() });
-    const companyName=db.magaza||"Firma", sube=String(branchName||"").trim(), o = GENEL_BOS(companyName); o.firma.sube=sube; o.silmePin = db.silmePin;
+    const o = GENEL_BOS(ad); o.silmePin = db.silmePin;
     await writeGenel(id, o);
-    const now=new Date().toISOString(), info={companyName,branchName:sube};
-    await syncOrgRole(id,"owner",user);
-    await syncBranchDirectory(id,info);
-    await syncUserLedgerIndex(id,user.uid,"owner",info);
-    const ad=sube||companyName; list.push({ id, ad, branchName:sube, companyName });
+    list.push({ id, ad });
     const fails = await writeGroup(list, adminPw);
     try { localStorage.setItem("kirtasiye_sahip_" + id, "1"); } catch (e) {}
     return { id, fails };
@@ -5191,10 +4416,6 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     const { list, bozuk } = await loadGroup();
     if (bozuk) throw new Error("kasa çözülemedi");
     if (list.some(x => x.id === id)) throw new Error("bu defter zaten listede");
-    const previousRole = ledgerRole;
-    const access = await ensureLedgerAccess(id);
-    ledgerRole = previousRole;
-    if (!access) throw new Error("Bu defterin yöneticisi sizi üye olarak eklemeli");
     const g = await readGenel(id);
     const snap = await fbm.getDocsFromServer(fbm.collection(fbDb, "defterler", id, "kayitlar"));
     if (!g && snap.size === 0 && !confirm("Bu bağlantıda kayıt ya da ayar bulunamadı (boş ya da yanlış olabilir). Yine de eklensin mi?")) throw new Error("vazgeçildi");
@@ -5232,7 +4453,6 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
   /* ---- Yönetici paneli ---- */
   const adminTouch = () => { if (db.silmePin) adminUntil = Date.now() + 10 * 60000; };
   async function openAdminPanel() {
-    if (!isLedgerManager()) return toast("Bu defterde yönetici yetkisi gerekli");
     if (!db.silmePin) return openAdminSetup();
     if (!adminActive() || !adminPw) {
       const p = await askPin("Yönetici girişi", "Yönetici şifresini girin");
@@ -5306,13 +4526,6 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
       document.getElementById("gReset").onclick = async () => { if (!confirm("Defter listesi sıfırlansın mı? Defterlerin kendisi silinmez; yalnızca liste.")) return; await writeGroup([{ id: DEFTER_ID, ad: db.magaza }], adminPw); renderLedgers(host); };
       return;
     }
-    if (isLedgerManager()) {
-      for (const L of g.list) { try { const info = L.id===DEFTER_ID ? {companyName:db.magaza,branchName:db.firma.sube||""} : await ledgerBranchInfo(L.id); await syncBranchDirectory(L.id,info); } catch(e) {} }
-      const directory=await accessibleLedgers().catch(()=>[]);
-      if(directory.length)g.list=directory.map(x=>({...x,ad:x.companyName||x.ad}));
-    } else { const assigned=await accessibleLedgers().catch(()=>[]); g.list=assigned.map(x=>({...x,ad:x.companyName||x.ad})); }
-    if (!g.list.some(x=>x.id===DEFTER_ID)) g.list.unshift({id:DEFTER_ID,ad:db.magaza,companyName:db.magaza,branchName:db.firma.sube||"",role:ledgerRole});
-    const branchManager=isLedgerManager();
     const sums = await Promise.all(g.list.map(L => L.id === DEFTER_ID ? Promise.resolve(localSummary()) : ledgerSummary(L.id)));
     const tBak = round2(sums.reduce((a, s) => a + (s.bak || 0), 0)), tBug = round2(sums.reduce((a, s) => a + (s.bugun || 0), 0));
     host.innerHTML = `
@@ -5320,21 +4533,23 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
       <div class="ledger-list">
         ${g.list.map((L, i) => { const s = sums[i], cur = L.id === DEFTER_ID; return `
           <div class="ledger-row ${cur ? "cur" : ""}">
-            <div class="ledger-top"><div><b>${esc(L.companyName || s.ad || L.ad)}</b>${L.branchName ? `<div class="branch-label">${esc(L.branchName)} şubesi</div>` : ""}</div>${cur ? `<span class="dev-me">Bu defter</span>` : ""}</div>
+            <div class="ledger-top"><b>${esc(s.ad || L.ad)}</b>${cur ? `<span class="dev-me">Bu defter</span>` : ""}</div>
             <div class="meta">${s.err ? "Okunamadı: " + esc(s.err) : `${s.n} kayıt · açık <b>${money0(s.bak)}</b> · bugün tahsil <b>${money0(s.bugun)}</b> · ertelenen ${s.ert} · son işlem ${agoIso(s.son)}`}</div>
             <div class="tpl-acts">
-              ${cur ? "" : `<button class="btn btn-gold" data-lopen="${esc(L.id)}">Şubeyi aç</button>`}
-              ${branchManager ? `<button class="btn btn-ghost" data-lren="${esc(L.id)}">Şube adını değiştir</button>` : ""}
+              ${cur ? "" : `<button class="btn btn-gold" data-lopen="${esc(L.id)}">Aç ve yönet</button>`}
+              <button class="btn btn-ghost" data-lren="${esc(L.id)}">Adı değiştir</button>
+              ${cur ? "" : `<button class="btn btn-ghost" data-ldel="${esc(L.id)}" style="color:var(--red)">Listeden çıkar</button>`}
             </div>
           </div>`; }).join("")}
       </div>
       <div class="tpl-acts" style="margin-top:8px">
-        ${branchManager ? `<button class="btn btn-leather" id="lNew">＋ Yeni şube defteri</button><button class="btn btn-ghost" id="lAdd">🔗 Mevcut defteri ekle</button>` : ""}
+        <button class="btn btn-leather" id="lNew">＋ Yeni defter</button>
+        <button class="btn btn-ghost" id="lAdd">🔗 Mevcut defteri ekle</button>
       </div>
       <p class="meta" style="margin-top:8px">Defter listesi yönetici şifrenizle <b>şifrelenerek</b> saklanır; çalışanlar diğer defterlerin bağlantısını göremez. Tüm defterlerde aynı yönetici şifresi geçerlidir.</p>`;
     host.querySelectorAll("[data-lopen]").forEach(b => b.onclick = () => openLedger(b.dataset.lopen));
     host.querySelectorAll("[data-lren]").forEach(b => b.onclick = async () => {
-      const L = g.list.find(x => x.id === b.dataset.lren); const ad = prompt("Şube adı:", L.branchName || L.ad); if (!ad || !ad.trim()) return;
+      const L = g.list.find(x => x.id === b.dataset.lren); const ad = prompt("Defter adı:", L.ad); if (!ad || !ad.trim()) return;
       try { await renameLedger(L.id, ad.trim()); toast("Ad değiştirildi"); renderAdminPanel(); } catch (e) { toast("Değiştirilemedi: " + fbErr(e)); }
     });
     host.querySelectorAll("[data-ldel]").forEach(b => b.onclick = async () => {
@@ -5342,12 +4557,12 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
       if (!confirm(`“${L.ad}” listeden çıkarılsın mı? Defterin kendisi silinmez; yalnızca bu listeden kalkar.`)) return;
       try { await removeFromGroup(L.id); toast("Listeden çıkarıldı"); renderLedgers(host); } catch (e) { toast("Çıkarılamadı: " + fbErr(e)); }
     });
-    if (document.getElementById("lNew")) document.getElementById("lNew").onclick = async () => {
-      const ad = prompt("Yeni şube adı (örn. Alsancak, Bornova):"); if (!ad || !ad.trim()) return;
-      try { const r = await addNewLedger(ad.trim()); toast(r.fails.length ? "Şube oluşturuldu; kasa güncellenemedi: " + r.fails.join(", ") : "Şube defteri oluşturuldu"); if (confirm(`“${ad.trim()}” şubesine şimdi geçilsin mi?`)) openLedger(r.id); else renderLedgers(host); }
+    document.getElementById("lNew").onclick = async () => {
+      const ad = prompt("Yeni defterin adı (örn. Şube 2):"); if (!ad || !ad.trim()) return;
+      try { const r = await addNewLedger(ad.trim()); toast(r.fails.length ? "Oluşturuldu; kasa güncellenemedi: " + r.fails.join(", ") : "Defter oluşturuldu"); if (confirm(`“${ad.trim()}” defterine şimdi geçilsin mi?`)) openLedger(r.id); else renderLedgers(host); }
       catch (e) { toast("Oluşturulamadı: " + (e.message || fbErr(e))); }
     };
-    if (document.getElementById("lAdd")) document.getElementById("lAdd").onclick = async () => {
+    document.getElementById("lAdd").onclick = async () => {
       const link = prompt("Eklenecek defterin bağlantısını yapıştırın.\nNot: o defterin yönetici şifresi, sizinkiyle aynı yapılacaktır."); if (!link) return;
       try { const r = await addExistingLedger(link); toast("Eklendi: " + r.ad); renderLedgers(host); }
       catch (e) { toast("Eklenemedi: " + (e.message || fbErr(e))); }
@@ -5371,7 +4586,6 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
 
         <label class="fld">Firma bilgileri</label>
         <input class="inp" id="sAd" value="${esc(db.magaza)}" placeholder="Firma adı / unvan" />
-        <label class="fld">Şube</label><input class="inp" id="sSube" value="${esc(db.firma.sube || "")}" placeholder="Örn. Alsancak, Bornova, Merkez" />
         <div class="row2">
           <div><label class="fld">Telefon</label><input class="inp" id="sTel" inputmode="tel" value="${esc(db.firma.tel)}" placeholder="05xx" /></div>
           <div><label class="fld">Vergi no</label><input class="inp" id="sVergi" value="${esc(db.firma.vergi)}" placeholder="İsteğe bağlı" /></div>
@@ -5421,8 +4635,8 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     renderLedgers($("ledgerHost"));
     $("sSave").onclick = () => {
       db.magaza = $("sAd").value.trim() || db.magaza;
-      db.firma.sube = $("sSube").value.trim(); db.firma.tel = $("sTel").value.trim(); db.firma.vergi = $("sVergi").value.trim(); db.firma.adres = $("sAdres").value.trim();
-      save(); if (cloudOn && isLedgerManager()) syncBranchDirectory(DEFTER_ID, { companyName: db.magaza, branchName: db.firma.sube }).catch(e => console.warn(e)); closeSheet(); render(); toast("Ayarlar kaydedildi");
+      db.firma.tel = $("sTel").value.trim(); db.firma.vergi = $("sVergi").value.trim(); db.firma.adres = $("sAdres").value.trim();
+      save(); closeSheet(); render(); toast("Ayarlar kaydedildi");
     };
     $("sLogoBtn").onclick = () => $("sLogoFile").click();
     $("sLogoFile").onchange = e => { const f = e.target.files?.[0]; if (f) processLogo(f); };
