@@ -131,8 +131,8 @@ service cloud.firestore {
 
         allow update: if (
           sabitAdmin()
-          && userId != get(sahipYolu()).data.ownerUid
-          && request.resource.data.role in ['admin', 'editor', 'viewer']
+          && ((userId == get(sahipYolu()).data.ownerUid && request.resource.data.role == 'owner')
+            || (userId != get(sahipYolu()).data.ownerUid && request.resource.data.role in ['admin', 'editor', 'viewer']))
           && gecerliUyeVerisi()
         ) || (
           uye()
