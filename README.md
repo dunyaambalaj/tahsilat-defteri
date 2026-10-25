@@ -15,7 +15,10 @@ Bu klasör, Ödeme Defteri uygulamasını GitHub Pages üzerinden internet adres
 |---|---|
 | index.html | Uygulamanın kendisi |
 | manifest.json | Ana ekrana eklenen uygulamanın ayarları |
-| sw.js | Çevrimdışı çalışma ve önbellek |\n| firestore.rules | Üyelik denetimli Firestore kuralları |\n| firestore.rules.migration | Eski kullanıcılar için geçiş kuralları |\n| SECURITY_MIGRATION.md | Hesap ve üyelik modeline geçiş rehberi |
+| sw.js | Çevrimdışı çalışma ve önbellek |
+| firestore.rules | Üyelik denetimli Firestore kuralları |
+| firestore.rules.migration | Eski kullanıcılar için geçiş kuralları |
+| SECURITY_MIGRATION.md | Hesap ve üyelik modeline geçiş rehberi |
 | icon.svg | Uygulama simgesi |
 | .nojekyll | GitHub Pages dosyaları olduğu gibi yayınlasın diye (isteğe bağlı) |
 | README.md | Bu kılavuz |
