@@ -1345,8 +1345,9 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
   let unlockDone = false;
 
   /* ---------- GERİ AL ---------- */
-  const NAME_KEY = "kirtasiye_kullanici";
+  const NAME_KEY = "kirtasiye_kullanici", FIRST_NAME_KEY = "kirtasiye_ad", LAST_NAME_KEY = "kirtasiye_soyad";
   const ME = () => { try { return (localStorage.getItem(NAME_KEY) || "").trim(); } catch (e) { return ""; } };
+  const hasFullName = () => { try { return !!localStorage.getItem(FIRST_NAME_KEY)?.trim() && !!localStorage.getItem(LAST_NAME_KEY)?.trim(); } catch(e) { return false; } };
   const DEV_ID = (() => {
     try { let v = localStorage.getItem("kirtasiye_cihaz"); if (!v) { v = Math.random().toString(36).slice(2, 10); localStorage.setItem("kirtasiye_cihaz", v); } return v; }
     catch (e) { return Math.random().toString(36).slice(2, 10); }
@@ -2245,6 +2246,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
   /* ---------- KAYIT FORMU ---------- */
   function openForm(edit, prefill) {
     if (!canWriteLedger()) return toast("Bu defterde salt görüntüleme yetkiniz var");
+    if (!edit && !hasFullName()) { openNameSheet(true); return; }
     const k = edit || {
       id: uid(), musteri: (prefill && prefill.musteri) || "", telefon: "", tutar: "", tur: "nakit", turKayit: "soz",
       taksitSayisi: 1,
@@ -3198,6 +3200,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
   const orgBranchRef = id => fbm.doc(fbDb, "organizasyonlar", ORG_ID, "defterler", id);
   const userLedgerIndexRef = (userId, id) => fbm.doc(fbDb, "kullaniciDefterleri", userId, "defterler", id);
   const userLedgerIndex = userId => fbm.collection(fbDb, "kullaniciDefterleri", userId, "defterler");
+  const userProfileRef = userId => fbm.doc(fbDb, "kullaniciProfilleri", userId);
   let applicationWatcher = null, applicationWatcherKey = "";
   let ownRoleWatcher = null, ownRoleWatcherKey = "";
   let adminApplicationsWatcher = null, adminApplicationsWatcherUid = "", adminInboxToken = 0;
@@ -3206,17 +3209,17 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
   const isFixedAdmin = user => isGoogleUser(user)
     && !!user.emailVerified
     && String(user.email || "").toLowerCase() === ADMIN_EMAIL;
-  const ROLE_LABEL = { owner: "Sahip", admin: "Admin", editor: "Düzenleme", viewer: "Salt görüntüleme" };
+  const ROLE_LABEL = { owner: "Sahip", admin: "Admin", accounting: "Muhasebe · tüm şubeler · görüntüleme", editor: "Düzenleme", viewer: "Salt görüntüleme" };
   const isLedgerManager = () => isFixedAdmin(fbAuth && fbAuth.currentUser) || ["owner", "admin"].includes(ledgerRole);
   const canAssignAdminRole = () => isFixedAdmin(fbAuth && fbAuth.currentUser) || ledgerRole === "owner";
   const canWriteLedger = () => !DEFTER_ID || ["owner", "admin", "editor"].includes(ledgerRole);
   const canManageSharedSettings = () => !DEFTER_ID || ["owner", "admin"].includes(ledgerRole) || isFixedAdmin(fbAuth && fbAuth.currentUser);
   const canAssignRole = (role, targetRole = "", targetUid = "") => {
     const user = fbAuth && fbAuth.currentUser;
-    if (!["admin", "editor", "viewer"].includes(role) || targetUid === (user && user.uid)) return false;
+    if (!["admin", "accounting", "editor", "viewer"].includes(role) || targetUid === (user && user.uid)) return false;
     if (isFixedAdmin(user) || ledgerRole === "owner") return targetRole !== "owner";
     return ledgerRole === "admin"
-      && ["editor", "viewer"].includes(role)
+      && ["accounting", "editor", "viewer"].includes(role)
       && (!targetRole || ["editor", "viewer"].includes(targetRole));
   };
   const canRemoveMember = (targetRole, targetUid) => {
@@ -3226,7 +3229,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     return ledgerRole === "admin" && ["editor", "viewer"].includes(targetRole);
   };
   const roleOptions = (selected = "editor", forAdmin = canAssignAdminRole()) => {
-    const roles = forAdmin ? ["admin", "editor", "viewer"] : ["editor", "viewer"];
+    const roles = forAdmin ? ["admin", "accounting", "editor", "viewer"] : ["accounting", "editor", "viewer"];
     return roles.map(role => `<option value="${role}" ${role === selected ? "selected" : ""}>${ROLE_LABEL[role]}</option>`).join("");
   };
 
@@ -3328,7 +3331,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     ownRoleWatcherKey = key;
     let localRole = null, globalRole = null, denied = false;
     const applyRole = () => {
-      const role = ["owner","admin"].includes(globalRole) ? globalRole : localRole;
+      const role = ["owner","admin","accounting"].includes(globalRole) ? globalRole : localRole;
       if (!role || !["owner","admin","editor","viewer"].includes(role)) {
         if (denied) return;
         denied = true; ledgerRole = null; cloudOn = false;
@@ -3368,7 +3371,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     const user = fbAuth && fbAuth.currentUser;
     if (!isGoogleUser(user)) return [];
     if (!fbDb && !(await cloudInit())) throw new Error(diag.err || "Firebase başlatılamadı");
-    if (isFixedAdmin(user) || ["owner","admin"].includes(ledgerRole)) {
+    if (isFixedAdmin(user) || ["owner","admin","accounting"].includes(ledgerRole)) {
       const snap = await fbm.getDocs(orgBranchesRef());
       return snap.docs.map(d => ({ id: d.id, ...d.data(), role: isFixedAdmin(user) ? "admin" : ledgerRole }));
     }
@@ -3424,7 +3427,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     }
     if (!ownerSnap.exists()) throw new Error("defter sahibi kaydı oluşturulamadı");
     const globalSnap = await fbm.getDoc(orgMemberRef(user.uid));
-    if (globalSnap.exists() && ["owner","admin"].includes(globalSnap.data().role)) {
+    if (globalSnap.exists() && ["owner","admin","accounting"].includes(globalSnap.data().role)) {
       ledgerRole = globalSnap.data().role;
       await syncBranchDirectory(id, await ledgerBranchInfo(id)).catch(e => console.warn("Şube kataloğu güncellenemedi:", e));
       return true;
@@ -4139,88 +4142,35 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
   }
 
   /* ---- Ad sorma ---- */
+  async function saveRecorderProfile(firstName, lastName) {
+    const user=fbAuth&&fbAuth.currentUser, fullName=(firstName+" "+lastName).trim();
+    try { localStorage.setItem(FIRST_NAME_KEY,firstName);localStorage.setItem(LAST_NAME_KEY,lastName);localStorage.setItem(NAME_KEY,fullName); } catch(e) {}
+    if(!isGoogleUser(user)||!fbDb)return fullName;
+    const now=new Date().toISOString(),profile={uid:user.uid,email:user.email||"",firstName,lastName,fullName,department:"",updatedAt:now};
+    await fbm.setDoc(userProfileRef(user.uid),profile,{merge:true});
+    if(DEFTER_ID&&ledgerRole){
+      const patch={name:fullName,firstName,lastName,email:user.email||""};
+      await fbm.updateDoc(memberRef(DEFTER_ID,user.uid),patch).catch(()=>{});
+      await fbm.updateDoc(orgMemberRef(user.uid),{name:fullName,firstName,lastName,email:user.email||"",updatedAt:now}).catch(()=>{});
+    }
+    return fullName;
+  }
   function openNameSheet(force) {
+    let first="",last="";
+    try { first=localStorage.getItem(FIRST_NAME_KEY)||"";last=localStorage.getItem(LAST_NAME_KEY)||"";if(!first&&!last){const bits=ME().split(/\s+/);first=bits.shift()||"";last=bits.join(" ");} } catch(e) {}
     openSheet(`
-      <div class="sheet-card">
-        <div class="grab"></div>
-        <h2 style="font-size:18px">Adınız</h2>
-        <p class="meta" style="margin:6px 0 10px">Kayıtlarda “kim ekledi, kim tahsil etti” bilgisi için adınızı yazın (örn. Ahmet). Yalnızca ad yeterli, e-posta gerekmez.</p>
-        <input class="inp" id="nmIn" maxlength="24" placeholder="Adınız" value="${esc(ME())}" />
-        <button class="btn btn-gold" id="nmSave" style="width:100%;margin-top:12px">Kaydet</button>
+      <div class="sheet-card"><div class="grab"></div><div class="meta" style="letter-spacing:.13em;font-weight:800">EKİP PROFİLİ</div>
+        <h2 style="font-size:22px;margin-top:5px">Adınız ve soyadınız</h2>
+        <p class="meta" style="margin:7px 0 10px">Tahsilat kayıtlarında işlemi yapan kişi tam adıyla görünür. Bilgileriniz üyelik profilinizde saklanır.</p>
+        <label class="fld">Ad</label><input class="inp" id="nmFirst" maxlength="40" autocomplete="given-name" placeholder="Adınız" value="${esc(first)}" />
+        <label class="fld">Soyad</label><input class="inp" id="nmLast" maxlength="50" autocomplete="family-name" placeholder="Soyadınız" value="${esc(last)}" />
+        <button class="btn btn-gold" id="nmSave" style="width:100%;margin-top:12px">Profili kaydet</button>
         ${force ? "" : `<button class="btn btn-ghost" id="sheetClose" style="width:100%;margin-top:8px">Vazgeç</button>`}
       </div>`);
-    const inp = document.getElementById("nmIn");
-    const go = () => {
-      const v = inp.value.trim();
-      if (!v) return toast("Bir ad yazın");
-      try { localStorage.setItem(NAME_KEY, v); } catch (e) {}
-      registerDevice(true);
-      closeSheet(); toast("Merhaba " + v);
-    };
-    document.getElementById("nmSave").onclick = go;
-    inp.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
-    const c = document.getElementById("sheetClose"); if (c) c.onclick = closeSheet;
-    setTimeout(() => inp.focus(), 50);
+    const go=async()=>{const firstName=document.getElementById("nmFirst").value.trim(),lastName=document.getElementById("nmLast").value.trim();if(!firstName||!lastName)return toast("Ad ve soyad alanlarını doldurun");try{await saveRecorderProfile(firstName,lastName);registerDevice(true);closeSheet();toast("Profil kaydedildi: "+firstName+" "+lastName)}catch(e){toast("Profil kaydedildi ancak bulut profili güncellenemedi: "+fbErr(e))}};
+    document.getElementById("nmSave").onclick=go;document.getElementById("nmLast").addEventListener("keydown",e=>{if(e.key==="Enter")go()});const c=document.getElementById("sheetClose");if(c)c.onclick=closeSheet;
   }
 
-  /* ---- Çakışmasız tahsilat / erteleme ----
-     Bulut açıkken işlem Firestore'da "işlem (transaction)" olarak yapılır: aynı anda iki kişi aynı kayda
-     tahsilat girse bile tutarlar birbirinin üzerine yazılmaz, toplanır. İnternet yoksa yerelde yapılır. */
-  async function mutateRecord(id, label, fn, opts = {}) {
-    if (!canWriteLedger()) { if (!opts.auto) toast("Bu defterde salt görüntüleme yetkiniz var"); return false; }
-    const auto = !!opts.auto;
-    const local = db.kayitlar.find(x => x.id === id);
-    if (!local) { if (!auto) toast("Kayıt artık yok"); return false; }
-    const beforeJson = JSON.stringify(local);
-    const me = auto ? "Sistem" : (ME() || "Bilinmiyor");
-    if (cloudOn && navigator.onLine) {
-      try {
-        let result = null;
-        await fbm.runTransaction(fbDb, async tx => {
-          result = null;
-          const ref = docRef("kayitlar", id);
-          const snap = await tx.get(ref);
-          let cur;
-          if (snap.exists()) { cur = JSON.parse(snap.data().d); cur.id = id; normalizeRec(cur); }
-          else cur = JSON.parse(beforeJson);
-          const bo = JSON.parse(JSON.stringify(cur));
-          if (fn(cur) === false) return; /* koşul artık geçerli değil (başka cihaz yapmış) */
-          stampRec(cur, bo, me, new Date().toISOString());
-          tx.set(ref, { d: JSON.stringify(cur), u: fbm.serverTimestamp() });
-          result = cur;
-        });
-        if (!result) return false;
-        const i = db.kayitlar.findIndex(x => x.id === id);
-        if (i >= 0) db.kayitlar[i] = result; else db.kayitlar.push(result);
-        remoteRec.set(id, JSON.stringify(result));
-        if (!auto) {
-          undoStack.push({ label, before: new Map([[id, beforeJson]]), touched: [id] });
-          if (undoStack.length > 40) undoStack.shift();
-        }
-        cacheSave();
-        return true;
-      } catch (e) {
-        console.warn("işlem başarısız", e);
-        if (!/unavailable|offline|network|deadline/i.test(String((e && e.code) || e))) {
-          if (!auto) toast("İşlem gönderilemedi: " + fbErr(e));
-          return false;
-        }
-        /* internet yok: aşağıda yerelde uygulanır, bağlantı gelince otomatik gönderilir */
-      }
-    }
-    if (auto) {
-      if (fn(local) === false) return false;
-      stampRec(local, JSON.parse(beforeJson), "Sistem", new Date().toISOString());
-      cacheSave(); schedulePush();
-      return true;
-    }
-    pushUndo(label);
-    if (fn(local) === false) { pendingUndo = null; return false; }
-    save();
-    return true;
-  }
-
-  /* ---- Silinenler kutusu ---- */
   function openTrash() {
     const list = db.kayitlar.filter(k => k.silindi).sort((a, b) => String(b.sonT || "").localeCompare(String(a.sonT || "")));
     openSheet(`
