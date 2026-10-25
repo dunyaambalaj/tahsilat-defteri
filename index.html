@@ -2246,7 +2246,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
   /* ---------- KAYIT FORMU ---------- */
   function openForm(edit, prefill) {
     if (!canWriteLedger()) return toast("Bu defterde salt görüntüleme yetkiniz var");
-    if (!edit && !hasFullName()) { openNameSheet(true); return; }
+    if (!hasFullName()) { openNameSheet(true); return; }
     const k = edit || {
       id: uid(), musteri: (prefill && prefill.musteri) || "", telefon: "", tutar: "", tur: "nakit", turKayit: "soz",
       taksitSayisi: 1,
@@ -3529,7 +3529,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
         const branchAssign = ["editor","viewer"].includes(m.role) && branchChoices.length>1 ? `<details style="flex:1 0 100%"><summary class="meta" style="cursor:pointer;padding:5px 0">Diğer şubelere erişim ver</summary><div class="branch-options">${branchChoices.filter(b=>b.id!==DEFTER_ID).map(b=>`<label class="branch-option"><input type="checkbox" data-member-assign="${esc(d.id)}" value="${esc(b.id)}"><span>${esc(b.branchName||b.companyName||b.id)}</span></label>`).join("")}</div><button class="btn btn-ghost" data-member-assign-save="${esc(d.id)}" style="margin-top:6px">Seçili şubelere erişim ver</button></details>` : "";
         const displayName = m.name || m.email || "İsimsiz üye";
         const initials = String(displayName).trim().split(/\s+/).slice(0,2).map(x=>x[0]||"").join("").toLocaleUpperCase("tr");
-        rows.push(`<article class="member-card"><div class="member-avatar">${esc(initials || "Ü")}</div><div class="member-info"><div class="member-name">${esc(displayName)}${self ? ' <span class="dev-me">Siz</span>' : ""}</div><div class="member-email">${esc(m.email || "E-posta bilgisi yok")}</div><div class="member-meta">Google UID · ${esc(d.id)}</div></div><div class="member-actions">${roleControl}${removeControl}${transferControl}${branchAssign}</div></article>`);
+        rows.push(`<article class="member-card"><div class="member-avatar">${esc(initials || "Ü")}</div><div class="member-info"><div class="member-name">${esc(displayName)}${self ? ' <span class="dev-me">Siz</span>' : ""}</div><div class="member-email">${esc(m.email || "E-posta bilgisi yok")}</div><div class="member-meta">${m.department==="muhasebe"?"Departman: Muhasebe · tüm şubelerde görüntüleme":m.department?"Departman: "+esc(m.department):"Google UID"} · ${esc(d.id)}</div></div><div class="member-actions">${roleControl}${removeControl}${transferControl}${branchAssign}</div></article>`);
       });
 
       const pending = [];
