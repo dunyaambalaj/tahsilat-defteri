@@ -107,7 +107,18 @@ service cloud.firestore {
         allow create: if girisli()
             && request.resource.data.keys().hasOnly(['ownerUid', 'createdAt'])
             && (sabitAdmin() || (request.resource.data.ownerUid == request.auth.uid && !exists(sahipYolu())));
-        allow update, delete: if sabitAdmin();
+        allow update: if sabitAdmin() || (
+          girisli()
+          && resource.data.ownerUid == request.auth.uid
+          && get(uyeYolu(request.auth.uid)).data.role == 'owner'
+          && request.resource.data.keys().hasOnly(['ownerUid', 'createdAt'])
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.ownerUid is string
+          && request.resource.data.ownerUid != request.auth.uid
+          && get(uyeYolu(request.resource.data.ownerUid)).data.role in ['admin', 'editor', 'viewer']
+          && getAfter(uyeYolu(request.resource.data.ownerUid)).data.role == 'owner'
+        );
+        allow delete: if sabitAdmin();
       }
 
       match /uyeler/{userId} {
@@ -146,6 +157,25 @@ service cloud.firestore {
           && userId != get(sahipYolu()).data.ownerUid
           && request.resource.data.role in ['admin', 'editor', 'viewer']
           && gecerliUyeVerisi()
+        ) || (
+          girisli()
+          && get(sahipYolu()).data.ownerUid == request.auth.uid
+          && get(uyeYolu(request.auth.uid)).data.role == 'owner'
+          && userId == request.auth.uid
+          && resource.data.role == 'owner'
+          && request.resource.data.role == 'admin'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role'])
+          && getAfter(sahipYolu()).data.ownerUid != request.auth.uid
+          && getAfter(uyeYolu(getAfter(sahipYolu()).data.ownerUid)).data.role == 'owner'
+        ) || (
+          girisli()
+          && get(sahipYolu()).data.ownerUid == request.auth.uid
+          && get(uyeYolu(request.auth.uid)).data.role == 'owner'
+          && userId != request.auth.uid
+          && resource.data.role in ['admin', 'editor', 'viewer']
+          && request.resource.data.role == 'owner'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role'])
+          && getAfter(sahipYolu()).data.ownerUid == userId
         ) || (
           uye()
           && get(uyeYolu(request.auth.uid)).data.role == 'admin'
