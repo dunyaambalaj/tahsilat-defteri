@@ -3456,7 +3456,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
         </div>
         <button class="btn btn-gold" id="memberAdd" style="width:100%;margin-top:8px">Seçilen rolle üye ekle</button>
         ${managerNote}
-        <button class="member-launch" id="openMemberPanel" type="button"><span class="ml-icon">${icon("users")}</span><span class="ml-copy"><b>Üye yönetimini aç</b><span>Üye bilgileri, roller ve erişim ayarları</span></span><span class="ml-count">${members.size}</span></button>`;
+        <button class="member-launch" id="openMemberPanel" type="button"><span class="ml-icon">${icon("people")}</span><span class="ml-copy"><b>Üye yönetimini aç</b><span>Üye bilgileri, roller ve erişim ayarları</span></span><span class="ml-count">${members.size}</span></button>`;
       document.getElementById("memberAdd").onclick = async () => {
         const id = document.getElementById("memberUid").value.trim();
         const role = document.getElementById("memberRole").value;
