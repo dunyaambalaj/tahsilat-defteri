@@ -59,6 +59,41 @@
       --input: #ffffff; --pill: #f0ddcf; --badge: #f3e4da; --ghost: #eddcd0;
       --stripe: rgba(190,140,120,.16);
     }
+    [data-theme="okyanus"] {
+      --leather: #123b49; --leather-2: #1e5967;
+      --gold: #63b9b0; --gold-dim: #378b85;
+      --paper: #eaf3f3; --sheet: #fbffff; --line: #d2e2e2; --mute: #526a6c;
+      --input: #ffffff; --pill: #deebeb; --badge: #e0efeb; --ghost: #e1eceb;
+      --stripe: rgba(56,120,125,.13);
+    }
+    [data-theme="adacayi"] {
+      --leather: #30483b; --leather-2: #486453;
+      --gold: #b99b62; --gold-dim: #90784b;
+      --paper: #edf1e8; --sheet: #fbfcf7; --line: #d8e1d3; --mute: #5e6e62;
+      --input: #ffffff; --pill: #e4eadf; --badge: #e2ebe2; --ghost: #e5ebdf;
+      --stripe: rgba(82,119,93,.12);
+    }
+    [data-theme="lavanta"] {
+      --leather: #383553; --leather-2: #504a71;
+      --gold: #ad95d5; --gold-dim: #7d679f;
+      --paper: #f0eff8; --sheet: #fcfbff; --line: #dedceb; --mute: #68647a;
+      --input: #ffffff; --pill: #e9e5f2; --badge: #e7e7f1; --ghost: #e7e5ef;
+      --stripe: rgba(112,100,153,.13);
+    }
+    [data-theme="gul"] {
+      --leather: #603b48; --leather-2: #82515e;
+      --gold: #d49aa1; --gold-dim: #a96f7b;
+      --paper: #f7edef; --sheet: #fff9fa; --line: #ead9de; --mute: #78636b;
+      --input: #ffffff; --pill: #f0e3e7; --badge: #f0e4e9; --ghost: #f2e7e9;
+      --stripe: rgba(160,92,113,.12);
+    }
+    [data-theme="kiremit"] {
+      --leather: #5a3b32; --leather-2: #795247;
+      --gold: #d3976f; --gold-dim: #ad7251;
+      --paper: #f5ece5; --sheet: #fffaf6; --line: #e7d8cd; --mute: #746056;
+      --input: #ffffff; --pill: #f0e4d9; --badge: #efe5dd; --ghost: #ede2d8;
+      --stripe: rgba(158,104,72,.14);
+    }
     [data-theme="gece"] {
       --ink: #ece7dd; --mute: #9aa5a1;
       --leather: #101a17; --leather-2: #16231f;
@@ -83,7 +118,6 @@
     [data-mode="dark"] .chip.on { background: #2a3d35; color: #f6edd8; border-color: #4f7a68; }
     [data-mode="dark"] .wk-day.on { background: #2a3d35; }
     [data-mode="dark"] .cal .d.on { background: #2a3d35; }
-    [data-mode="dark"] .share-sheet { background: #fff8ec; }
     [data-mode="dark"] .sheet { background: rgba(0,0,0,.66); }
     [data-mode="dark"] .card { border-color: var(--line); }
     [data-mode="dark"] .nav { background: #141a1c; }
@@ -113,8 +147,8 @@
     /* ---------- DERİ BAŞLIK (mobil/tablet) ---------- */
     .leather {
       background:
-        radial-gradient(1200px 220px at 20% -40%, rgba(201,162,39,.22), transparent 50%),
-        linear-gradient(180deg, #1c3b32 0%, #142923 100%);
+        radial-gradient(1200px 220px at 20% -40%, color-mix(in srgb, var(--gold) 24%, transparent), transparent 50%),
+        linear-gradient(180deg, var(--leather-2) 0%, var(--leather) 100%);
       color: #f6edd8;
       padding-top: calc(var(--safe-top) + 10px);
     }
@@ -145,10 +179,10 @@
       overflow: auto;
       overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
-      padding: 12px 14px calc(92px + var(--safe-bot));
+      padding: 12px 14px calc(112px + var(--safe-bot));
       background:
-        repeating-linear-gradient(0deg, transparent 0 31px, rgba(196,168,120,.18) 31px 32px),
-        linear-gradient(90deg, #d9b36a 0 7px, transparent 7px),
+        repeating-linear-gradient(0deg, transparent 0 31px, var(--stripe) 31px 32px),
+        linear-gradient(90deg, var(--gold) 0 7px, transparent 7px),
         var(--paper);
     }
     .page-inner { width: 100%; max-width: 720px; margin: 0 auto; min-width: 0; }
@@ -287,7 +321,7 @@
     .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
     /* ---------- MİNİ SATIRLAR ---------- */
-    .mini { display: grid; gap: 6px; }
+    .mini { display: grid; gap: 8px; }
     .mini-day {
       display: flex; align-items: baseline; gap: 8px;
       background: var(--sheet); border: 1px solid var(--line); border-radius: 12px;
@@ -299,30 +333,35 @@
 
     /* ---------- FAB ---------- */
     .fab {
-      position: fixed; right: 16px; bottom: calc(76px + var(--safe-bot));
-      width: 58px; height: 58px; border-radius: 18px; border: 0;
-      background: linear-gradient(180deg, #d4b03a, #b8901e);
-      color: #1a1612; font-size: 32px; font-weight: 700;
-      box-shadow: 0 10px 24px rgba(180, 140, 30, .45);
-      z-index: 20;
+      flex: 0 0 56px; width: 56px; height: 56px; border-radius: 50%; border: 0;
+      margin: -18px 8px 0; position: relative; z-index: 34;
+      display: grid; place-items: center;
+      background: radial-gradient(120% 120% at 30% 18%, rgba(255,255,255,.9), color-mix(in srgb, var(--gold) 60%, #fff) 38%, var(--gold));
+      color: #1a1612; font-size: 32px; font-weight: 600; line-height: 1;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.92), inset 0 -3px 8px color-mix(in srgb, var(--gold-dim) 45%, transparent), 0 10px 24px color-mix(in srgb, var(--gold) 40%, transparent);
+      cursor: pointer; transition: transform .22s cubic-bezier(.3,1.5,.5,1), box-shadow .22s;
     }
+    .fab:active { transform: scale(.94); }
 
     /* ---------- ALT GEZİNME ---------- */
     .nav {
       position: fixed; left: 0; right: 0; bottom: 0;
-      background: var(--sheet);
-      border-top: 1px solid var(--line);
-      display: grid; grid-template-columns: repeat(5, 1fr);
-      padding: 6px 4px calc(8px + var(--safe-bot));
-      z-index: 30;
+      min-height: calc(68px + var(--safe-bot));
+      background: var(--sheet); border-top: 1px solid var(--line);
+      display: flex; align-items: center; justify-content: center;
+      padding: 7px 8px calc(8px + var(--safe-bot)); z-index: 30;
     }
-    .nav button {
+    .nav-group { display: flex; align-items: center; flex: 1 1 0; min-width: 0; }
+    .nav-group:first-of-type, .nav-group:last-of-type { width: calc((100% - 80px) / 2); }
+    .nav-group:first-of-type { margin-right: 2px; }
+    .nav-group:last-of-type { margin-left: 2px; }
+    .nav button:not(.fab) {
+      flex: 1 1 0; min-width: 0;
       background: none; border: 0; color: var(--mute);
-      display: flex; flex-direction: column; align-items: center; gap: 2px;
-      font-size: 9.5px; font-weight: 700; letter-spacing: .02em;
-      padding: 6px 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+      font-size: 9.5px; font-weight: 700; letter-spacing: .02em; padding: 6px 1px;
     }
-    .nav button.on { color: var(--leather); }
+    .nav button.on:not(.fab) { color: var(--leather); }
     .nav svg { width: 22px; height: 22px; }
 
     /* ---------- ALTLIK / DİYALOG ---------- */
@@ -392,11 +431,6 @@
     .search-wrap { position: relative; margin-bottom: 10px; min-width: 0; }
     .search-wrap svg { position: absolute; left: 12px; top: 12px; color: var(--mute); }
 
-    .share-sheet {
-      background: #fff; color: #111; border: 1px dashed #c9b48a;
-      border-radius: 8px; padding: 18px 16px; font-family: Georgia, serif;
-    }
-
     /* ---------- TOAST + GERİ AL ---------- */
     .toast {
       position: fixed; left: 50%; bottom: calc(90px + var(--safe-bot));
@@ -415,8 +449,8 @@
     .lockwrap {
       position: fixed; inset: 0; z-index: 140;
       background:
-        radial-gradient(900px 300px at 50% -10%, rgba(201,162,39,.16), transparent 55%),
-        linear-gradient(180deg, #1c3b32, #0f211c);
+        radial-gradient(900px 300px at 50% -10%, color-mix(in srgb, var(--gold) 20%, transparent), transparent 55%),
+        linear-gradient(180deg, var(--leather-2), var(--leather));
       display: flex; align-items: center; justify-content: center; padding: 20px;
     }
     .lockcard { width: min(320px, 92vw); text-align: center; color: #f6edd8; }
@@ -445,6 +479,11 @@
     h1,h2,h3 { margin: 0; }
 
     /* ---------- TABLET ---------- */
+    @media (max-width: 420px) {
+      .notify-row .mini-day { grid-template-columns: 44px minmax(0,1fr) auto; gap: 4px 6px; padding: 9px 8px; }
+      .notify-row .mini-day .v { max-width: 84px; font-size: 11.5px; }
+      .notify-wa { width: 36px; height: 38px; flex-basis: 36px; }
+    }
     @media (min-width: 760px) {
       .page-inner { max-width: 940px; }
       .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -464,25 +503,22 @@
 
     /* ---------- PC ---------- */
     @media (min-width: 1100px) {
-      .page { padding: 28px 32px 130px; }
+      .page { padding: 28px 32px 148px; }
       .page-inner { max-width: 1120px; }
       .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
     /* ---------- ALT MENÜ: tablet/PC'de hap biçiminde merkez bar ---------- */
     @media (min-width: 760px) {
-      .page { padding-bottom: 130px; }
+      .page { padding-bottom: 148px; }
       .nav {
         left: 50%; right: auto; bottom: calc(14px + var(--safe-bot));
-        transform: translateX(-50%);
-        width: min(620px, 94vw);
-        border: 1px solid var(--line);
-        border-radius: 22px;
-        box-shadow: 0 14px 34px rgba(15, 25, 20, .22);
-        padding: 8px 10px;
+        transform: translateX(-50%); width: min(720px, 96vw); min-height: 76px;
+        border: 1px solid var(--line); border-radius: 24px;
+        box-shadow: 0 14px 34px rgba(15, 25, 20, .22); padding: 8px 12px;
       }
-      .nav button { font-size: 11px; padding: 8px 0; }
+      .nav button:not(.fab) { font-size: 11px; padding: 8px 0; }
       .nav svg { width: 24px; height: 24px; }
-      .fab { right: 30px; bottom: 110px; }
+      .nav .fab { margin-left: 12px; margin-right: 12px; }
     }
     /* ---------- BİLDİRİM ZİLİ + LOGO ---------- */
     .hdr-ico { position: relative; }
@@ -507,9 +543,22 @@
     }
     .brand-mark img { width: 100%; height: 100%; object-fit: cover; border-radius: 9px; display: block; }
     .theme-dot { width: 100%; height: 22px; border-radius: 7px; margin-bottom: 5px; border: 1px solid rgba(0,0,0,.12); }
-    .notify-row { display: flex; align-items: center; gap: 8px; }
-    .notify-row .mini-day { flex: 1; }
-    .notify-wa { width: 40px; height: 40px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 40px; }
+    .notify-row { display: grid; grid-template-columns: minmax(0,1fr) 40px; align-items: center; gap: 6px; min-width: 0; }
+    .notify-row .mini-day {
+      display: grid; grid-template-columns: 48px minmax(0,1fr) auto; align-items: center;
+      gap: 4px 8px; min-height: 56px; padding: 10px; flex: 1; min-width: 0;
+    }
+    .notify-row .mini-day .d { width: auto; flex: none; font-size: 12px; }
+    .notify-copy { display: grid; gap: 2px; min-width: 0; text-align: left; }
+    .notify-row .mini-day .who {
+      display: block; min-width: 0; white-space: normal; overflow: visible; text-overflow: clip;
+      overflow-wrap: anywhere; font-size: 13px; font-weight: 800; line-height: 1.28;
+    }
+    .notify-type { color: var(--mute); font-size: 11px; line-height: 1.25; overflow-wrap: anywhere; }
+    .notify-row .mini-day .v { white-space: nowrap; font-size: 12px; max-width: 100px; }
+    .notify-wa { width: 40px; height: 40px; border-radius: 13px; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 40px; }
+    .digest-list { grid-template-columns: 1fr; }
+    .reminder-sheet { max-height: min(92dvh, 920px); padding-bottom: calc(20px + var(--safe-bot)); }
 
 
     /* ===== ORTAK + KLASİK ===== */
@@ -664,8 +713,8 @@
 html[data-look="cam"], html[data-look="cam"][data-theme] {
       --serif: "New York", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
       --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Avenir Next", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
-      --cream: #f6edd8;
-      --gold-hi: #efd679;
+      --cream: color-mix(in srgb, var(--sheet) 92%, #fff);
+      --gold-hi: color-mix(in srgb, var(--gold) 54%, #fff);
       --rim-hi: rgba(255,255,255,.95);
       --rim-lo: rgba(255,255,255,.10);
       --glass-a: color-mix(in srgb, var(--sheet) 74%, transparent);
@@ -1027,6 +1076,98 @@ html[data-look="cam"] .goal { border-radius: 24px; }
 html[data-look="cam"] .goal-top span { color: var(--gold-dim); }
 html[data-look="cam"] .goal-empty { color: var(--mute); box-shadow: var(--glass-inset), 0 0 0 1.5px color-mix(in srgb, var(--gold) 40%, transparent), var(--glass-shadow); }
 html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--leather) 7%, transparent); }
+  
+/* Final responsive navigation and reminder polish */
+.nav {
+  position: fixed !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: calc(10px + var(--safe-bot)) !important;
+  transform: translateX(-50%) !important;
+  width: min(720px, calc(100vw - 20px)) !important;
+  max-width: none !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  padding: 6px !important;
+  z-index: 40 !important;
+}
+.nav-group {
+  display: flex !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  align-items: center !important;
+  justify-content: space-around !important;
+}
+.nav-group button {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+}
+.nav .fab {
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+  flex: 0 0 58px !important;
+  width: 58px !important;
+  height: 58px !important;
+  margin: -20px 5px 0 !important;
+  z-index: 2 !important;
+  display: grid !important;
+  place-items: center !important;
+}
+html[data-look="cam"] .nav { display: flex !important; }
+html[data-look="cam"] .nav button:not(.fab) { flex: 1 1 0; min-width: 0; }
+html[data-look="cam"] .fab {
+  position: relative !important;
+  inset: auto !important;
+  flex: 0 0 62px !important;
+  width: 62px !important;
+  height: 62px !important;
+  margin: -20px 5px 0 !important;
+  color: var(--leather) !important;
+  background: radial-gradient(120% 120% at 30% 18%, rgba(255,255,255,.9), color-mix(in srgb, var(--gold-hi) 78%, white) 40%, var(--gold)) !important;
+}
+html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 2px; }
+.page { padding-bottom: calc(118px + var(--safe-bot)) !important; }
+@media (min-width: 980px) {
+  html[data-look="cam"] .tb-nav { display: none !important; }
+  html[data-look="cam"] .tb-inner { display: flex !important; justify-content: space-between !important; }
+  html[data-look="cam"] .hbar { margin-left: auto; }
+  html[data-look="cam"] .page { padding-bottom: 138px !important; }
+}
+.notify-row { align-items: stretch; }
+.notify-row .mini-day {
+  display: grid !important;
+  grid-template-columns: auto minmax(0,1fr) auto !important;
+  align-items: center !important;
+  gap: 4px 9px !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  min-height: 54px;
+}
+.notify-row .notify-copy { min-width: 0 !important; white-space: normal !important; overflow: visible !important; }
+.notify-row .who {
+  display: block !important;
+  min-width: 0 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+  text-overflow: clip !important;
+  line-height: 1.25 !important;
+}
+.notify-row .notify-type { display: block; white-space: normal; line-height: 1.25; }
+.notify-row .v { white-space: nowrap; max-width: 34vw; }
+@media (max-width: 380px) {
+  .nav { width: calc(100vw - 12px) !important; gap: 1px !important; padding: 5px !important; }
+  .nav .fab { flex-basis: 52px !important; width: 52px !important; height: 52px !important; margin-left: 2px !important; margin-right: 2px !important; }
+  html[data-look="cam"] .fab { flex-basis: 54px !important; width: 54px !important; height: 54px !important; }
+  html[data-look="cam"] .nav button:not(.fab) { font-size: 9px !important; }
+  .notify-row .mini-day { gap: 4px 6px !important; }
+}
+
   </style>
 </head>
 <body>
@@ -1048,7 +1189,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     try { const v = localStorage.getItem(ID_KEY); return ID_RE.test(v || "") ? v : null; } catch (e) { return null; }
   })();
   const cacheKey = () => DEFTER_ID ? KEY + ":" + DEFTER_ID : KEY;
-  const BUILD = "12";
+  const BUILD = "15";
   const FB_VERSIONS = ["13.0.0", "12.8.0", "12.2.1"]; /* sırayla denenir */
   /* Firebase web ayarları herkese açık bilgidir. firebase-config.js okunamazsa bu yedek kullanılır. */
   const FB_DEFAULT = {
@@ -1120,7 +1261,12 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     { id:"deri", ad:"Deri Yeşil", c1:"#142923", c2:"#c9a227", c3:"#f3ead8" },
     { id:"lacivert", ad:"Lacivert", c1:"#152238", c2:"#d2a83a", c3:"#e8edf4" },
     { id:"kahve", ad:"Kahve", c1:"#3a2718", c2:"#d1a33c", c3:"#f0e6d3" },
-      { id:"bordo", ad:"Bordo", c1:"#3f1622", c2:"#d4a73a", c3:"#f5ece2" }
+    { id:"bordo", ad:"Bordo", c1:"#3f1622", c2:"#d4a73a", c3:"#f5ece2" },
+    { id:"okyanus", ad:"Okyanus", c1:"#123b49", c2:"#63b9b0", c3:"#eaf3f3" },
+    { id:"adacayi", ad:"Adaçayı", c1:"#30483b", c2:"#b99b62", c3:"#edf1e8" },
+    { id:"lavanta", ad:"Lavanta", c1:"#383553", c2:"#ad95d5", c3:"#f0eff8" },
+    { id:"gul", ad:"Gül Kurusu", c1:"#603b48", c2:"#d49aa1", c3:"#f7edef" },
+    { id:"kiremit", ad:"Kiremit", c1:"#5a3b32", c2:"#d3976f", c3:"#f5ece5" }
   ];
   function defaultDB() {
     return {
@@ -1229,6 +1375,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     pendingUndo = null;
   }
   function undoLast() {
+    if (!canWriteLedger()) return toast("Bu defterde salt görüntüleme yetkiniz var");
     const u = undoStack.pop();
     if (!u) return toast("Geri alınacak işlem yok");
     u.touched.forEach(id => {
@@ -1427,7 +1574,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     return `<div class="notify-row">
       <button class="mini-day" data-setdate="${k.vade}">
         <span class="d">${fmtDate(k.vade).slice(0,5)}</span>
-        <span class="who">${esc(k.musteri)} · ${esc(typeAd(k.tur, k))}</span>
+        <span class="notify-copy"><span class="who">${esc(k.musteri)}</span><span class="notify-type">${esc(typeAd(k.tur, k))}</span></span>
         <span class="v">${fmtTRY(remaining(k))}</span>
       </button>
       ${wa ? `<a class="btn btn-wa notify-wa" href="${waLink(k)}" target="_blank" rel="noopener" data-wa="1" title="WhatsApp hatırlat">${icon("msg")}</a>` : ""}
@@ -1439,7 +1586,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     const sec = (title, color, arr, wa) => arr.length ? `
       <div class="sec-title" style="margin-top:14px;color:${color}">${title} <span class="cnt">${arr.length}</span></div>
       <div class="meta" style="margin:-4px 0 8px">Toplam ${fmtTRY(sumGroup(arr))}</div>
-      <div class="mini">${arr.map(k => digestRow(k, wa)).join("")}</div>` : "";
+      <div class="mini digest-list">${arr.map(k => digestRow(k, wa)).join("")}</div>` : "";
     openSheet(`
       <div class="sheet-card">
         <div class="grab"></div>
@@ -1485,7 +1632,9 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   }
 
   function nav() {
-    return `<nav class="nav">${db.gorunum === "klasik" ? "" : `<i class="gi"></i>`}${VIEWS.map(([id,ad,ic]) => `<button data-view="${id}" class="${view===id?"on":""}">${icon(ic)}<span>${ad}</span></button>`).join("")}</nav>`;
+    const items = VIEWS.map(([id,ad,ic]) => `<button data-view="${id}" class="${view===id?"on":""}">${icon(ic)}<span>${ad}</span></button>`);
+    const addButton = canWriteLedger() ? '<button class="fab" id="fab" aria-label="Tahsilat ekle" title="Tahsilat ekle">+</button>' : "";
+    return `<nav class="nav" aria-label="Ana menü"><div class="nav-group nav-left">${items.slice(0,2).join("")}</div>${addButton}<div class="nav-group nav-right">${items.slice(2).join("")}</div></nav>`;
   }
 
   function waLink(k) {
@@ -1497,7 +1646,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   function paymentCard(k) {
     const st = statusOf(k);
     const late = isLate(k);
-    const showActs = isOpen(k);
+    const showActs = isOpen(k) && canWriteLedger();
     const stamp = st !== "bekliyor" ? `<span class="stamp ${st}">${statusLabel(st)}</span>` : "";
     const rem = remaining(k);
     const amtLine = st === "kismi"
@@ -1590,7 +1739,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         </button>`).join("")
       ).join("")}</div>` : `<div class="panel meta" style="padding:14px">Önümüzdeki 7 günde vadeli alacak görünmüyor.</div>`}
       ${recentActivityHtml()}
-      <button class="fab" id="fab">+</button>
+
     `;
   }
 
@@ -1655,7 +1804,6 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       ${selectedDate === todayISO() && overdueList().filter(k => !isErt(k)).length ? `
         <div class="sec-title" style="color:var(--red)">Geciken açık bakiyeler <span class="cnt">${overdueList().filter(k => !isErt(k)).length}</span></div>
         ${cardsGrid(overdueList().filter(k => !isErt(k)))}` : ""}
-      <button class="fab" id="fab">+</button>
     `;
   }
 
@@ -1813,7 +1961,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     } else {
       body = dayDetail(selectedDate, events, true);
     }
-    return head + body + `<button class="fab" id="fab">+</button>`;
+    return head + body;
   }
 
   /* ---------- MÜŞTERİ ---------- */
@@ -1867,7 +2015,6 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
           </div>
         </article>`).join("") : `<div class="empty">Müşteri bulunamadı.</div>`}
       </div>
-      <button class="fab" id="fab">+</button>
     `;
   }
 
@@ -1995,7 +2142,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     });
     document.getElementById("btnBell")?.addEventListener("click", openNotifCenter);
     document.getElementById("btnShareTop")?.addEventListener("click", () => openShare(selectedDate, ofDate(selectedDate), fmtLong(selectedDate)));
-    document.getElementById("fab")?.addEventListener("click", () => openForm());
+    document.getElementById("fab")?.addEventListener("click", () => canWriteLedger() ? openForm() : toast("Bu defterde salt görüntüleme yetkiniz var"));
     document.getElementById("goalOpen")?.addEventListener("click", openGoalSheet);
     document.getElementById("actAll")?.addEventListener("click", openActivity);
     const pgEl = document.querySelector(".page"), tbEl = document.querySelector(".topbar");
@@ -2045,6 +2192,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     document.querySelectorAll("[data-cust]").forEach(b => b.onclick = () => openCustomer(b.dataset.cust));
     document.querySelectorAll("[data-act]").forEach(b => b.onclick = e => {
       e.stopPropagation();
+      if (!canWriteLedger()) return toast("Bu defterde salt görüntüleme yetkiniz var");
       const k = kayitlar().find(x => x.id === b.dataset.id);
       if (!k) return;
       if (b.dataset.act === "tahsil") openTahsil(k);
@@ -2083,6 +2231,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
 
   /* ---------- KAYIT FORMU ---------- */
   function openForm(edit, prefill) {
+    if (!canWriteLedger()) return toast("Bu defterde salt görüntüleme yetkiniz var");
     const k = edit || {
       id: uid(), musteri: (prefill && prefill.musteri) || "", telefon: "", tutar: "", tur: "nakit", turKayit: "soz",
       taksitSayisi: 1,
@@ -2201,7 +2350,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
 
   /* ---------- DETAY ---------- */
   function openDetail(k) {
-    const st = statusOf(k);
+    const st = statusOf(k), canEdit = canWriteLedger();
     openSheet(`
       <div class="sheet-card">
         <div class="grab"></div>
@@ -2222,21 +2371,24 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         ${authorLine(k)}
         ${(k.ertelemeGecmisi||[]).length ? `<label class="fld">Erteleme geçmişi</label><ul class="hist">${k.ertelemeGecmisi.map(e => `<li>${fmtDate(e.eski)} → ${fmtDate(e.yeni)}${e.neden ? ` · ${esc(e.neden)}` : ""}${e.k ? ` · ${esc(e.k)}` : ""}</li>`).join("")}</ul>` : ""}
         ${(k.gecmis||[]).length ? `<label class="fld">Hareket geçmişi</label><ul class="hist">${(k.gecmis||[]).slice().reverse().map(h => `<li>${esc(ACT_AD[h.a] || h.a)} · ${esc(h.d)}<br/><span>${new Date(h.t).toLocaleString("tr-TR")}${h.k ? " · " + esc(h.k) : ""}</span></li>`).join("")}</ul>` : ""}
-        ${st!=="tahsil" && st!=="iptal" ? `<div class="acts" style="margin-top:14px">
+${canEdit && st!=="tahsil" && st!=="iptal" ? `<div class="acts" style="margin-top:14px">
           <button class="btn btn-tahsil" id="dTahsil">Tahsil</button>
           <button class="btn btn-erte" id="dErtele">Ertele</button>
         </div>
         <a class="btn btn-wa owner" style="width:100%;margin-top:8px" href="${waLink(k)}" target="_blank" rel="noopener" data-wak="${k.id}">${icon("msg")} WhatsApp hatırlat</a>` : ""}
-        <div class="g2" style="margin-top:8px">
+        ${canEdit ? `<div class="g2" style="margin-top:8px">
           <button class="btn btn-ghost" id="dEdit">Düzenle</button>
           <button class="btn btn-ghost" id="dDel" style="color:#8b2e2e">Sil</button>
-        </div>
+        </div>` : ""}
       </div>`);
     document.getElementById("sheetClose").onclick = closeSheet;
     document.getElementById("dTahsil")?.addEventListener("click", () => openTahsil(k));
     document.getElementById("dErtele")?.addEventListener("click", () => openErtele(k));
-    document.getElementById("dEdit").onclick = () => openForm(k);
-    document.getElementById("dDel").onclick = async () => {
+    const editButton = document.getElementById("dEdit");
+    if (editButton) editButton.onclick = () => openForm(k);
+    const deleteButton = document.getElementById("dDel");
+    if (deleteButton) deleteButton.onclick = async () => {
+      if (!canWriteLedger()) return toast("Bu defterde salt görüntüleme yetkiniz var");
       if (!confirm("Bu kayıt silinsin mi?")) return;
       if (!(await guardDelete())) return;
       pushUndo("Silme");
@@ -2248,6 +2400,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
 
   /* ---------- TAHSİL ---------- */
   function openTahsil(k) {
+    if (!canWriteLedger()) return toast("Bu defterde salt görüntüleme yetkiniz var");
     const kalan = remaining(k);
     const mVal = liveMask(String(kalan).replace(".",","));
     openSheet(`
@@ -2322,6 +2475,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
 
   /* ---------- ERTELE ---------- */
   function openErtele(k) {
+    if (!canWriteLedger()) return toast("Bu defterde salt görüntüleme yetkiniz var");
     openSheet(`
       <div class="sheet-card">
         <div class="grab"></div>
@@ -2395,6 +2549,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     document.getElementById("cAdd").onclick = () => { closeSheet(); openForm(null, { musteri: ad }); };
     document.querySelectorAll("[data-act]").forEach(b => b.onclick = e => {
       e.stopPropagation();
+      if (!canWriteLedger()) return toast("Bu defterde salt görüntüleme yetkiniz var");
       const k = kayitlar().find(x => x.id === b.dataset.id);
       if (b.dataset.act === "tahsil") openTahsil(k);
       if (b.dataset.act === "ertele") openErtele(k);
@@ -2483,8 +2638,8 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   }
   function openSettings() {
     const temaHtml = TEMALAR.map(x => `
-      <button class="type-opt ${db.tema===x.id?"on":""}" data-tema="${x.id}" style="padding:8px 6px">
-        <span class="theme-dot" style="background:linear-gradient(90deg, ${x.c1} 58%, ${x.c2} 58%)"></span>
+      <button class="type-opt ${db.tema===x.id?"on":""}" data-tema="${x.id}" aria-label="Tema: ${x.ad}" title="${x.ad}" style="padding:8px 6px">
+        <span class="theme-dot" style="background:linear-gradient(90deg, ${x.c1} 42%, ${x.c2} 42% 68%, ${x.c3} 68%)"></span>
         <span style="font-size:11px">${x.ad}</span>
       </button>`).join("");
     openSheet(`
@@ -2515,7 +2670,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         <div class="chips" id="btChips">${Object.keys(KIND_AD).map(k => `<button class="chip ${btPref(k) ? "on" : ""}" data-bt="${k}">${KIND_AD[k]}</button>`).join("")}</div>
         <p class="meta" style="margin:6px 2px">Seçili türlerdeki işlemler için uyarı gelir; zil düğmesindeki Bildirimler ekranında hepsi listelenir.</p>
 
-        <label class="fld">Ortak defter (herkes ekleyip düzenleyebilir)</label>
+        <label class="fld">Ortak defter · rol bazlı erişim</label>
         <div id="shareHost"></div>
 
         <label class="fld">Cihaz kilidi (yalnızca bu cihaza özel PIN)</label>
@@ -2525,11 +2680,11 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         </div>
         ${db.pin ? `<button class="btn btn-ghost" id="sLockNow" style="width:100%;margin-top:8px">${icon("lock")} Şimdi kilitle</button>` : ""}
 
-        <label class="fld">Yönetici</label>
+${isLedgerManager() ? `<label class="fld">Yönetici</label>
         <button class="btn btn-gold" id="sAdmin" style="width:100%">🛡 Yönetici paneli ${db.silmePin ? "🔒" : ""}</button>
-        <p class="meta" style="margin:6px 2px">Firma bilgileri, defterler, aylık hedef, mesai saatleri, WhatsApp şablonları, cihaz yönetimi, silinenler, yedekleme ve şifre ayarları yönetici şifresiyle açılan panelde.</p>
+        <p class="meta" style="margin:6px 2px">Firma bilgileri, defterler, aylık hedef, mesai saatleri, WhatsApp şablonları, cihaz yönetimi, silinenler, yedekleme ve şifre ayarları yönetici şifresiyle açılır.</p>` : ""}
 
-        <label class="fld">Defter erişimi · ${esc(ledgerRole || "üyelik bekleniyor")}</label>
+        <label class="fld">Defter erişimi · ${esc(ROLE_LABEL[ledgerRole] || ledgerRole || "üyelik bekleniyor")}</label>
         <div id="memberHost" class="panel" style="padding:10px"></div>
 
         <label class="fld">Kullanıcı adı (bu cihaz)</label>
@@ -2796,9 +2951,17 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     const c = document.createElement("canvas");
     c.width = W; c.height = H;
     const ctx = c.getContext("2d");
-    ctx.fillStyle = "#f3ead8"; ctx.fillRect(0,0,W,H);
-    ctx.fillStyle = "#142923"; ctx.fillRect(0,0,W,210);
-    ctx.fillStyle = "#c9a227"; ctx.fillRect(0,210,W,6);
+    const css = getComputedStyle(document.documentElement);
+    const color = (key, fallback) => css.getPropertyValue(key).trim() || fallback;
+    const C = {
+      ink: color("--ink", "#1a1612"), primary: color("--leather", "#142923"),
+      accent: color("--gold", "#c9a227"), paper: color("--paper", "#f3ead8"),
+      sheet: color("--sheet", "#fff8ec"), line: color("--line", "#e4d5b8"),
+      mute: color("--mute", "#6b5e4a")
+    };
+    ctx.fillStyle = C.paper; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle = C.primary; ctx.fillRect(0,0,W,210);
+    ctx.fillStyle = C.accent; ctx.fillRect(0,210,W,6);
     let tx = 64;
     if (logoImg) {
       try {
@@ -2811,49 +2974,49 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         tx = 184;
       } catch(e) { tx = 64; }
     }
-    ctx.font = "700 20px sans-serif"; ctx.fillStyle = "#c9a227";
+    ctx.font = "700 20px sans-serif"; ctx.fillStyle = C.accent;
     ctx.fillText("ÖDEME DEFTERİ", tx, 62);
-    ctx.fillStyle = "#fff8ec"; ctx.font = "800 38px sans-serif";
+    ctx.fillStyle = "#fff"; ctx.font = "800 38px sans-serif";
     ctx.fillText(db.magaza.slice(0, 30), tx, 106);
-    ctx.font = "600 17px sans-serif"; ctx.fillStyle = "#b9c9c0";
+    ctx.font = "600 17px sans-serif"; ctx.fillStyle = "rgba(255,255,255,.76)";
     if (db.firma.tel) ctx.fillText(("Tel: " + db.firma.tel).slice(0, 46), tx, 134);
-    ctx.font = "600 26px sans-serif"; ctx.fillStyle = "#ead889";
+    ctx.font = "600 26px sans-serif"; ctx.fillStyle = "#fff";
     ctx.fillText(title.slice(0, 50), 64, 182);
-    ctx.fillStyle = "#1a1612"; ctx.font = "700 22px sans-serif";
+    ctx.fillStyle = C.ink; ctx.font = "700 22px sans-serif";
     ctx.fillText("Müşteri · Ödeme türü · Vade", 64, 262);
     ctx.textAlign = "right"; ctx.fillText("Tutar", W-64, 262); ctx.textAlign = "left";
     rows.forEach((k, i) => {
       const y = head + i * rowH;
-      ctx.fillStyle = i % 2 ? "#fff8ec" : "#fffdf7";
+      ctx.fillStyle = i % 2 ? C.sheet : C.paper;
       rr(ctx, 48, y, W-96, rowH-12, 14); ctx.fill();
-      ctx.fillStyle = "#1a1612"; ctx.font = "700 27px sans-serif";
+      ctx.fillStyle = C.ink; ctx.font = "700 27px sans-serif";
       ctx.fillText((k.musteri || "").slice(0, 28), 72, y + 36);
       const tl = typeAd(k.tur, k);
       ctx.font = "700 19px sans-serif";
       const tw = ctx.measureText(tl).width + 26;
-      ctx.fillStyle = "#e4d5b8"; rr(ctx, 72, y + 50, tw, 32, 16); ctx.fill();
-      ctx.fillStyle = "#142923"; ctx.fillText(tl, 85, y + 73);
-      ctx.fillStyle = "#6b5e4a"; ctx.font = "500 19px sans-serif";
+      ctx.fillStyle = C.line; rr(ctx, 72, y + 50, tw, 32, 16); ctx.fill();
+      ctx.fillStyle = C.primary; ctx.fillText(tl, 85, y + 73);
+      ctx.fillStyle = C.mute; ctx.font = "500 19px sans-serif";
       ctx.fillText(`${statusLabel(statusOf(k))}  ·  Vade ${fmtDate(k.vade)}`, 72 + tw + 14, y + 73);
-      ctx.fillStyle = "#1a1612"; ctx.font = "800 26px sans-serif";
+      ctx.fillStyle = C.ink; ctx.font = "800 26px sans-serif";
       ctx.textAlign = "right"; ctx.fillText(fmtTRY(k.tutar), W-72, y + 40);
       if ((k.tahsilTutar || 0) > 0 && statusOf(k) !== "tahsil") {
-        ctx.font = "600 18px sans-serif"; ctx.fillStyle = "#6b5e4a";
+        ctx.font = "600 18px sans-serif"; ctx.fillStyle = C.mute;
         ctx.fillText(`Kalan ${fmtTRY(remaining(k))}`, W-72, y + 68);
       }
       ctx.textAlign = "left";
     });
     if (list.length > 12) {
-      ctx.fillStyle = "#6b5e4a"; ctx.font = "600 20px sans-serif";
+      ctx.fillStyle = C.mute; ctx.font = "600 20px sans-serif";
       ctx.fillText(`ve ${list.length - 12} kayıt daha…`, 64, head + rows.length * rowH + 4);
     }
     const fy = H - 170;
-    ctx.fillStyle = "#142923"; ctx.fillRect(48, fy, W-96, 120);
-    ctx.fillStyle = "#ead889"; ctx.font = "700 20px sans-serif";
+    ctx.fillStyle = C.primary; ctx.fillRect(48, fy, W-96, 120);
+    ctx.fillStyle = C.accent; ctx.font = "700 20px sans-serif";
     ctx.fillText("Bekleyen", 80, fy+40); ctx.fillText("Tahsil", 420, fy+40); ctx.fillText("Ertelenen", 760, fy+40);
-    ctx.fillStyle = "#fff8ec"; ctx.font = "800 27px sans-serif";
+    ctx.fillStyle = "#fff"; ctx.font = "800 27px sans-serif";
     ctx.fillText(fmtTRY(s.bek), 80, fy+84); ctx.fillText(fmtTRY(s.tah), 420, fy+84); ctx.fillText(fmtTRY(s.ert), 760, fy+84);
-    ctx.fillStyle = "#6b5e4a"; ctx.font = "500 16px sans-serif";
+    ctx.fillStyle = C.mute; ctx.font = "500 16px sans-serif";
     ctx.fillText("Ortak defter · " + new Date().toLocaleString("tr-TR"), 64, H - 28);
     return c;
   }
@@ -2870,30 +3033,6 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
             <div style="display:flex;align-items:center;gap:8px">
               <h2 style="flex:1;font-size:18px">Görsel paylaşım</h2>
               <button class="btn btn-ghost" id="sheetClose">Kapat</button>
-            </div>
-            <div class="share-sheet">
-              <div style="display:flex;gap:12px;align-items:center">
-                ${db.firma.logo ? `<img src="${db.firma.logo}" style="width:44px;height:44px;object-fit:cover;border-radius:10px;flex:0 0 44px">` : ""}
-                <div style="min-width:0">
-                  <div style="letter-spacing:.2em;font-size:11px;color:#7a6a4e">ÖDEME FİŞİ</div>
-                  <div style="font-weight:800;font-size:20px">${esc(db.magaza)}</div>
-                  ${db.firma.tel ? `<div style="font-size:12px;color:#7a6a4e">${esc(db.firma.tel)}</div>` : ""}
-                </div>
-              </div>
-              <div style="margin:4px 0 10px">${esc(title)}</div>
-              <div style="border-top:1px dashed #c9b48a;padding-top:8px">
-                ${list.slice(0,12).map(k => `<div style="display:flex;justify-content:space-between;gap:8px;margin:6px 0;font-size:13px">
-                  <span style="min-width:0"><b>${esc(k.musteri)}</b><br/><span style="color:#7a6a4e">${esc(typeAd(k.tur, k))} · ${statusLabel(statusOf(k))}</span></span>
-                  <span style="font-weight:800;white-space:nowrap">${fmtTRY(k.tutar)}</span>
-                </div>`).join("") || "<div>Kayıt yok</div>"}
-                ${list.length>12 ? `<div style="color:#7a6a4e;font-size:12px">ve ${list.length-12} kayıt daha</div>` : ""}
-              </div>
-              <div style="border-top:1px dashed #c9b48a;margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;gap:8px;font-size:13px">
-                <span>Bekleyen<br/><b>${fmtTRY(s.bek)}</b></span>
-                <span>Tahsil<br/><b>${fmtTRY(s.tah)}</b></span>
-                <span>Ertelenen<br/><b>${fmtTRY(s.ert)}</b></span>
-              </div>
-              ${db.firma.adres ? `<div style="margin-top:8px;font-size:11px;color:#7a6a4e">${esc(db.firma.adres)}</div>` : ""}
             </div>
             <p class="meta" style="margin:10px 0">“Görseli paylaş” ile fişi doğrudan WhatsApp ve diğer uygulamalara gönderin ya da “PNG indir” ile kaydedin.</p>
             <img src="${url}" alt="rapor" style="width:100%;border-radius:12px;border:1px solid var(--line)" />
@@ -3037,12 +3176,40 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   const memberRef = (id, userId) => fbm.doc(fbDb, "defterler", id, "uyeler", userId);
   const memberApplicationRef = (id, userId) => fbm.doc(fbDb, "defterler", id, "uyelikBasvurulari", userId);
   const memberApplicationsRef = id => fbm.collection(fbDb, "defterler", id, "uyelikBasvurulari");
+  const adminApplicationsRef = () => fbm.collection(fbDb, "uyelikBildirimleri");
+  const adminApplicationRef = id => fbm.doc(fbDb, "uyelikBildirimleri", id);
+  const adminApplicationId = (ledgerId, userId) => ledgerId + "__" + userId;
   let applicationWatcher = null, applicationWatcherKey = "";
+  let ownRoleWatcher = null, ownRoleWatcherKey = "";
+  let adminApplicationsWatcher = null, adminApplicationsWatcherUid = "", adminInboxToken = 0;
   const ADMIN_EMAIL = "izmirdunyaambalaj@gmail.com";
   const isGoogleUser = user => !!user && !user.isAnonymous;
   const isFixedAdmin = user => isGoogleUser(user)
     && !!user.emailVerified
     && String(user.email || "").toLowerCase() === ADMIN_EMAIL;
+  const ROLE_LABEL = { owner: "Sahip", admin: "Admin", editor: "Düzenleme", viewer: "Salt görüntüleme" };
+  const isLedgerManager = () => isFixedAdmin(fbAuth && fbAuth.currentUser) || ["owner", "admin"].includes(ledgerRole);
+  const canAssignAdminRole = () => isFixedAdmin(fbAuth && fbAuth.currentUser) || ledgerRole === "owner";
+  const canWriteLedger = () => !DEFTER_ID || ["owner", "admin", "editor"].includes(ledgerRole);
+  const canManageSharedSettings = () => !DEFTER_ID || ["owner", "admin"].includes(ledgerRole) || isFixedAdmin(fbAuth && fbAuth.currentUser);
+  const canAssignRole = (role, targetRole = "", targetUid = "") => {
+    const user = fbAuth && fbAuth.currentUser;
+    if (!["admin", "editor", "viewer"].includes(role) || targetUid === (user && user.uid)) return false;
+    if (isFixedAdmin(user) || ledgerRole === "owner") return targetRole !== "owner";
+    return ledgerRole === "admin"
+      && ["editor", "viewer"].includes(role)
+      && (!targetRole || ["editor", "viewer"].includes(targetRole));
+  };
+  const canRemoveMember = (targetRole, targetUid) => {
+    const user = fbAuth && fbAuth.currentUser;
+    if (targetUid === (user && user.uid) || targetRole === "owner") return false;
+    if (isFixedAdmin(user) || ledgerRole === "owner") return true;
+    return ledgerRole === "admin" && ["editor", "viewer"].includes(targetRole);
+  };
+  const roleOptions = (selected = "editor", forAdmin = canAssignAdminRole()) => {
+    const roles = forAdmin ? ["admin", "editor", "viewer"] : ["editor", "viewer"];
+    return roles.map(role => `<option value="${role}" ${role === selected ? "selected" : ""}>${ROLE_LABEL[role]}</option>`).join("");
+  };
 
   async function authenticateGoogle() {
     const ok = await cloudInit();
@@ -3108,21 +3275,24 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       try {
         const ref = memberApplicationRef(DEFTER_ID, uidValue);
         const current = await fbm.getDoc(ref);
-        if (current.exists() && current.data().status === "pending") {
-          toast("Başvurunuz zaten bekliyor");
-        } else {
-          const now = new Date().toISOString();
-          await fbm.setDoc(ref, {
-            uid: uidValue,
-            email: user.email || "",
-            name: user.displayName || "",
-            status: "pending",
-            createdAt: current.exists() ? (current.data().createdAt || now) : now,
-            updatedAt: now
-          });
-          requestButton.textContent = "Başvuru gönderildi";
-          toast("Başvurunuz defter yöneticisine iletildi");
-        }
+        const now = new Date().toISOString();
+        const application = {
+          uid: uidValue,
+          email: user.email || "",
+          name: user.displayName || "",
+          status: "pending",
+          createdAt: current.exists() ? (current.data().createdAt || now) : now,
+          updatedAt: now
+        };
+        const globalId = adminApplicationId(DEFTER_ID, uidValue);
+        const batch = fbm.writeBatch(fbDb);
+        if (!(current.exists() && current.data().status === "pending")) batch.set(ref, application);
+        batch.set(adminApplicationRef(globalId), { ...application, defterId: DEFTER_ID });
+        await batch.commit();
+        requestButton.textContent = "Başvuru gönderildi";
+        toast(current.exists() && current.data().status === "pending"
+          ? "Başvurunuz yönetici bildirim kuyruğuna iletildi"
+          : "Başvurunuz defter yöneticisine iletildi");
       } catch (e) {
         requestButton.disabled = false;
         toast("Başvuru gönderilemedi: " + fbErr(e));
@@ -3130,21 +3300,47 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     };
   }
 
+  function watchOwnLedgerRole(id) {
+    const user = fbAuth && fbAuth.currentUser;
+    if (!isGoogleUser(user) || isFixedAdmin(user)) return;
+    const key = id + ":" + user.uid;
+    if (ownRoleWatcherKey === key) return;
+    if (ownRoleWatcher) ownRoleWatcher();
+    ownRoleWatcherKey = key;
+    ownRoleWatcher = fbm.onSnapshot(memberRef(id, user.uid), snap => {
+      if (!snap.exists() || !["owner", "admin", "editor", "viewer"].includes(snap.data().role)) {
+        ledgerRole = null;
+        cloudOn = false;
+        showAccountGate("Bu defterdeki erişiminiz kaldırıldı. Yöneticiyle iletişime geçin.");
+        return;
+      }
+      const nextRole = snap.data().role;
+      if (nextRole !== ledgerRole) {
+        ledgerRole = nextRole;
+        closeSheet();
+        render();
+        toast("Defter rolünüz güncellendi: " + (ROLE_LABEL[nextRole] || nextRole));
+      }
+    }, e => console.warn("Üyelik rolü dinlenemedi:", e));
+  }
+
   async function ensureLedgerAccess(id) {
     const user = fbAuth && fbAuth.currentUser;
     if (!isGoogleUser(user)) return false;
     if (isFixedAdmin(user)) {
       const oref = ownerRef(id);
-      const ownerSnap = await fbm.getDoc(oref);
+      let ownerSnap = await fbm.getDoc(oref);
       if (!ownerSnap.exists()) {
         await fbm.setDoc(oref, { ownerUid: user.uid, createdAt: new Date().toISOString() });
+        ownerSnap = await fbm.getDoc(oref);
       }
+      const fixedRole = ownerSnap.exists() && ownerSnap.data().ownerUid === user.uid ? "owner" : "admin";
       const selfRef = memberRef(id, user.uid);
       const self = await fbm.getDoc(selfRef);
-      if (!self.exists() || self.data().role !== "owner") {
-        await fbm.setDoc(selfRef, { role: "owner", email: user.email || "", name: user.displayName || "", addedAt: new Date().toISOString() });
+      if (!self.exists() || self.data().role !== fixedRole) {
+        await fbm.setDoc(selfRef, { role: fixedRole, email: user.email || "", name: user.displayName || "", addedAt: new Date().toISOString(), addedBy: user.uid });
       }
-      ledgerRole = "owner";
+      ledgerRole = fixedRole;
       return true;
     }
     const oref = ownerRef(id);
@@ -3172,9 +3368,9 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       return true;
     }
     const member = await fbm.getDoc(memberRef(id, user.uid));
-    if (!member.exists() || member.data().role !== "editor") {
+    if (!member.exists() || !["admin", "editor", "viewer"].includes(member.data().role)) {
       ledgerRole = null;
-      showAccountGate("Bu Google hesabı bu deftere henüz üye değil. Kullanıcı kodunuzu defter yöneticisine gönderin.");
+      showAccountGate("Bu Google hesabı bu deftere henüz üye değil. Defter bağlantısından üyelik başvurusu gönderebilirsiniz.");
       return false;
     }
     ledgerRole = member.data().role;
@@ -3184,68 +3380,133 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   async function loadLedgerMembers(host) {
     if (!host || !DEFTER_ID || !isGoogleUser(fbAuth && fbAuth.currentUser)) return;
     const token = ++memberLoadToken;
-    if (ledgerRole !== "owner") {
+    if (!isLedgerManager()) {
       const user = fbAuth.currentUser;
-      host.innerHTML = `<div class="meta">Bu defterdeki rolünüz: <b>${esc(ledgerRole || "üye")}</b>. Kullanıcı kodunuz: <code>${esc(user.uid)}</code>. Üyelik başvurularını ve erişimi defter sahibi yönetir.</div>`;
+      host.innerHTML = `<div class="meta">Bu defterdeki rolünüz: <b>${esc(ROLE_LABEL[ledgerRole] || "üye")}</b>. Kullanıcı kodunuz: <code>${esc(user.uid)}</code>. Üye ve başvuru yönetimi defter yöneticilerine açıktır.</div>`;
       return;
     }
-    host.innerHTML = `<div class="meta">Üyeler ve başvurular yükleniyor…</div>`;
+    host.innerHTML = '<div class="meta">Üyeler ve başvurular yükleniyor…</div>';
     try {
-      const [members, applications] = await Promise.all([
+      const [members, applications, globalApplications] = await Promise.all([
         fbm.getDocs(fbm.collection(fbDb, "defterler", DEFTER_ID, "uyeler")),
-        fbm.getDocs(memberApplicationsRef(DEFTER_ID))
+        fbm.getDocs(memberApplicationsRef(DEFTER_ID)),
+        isFixedAdmin(fbAuth.currentUser) ? fbm.getDocs(adminApplicationsRef()) : Promise.resolve(null)
       ]);
       if (token !== memberLoadToken || !host.isConnected) return;
       const rows = [];
       members.forEach(d => {
-        const m = d.data();
-        rows.push(`<div class="mini-day" style="align-items:center"><div class="who"><b>${esc(m.name || m.email || d.id)}</b><div class="meta">${esc(d.id)} · ${esc(m.role || "üye")}</div></div>${d.id === fbAuth.currentUser.uid ? '<span class="dev-me">Sahip</span>' : `<button class="btn btn-ghost" data-member-remove="${esc(d.id)}" style="color:var(--red)">Kaldır</button>`}</div>`);
+        const m = d.data(), self = d.id === fbAuth.currentUser.uid;
+        const canChange = !self && canAssignRole(m.role, m.role, d.id);
+        const roleControl = canChange
+          ? `<select class="inp" data-member-role="${esc(d.id)}" style="width:auto;min-width:132px;padding:7px">${roleOptions(m.role)}</select>`
+          : `<span class="dev-me">${esc(ROLE_LABEL[m.role] || "Üye")}${self ? " · siz" : ""}</span>`;
+        const removeControl = canRemoveMember(m.role, d.id)
+          ? `<button class="btn btn-ghost" data-member-remove="${esc(d.id)}" style="color:var(--red)">Kaldır</button>`
+          : "";
+        rows.push(`<div class="mini-day" style="align-items:center;gap:8px">
+          <div class="who" style="min-width:0;flex:1"><b>${esc(m.name || m.email || d.id)}</b><div class="meta">${esc(d.id)}</div></div>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${roleControl}${removeControl}</div>
+        </div>`);
       });
+
       const pending = [];
-      applications.forEach(d => { if (d.data().status === "pending") pending.push({ id: d.id, ...d.data() }); });
+      applications.forEach(d => {
+        if (d.data().status === "pending") pending.push({ id: d.id, uid: d.id, ledgerId: DEFTER_ID, ...d.data() });
+      });
+      if (globalApplications) globalApplications.forEach(d => {
+        const a = d.data();
+        if (a.status !== "pending") return;
+        const local = pending.find(x => x.ledgerId === a.defterId && x.uid === a.uid);
+        if (local) { local.globalId = d.id; local.source = "global"; }
+        else pending.push({ ...a, id: d.id, globalId: d.id, source: "global", ledgerId: a.defterId, uid: a.uid });
+      });
       pending.sort((a,b) => String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
-      const requests = pending.map(a => `<div class="mini-day" style="align-items:center"><div class="who"><b>${esc(a.name || a.email || a.uid || a.id)}</b><div class="meta">${esc(a.email || "")} · UID: ${esc(a.uid || a.id)}</div></div><div style="display:flex;gap:6px"><button class="btn btn-gold" data-request-approve="${esc(a.id)}">Onayla</button><button class="btn btn-ghost" data-request-reject="${esc(a.id)}">Reddet</button></div></div>`).join("");
+      const requests = pending.map(a => {
+        const key = (a.ledgerId || DEFTER_ID) + "/" + (a.uid || a.id);
+        return `<div class="mini-day" style="align-items:center;gap:8px">
+          <div class="who" style="min-width:0;flex:1"><b>${esc(a.name || a.email || a.uid || a.id)}</b>
+            <div class="meta">${esc(a.email || "")} · Defter: ${esc(String(a.ledgerId || DEFTER_ID).slice(0,10))}… · UID: ${esc(a.uid || a.id)}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <select class="inp" data-request-role="${esc(key)}" style="width:auto;min-width:126px;padding:7px">${roleOptions("editor")}</select>
+            <button class="btn btn-gold" data-request-approve="${esc(key)}">Onayla</button>
+            <button class="btn btn-ghost" data-request-reject="${esc(key)}">Reddet</button>
+          </div>
+        </div>`;
+      }).join("");
+      const managerNote = ledgerRole === "admin" && !isFixedAdmin(fbAuth.currentUser)
+        ? '<p class="meta" style="margin-top:8px">Admin rolü diğer adminleri ve sahipleri değiştiremez; yeni üyeleri düzenleyici veya salt görüntüleyici olarak ekleyebilir.</p>' : "";
       host.innerHTML = `
         <label class="fld">Yeni üyelik başvuruları ${pending.length ? `· ${pending.length}` : ""}</label>
         <div class="mini">${requests || '<div class="meta">Bekleyen başvuru yok.</div>'}</div>
-        <label class="fld" style="margin-top:12px">Kullanıcı koduyla üye ekle</label>
-        <div class="g2"><input class="inp" id="memberUid" placeholder="Google kullanıcı kodu" /><div class="inp" style="display:flex;align-items:center">Düzenleyebilir</div></div>
-        <button class="btn btn-gold" id="memberAdd" style="width:100%;margin-top:8px">Üye ekle</button>
+        <label class="fld" style="margin-top:12px">Google kullanıcı koduyla üye ekle</label>
+        <div class="g2">
+          <input class="inp" id="memberUid" placeholder="Google kullanıcı kodu" />
+          <select class="inp" id="memberRole">${roleOptions("editor")}</select>
+        </div>
+        <button class="btn btn-gold" id="memberAdd" style="width:100%;margin-top:8px">Seçilen rolle üye ekle</button>
+        ${managerNote}
         <label class="fld" style="margin-top:12px">Defter üyeleri</label>
-        <div class="mini" style="margin-top:8px">${rows.join("") || '<div class="meta">Henüz başka üye yok.</div>'}</div>
-        <p class="meta" style="margin-top:8px">Kullanıcılar Google ile giriş yapıp bu ekrandan üyelik isteği gönderebilir.</p>`;
+        <div class="mini" style="margin-top:8px">${rows.join("") || '<div class="meta">Henüz başka üye yok.</div>'}</div>`;
       document.getElementById("memberAdd").onclick = async () => {
         const id = document.getElementById("memberUid").value.trim();
+        const role = document.getElementById("memberRole").value;
         if (!/^[A-Za-z0-9_-]{20,}$/.test(id)) return toast("Geçerli Google kullanıcı kodu girin");
-        if (id === fbAuth.currentUser.uid) return toast("Kendinizi tekrar ekleyemezsiniz");
+        if (!canAssignRole(role, "", id)) return toast("Bu rolü atama yetkiniz yok");
         try {
-          await fbm.setDoc(memberRef(DEFTER_ID, id), { role: "editor", addedAt: new Date().toISOString(), addedBy: fbAuth.currentUser.uid });
-          toast("Üye eklendi"); loadLedgerMembers(host);
+          await fbm.setDoc(memberRef(DEFTER_ID, id), {
+            role, email: "", name: "", addedAt: new Date().toISOString(), addedBy: fbAuth.currentUser.uid
+          });
+          toast(`${ROLE_LABEL[role]} rolüyle üye eklendi`); loadLedgerMembers(host);
         } catch (e) { toast("Üye eklenemedi: " + fbErr(e)); }
       };
+      host.querySelectorAll("[data-member-role]").forEach(select => select.onchange = async () => {
+        const userId = select.dataset.memberRole;
+        const target = members.docs.find(d => d.id === userId);
+        const newRole = select.value;
+        if (!target || !canAssignRole(newRole, target.data().role, userId)) return loadLedgerMembers(host);
+        select.disabled = true;
+        try {
+          await fbm.updateDoc(memberRef(DEFTER_ID, userId), { role: newRole });
+          toast(`${ROLE_LABEL[newRole]} rolü kaydedildi`); loadLedgerMembers(host);
+        } catch (e) { toast("Rol değiştirilemedi: " + fbErr(e)); loadLedgerMembers(host); }
+      });
       host.querySelectorAll("[data-request-approve]").forEach(button => button.onclick = async () => {
-        const id = button.dataset.requestApprove;
-        const req = pending.find(x => x.id === id);
+        const key = button.dataset.requestApprove;
+        const req = pending.find(x => (x.ledgerId || DEFTER_ID) + "/" + (x.uid || x.id) === key);
         if (!req) return;
+        const roleSelect = [...host.querySelectorAll("[data-request-role]")].find(x => x.dataset.requestRole === key);
+        const role = roleSelect ? roleSelect.value : "editor";
+        if (!canAssignRole(role, "", req.uid || req.id)) return toast("Bu rolü atama yetkiniz yok");
         button.disabled = true;
         try {
+          const now = new Date().toISOString(), ledgerId = req.ledgerId || DEFTER_ID, userId = req.uid || req.id;
           const batch = fbm.writeBatch(fbDb);
-          batch.set(memberRef(DEFTER_ID, id), { role: "editor", email: req.email || "", name: req.name || "", addedAt: new Date().toISOString(), addedBy: fbAuth.currentUser.uid });
-          batch.update(memberApplicationRef(DEFTER_ID, id), { status: "approved", handledAt: new Date().toISOString(), handledBy: fbAuth.currentUser.uid });
+          batch.set(memberRef(ledgerId, userId), { role, email: req.email || "", name: req.name || "", addedAt: now, addedBy: fbAuth.currentUser.uid });
+          batch.update(memberApplicationRef(ledgerId, userId), { status: "approved", handledAt: now, handledBy: fbAuth.currentUser.uid });
+          if (req.globalId) batch.update(adminApplicationRef(req.globalId), { status: "approved", updatedAt: now, handledAt: now, handledBy: fbAuth.currentUser.uid });
           await batch.commit();
-          toast("Başvuru onaylandı, üye erişimi açıldı"); loadLedgerMembers(host);
+          toast(`Başvuru onaylandı; ${ROLE_LABEL[role]} erişimi açıldı`); loadLedgerMembers(host);
         } catch (e) { button.disabled = false; toast("Başvuru onaylanamadı: " + fbErr(e)); }
       });
       host.querySelectorAll("[data-request-reject]").forEach(button => button.onclick = async () => {
-        const id = button.dataset.requestReject;
+        const key = button.dataset.requestReject;
+        const req = pending.find(x => (x.ledgerId || DEFTER_ID) + "/" + (x.uid || x.id) === key);
+        if (!req) return;
         button.disabled = true;
         try {
-          await fbm.updateDoc(memberApplicationRef(DEFTER_ID, id), { status: "rejected", handledAt: new Date().toISOString(), handledBy: fbAuth.currentUser.uid });
+          const now = new Date().toISOString(), ledgerId = req.ledgerId || DEFTER_ID, userId = req.uid || req.id;
+          const batch = fbm.writeBatch(fbDb);
+          batch.update(memberApplicationRef(ledgerId, userId), { status: "rejected", handledAt: now, handledBy: fbAuth.currentUser.uid });
+          if (req.globalId) batch.update(adminApplicationRef(req.globalId), { status: "rejected", updatedAt: now, handledAt: now, handledBy: fbAuth.currentUser.uid });
+          await batch.commit();
           toast("Başvuru reddedildi"); loadLedgerMembers(host);
         } catch (e) { button.disabled = false; toast("Başvuru reddedilemedi: " + fbErr(e)); }
       });
       host.querySelectorAll("[data-member-remove]").forEach(button => button.onclick = async () => {
         const id = button.dataset.memberRemove;
+        const target = members.docs.find(d => d.id === id);
+        if (!target || !canRemoveMember(target.data().role, id)) return toast("Bu üyeyi kaldırma yetkiniz yok");
         if (!confirm("Bu kişinin defter erişimi kaldırılsın mı? Çevrimdışı kopyası cihazında kalmış olabilir.")) return;
         try { await fbm.deleteDoc(memberRef(DEFTER_ID, id)); toast("Üyenin erişimi kaldırıldı"); loadLedgerMembers(host); }
         catch (e) { toast("Üye kaldırılamadı: " + fbErr(e)); }
@@ -3257,7 +3518,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
 
   function watchMembershipApplications() {
     const user = fbAuth && fbAuth.currentUser;
-    if (!DEFTER_ID || !isGoogleUser(user) || ledgerRole !== "owner") return;
+    if (!DEFTER_ID || !isGoogleUser(user) || !isLedgerManager()) return;
     const key = DEFTER_ID + ":" + user.uid;
     if (applicationWatcherKey === key) return;
     if (applicationWatcher) applicationWatcher();
@@ -3305,7 +3566,9 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       diag.uid = user.uid;
       diag.email = user.email || "";
       if (!(await ensureLedgerAccess(DEFTER_ID))) { cloudStarting = false; return; }
+      watchOwnLedgerRole(DEFTER_ID);
       watchMembershipApplications();
+      watchAdminApplications();
     } catch (e) {
       console.warn(e); cloudStarting = false;
       if (String(e.code || "").includes("permission-denied")) showAccountGate("Erişim reddedildi. Üyelik kurallarını ve defter davetinizi kontrol edin.");
@@ -3425,7 +3688,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   }
 
   function schedulePush() {
-    if (!cloudOn) return;
+    if (!cloudOn || !canWriteLedger()) return;
     clearTimeout(pushTimer);
     pushTimer = setTimeout(pushNow, 400);
   }
@@ -3434,6 +3697,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   async function pushNow() {
     clearTimeout(pushTimer);
     if (!cloudOn) return false;
+    if (!canWriteLedger()) { setSyncState("hazir"); return false; }
     const jobs = [];
     const track = (p, undo) => jobs.push(p.catch(e => { undo(); throw e; }));
     db.kayitlar.forEach(k => {
@@ -3442,15 +3706,17 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       remoteRec.set(k.id, json);
       track(fbm.setDoc(docRef("kayitlar", k.id), { d: json, u: fbm.serverTimestamp() }), () => remoteRec.delete(k.id));
     });
-    const sj = sharedSettingsJson();
-    if (remoteSet !== sj) {
-      const old = remoteSet; remoteSet = sj;
-      track(fbm.setDoc(docRef("ayar", "genel"), { d: sj, u: fbm.serverTimestamp() }), () => { remoteSet = old; });
-    }
-    const lg = db.firma.logo || "";
-    if (remoteLogo !== lg) {
-      const old = remoteLogo; remoteLogo = lg;
-      track(fbm.setDoc(docRef("ayar", "logo"), { d: lg, u: fbm.serverTimestamp() }), () => { remoteLogo = old; });
+    if (canManageSharedSettings()) {
+      const sj = sharedSettingsJson();
+      if (remoteSet !== sj) {
+        const old = remoteSet; remoteSet = sj;
+        track(fbm.setDoc(docRef("ayar", "genel"), { d: sj, u: fbm.serverTimestamp() }), () => { remoteSet = old; });
+      }
+      const lg = db.firma.logo || "";
+      if (remoteLogo !== lg) {
+        const old = remoteLogo; remoteLogo = lg;
+        track(fbm.setDoc(docRef("ayar", "logo"), { d: lg, u: fbm.serverTimestamp() }), () => { remoteLogo = old; });
+      }
     }
     if (!jobs.length) return true;
     try { await Promise.all(jobs); return true; }
@@ -3585,6 +3851,93 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     location.hash = "d=" + m[1];
     location.reload();
   }
+  async function resolveAdminApplication(app, status, role, host, button) {
+    if (!isFixedAdmin(fbAuth && fbAuth.currentUser)) return toast("Bu işlem sistem yöneticisine açıktır");
+    if (status === "approved" && !canAssignRole(role, "", app.uid)) return toast("Seçilen rol atanamıyor");
+    button.disabled = true;
+    try {
+      const now = new Date().toISOString(), batch = fbm.writeBatch(fbDb);
+      if (status === "approved") batch.set(memberRef(app.defterId, app.uid), {
+        role, email: app.email || "", name: app.name || "", addedAt: now, addedBy: fbAuth.currentUser.uid
+      });
+      batch.update(memberApplicationRef(app.defterId, app.uid), { status, handledAt: now, handledBy: fbAuth.currentUser.uid });
+      batch.update(adminApplicationRef(app.id), { status, updatedAt: now, handledAt: now, handledBy: fbAuth.currentUser.uid });
+      await batch.commit();
+      toast(status === "approved" ? `Başvuru onaylandı; ${ROLE_LABEL[role]} erişimi açıldı` : "Başvuru reddedildi");
+      loadAdminInbox(host);
+    } catch (e) {
+      button.disabled = false;
+      toast("Başvuru işlenemedi: " + fbErr(e));
+    }
+  }
+
+  async function loadAdminInbox(host) {
+    if (!host || !isFixedAdmin(fbAuth && fbAuth.currentUser)) return;
+    const token = ++adminInboxToken;
+    host.innerHTML = '<div class="meta">Üyelik bildirimleri yükleniyor…</div>';
+    try {
+      const snap = await fbm.getDocs(adminApplicationsRef());
+      if (token !== adminInboxToken || !host.isConnected) return;
+      const pending = [];
+      snap.forEach(d => { if (d.data().status === "pending") pending.push({ id: d.id, ...d.data() }); });
+      pending.sort((a,b) => String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
+      host.innerHTML = pending.length ? pending.map((a,i) => `
+        <div class="mini-day" style="align-items:center;margin-top:8px">
+          <div class="who" style="min-width:0;overflow-wrap:anywhere">
+            <b>${esc(a.name || a.email || a.uid)}</b>
+            <div class="meta">${esc(a.email || "")} · Defter: ${esc(String(a.defterId || "").slice(0,10))}…</div>
+            <div class="meta">UID: ${esc(a.uid || "")}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap">
+            <select class="inp" data-admin-role="${i}" style="width:auto;min-width:132px;padding:7px">${roleOptions("editor")}</select>
+            <button class="btn btn-gold" data-admin-approve="${i}">Onayla</button>
+            <button class="btn btn-ghost" data-admin-reject="${i}">Reddet</button>
+          </div>
+        </div>`).join("") : '<div class="meta">Bekleyen üyelik talebi yok.</div>';
+      host.querySelectorAll("[data-admin-approve]").forEach(button => {
+        const app = pending[Number(button.dataset.adminApprove)];
+        button.onclick = () => {
+          const select = host.querySelector(`[data-admin-role="${button.dataset.adminApprove}"]`);
+          const role = select ? select.value : "editor";
+          app && resolveAdminApplication(app, "approved", role, host, button);
+        };
+      });
+      host.querySelectorAll("[data-admin-reject]").forEach(button => {
+        const app = pending[Number(button.dataset.adminReject)];
+        button.onclick = () => app && resolveAdminApplication(app, "rejected", "editor", host, button);
+      });
+    } catch (e) {
+      if (token === adminInboxToken && host.isConnected) host.innerHTML = `<div class="meta" style="color:var(--red)">Üyelik bildirimleri okunamadı: ${esc(fbErr(e))}</div>`;
+    }
+  }
+
+  function watchAdminApplications() {
+    const user = fbAuth && fbAuth.currentUser;
+    if (!isFixedAdmin(user) || !fbDb) return;
+    if (adminApplicationsWatcherUid === user.uid) return;
+    if (adminApplicationsWatcher) adminApplicationsWatcher();
+    adminApplicationsWatcherUid = user.uid;
+    let initial = true;
+    adminApplicationsWatcher = fbm.onSnapshot(adminApplicationsRef(), snap => {
+      const added = [];
+      snap.docChanges().forEach(change => {
+        const app = change.doc.data();
+        if (change.type === "added" && app.status === "pending") added.push(app);
+      });
+      const host = document.getElementById("adminInbox");
+      if (host && host.isConnected) loadAdminInbox(host);
+      if (!initial && added.length) {
+        toast(added.length === 1 ? "Yeni üyelik başvurusu geldi" : added.length + " yeni üyelik başvurusu geldi",
+          { label: "Başvuruları gör", fn: () => {
+            const inbox = document.getElementById("adminInbox");
+            if (inbox) inbox.scrollIntoView({ behavior: "smooth", block: "center" });
+            else openSettings();
+          } }, 9000);
+      }
+      initial = false;
+    }, e => console.warn("Genel üyelik bildirimleri dinlenemedi:", e));
+  }
+
   function welcomeStart() {
     let n = 0;
     try { const r = JSON.parse(localStorage.getItem(KEY) || "null"); n = r && Array.isArray(r.kayitlar) ? r.kayitlar.filter(k => !k.silindi).length : 0; } catch (e) {}
@@ -3601,6 +3954,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
           <div class="meta" style="margin:16px 0 6px;text-align:center">— ya da size gönderilen bağlantıyla katılın —</div>
           <input class="inp" id="wLink" placeholder="Defter bağlantısını buraya yapıştırın" />
           <button class="btn btn-ghost" id="wJoin" style="width:100%;margin-top:8px" ${isGoogleUser(fbAuth && fbAuth.currentUser) ? "" : "disabled"}>Bağlantıyla katıl</button>
+          ${isFixedAdmin(fbAuth && fbAuth.currentUser) ? '<div class="panel" style="margin-top:14px;padding:12px"><b style="font-size:14px">Tüm defterlerden üyelik talepleri</b><div id="adminInbox" style="margin-top:8px"></div></div>' : ""}
         </div>
       </div>`;
     const authButton = document.getElementById("wSignIn");
@@ -3610,6 +3964,10 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     };
     document.getElementById("wNew").onclick = createDefter;
     document.getElementById("wJoin").onclick = () => joinDefter(document.getElementById("wLink").value);
+    if (isFixedAdmin(fbAuth && fbAuth.currentUser)) {
+      loadAdminInbox(document.getElementById("adminInbox"));
+      watchAdminApplications();
+    }
     cloudInit();
   }
 
@@ -3649,6 +4007,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
      Bulut açıkken işlem Firestore'da "işlem (transaction)" olarak yapılır: aynı anda iki kişi aynı kayda
      tahsilat girse bile tutarlar birbirinin üzerine yazılmaz, toplanır. İnternet yoksa yerelde yapılır. */
   async function mutateRecord(id, label, fn, opts = {}) {
+    if (!canWriteLedger()) { if (!opts.auto) toast("Bu defterde salt görüntüleme yetkiniz var"); return false; }
     const auto = !!opts.auto;
     const local = db.kayitlar.find(x => x.id === id);
     if (!local) { if (!auto) toast("Kayıt artık yok"); return false; }
@@ -4727,6 +5086,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   /* ---- Yönetici paneli ---- */
   const adminTouch = () => { if (db.silmePin) adminUntil = Date.now() + 10 * 60000; };
   async function openAdminPanel() {
+    if (!isLedgerManager()) return toast("Bu defterde yönetici yetkisi gerekli");
     if (!db.silmePin) return openAdminSetup();
     if (!adminActive() || !adminPw) {
       const p = await askPin("Yönetici girişi", "Yönetici şifresini girin");
