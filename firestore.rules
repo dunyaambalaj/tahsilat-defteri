@@ -63,6 +63,11 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Collection-group sorgusunda yalnız sabit yönetici geçmiş başvuruları tarayabilir.
+    match /{path=**}/uyelikBasvurulari/{userId} {
+      allow list: if sabitAdmin();
+    }
+
     match /defterler/{defterId} {
       function uyeYolu(userId) {
         return /databases/$(database)/documents/defterler/$(defterId)/uyeler/$(userId);

@@ -1189,7 +1189,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     try { const v = localStorage.getItem(ID_KEY); return ID_RE.test(v || "") ? v : null; } catch (e) { return null; }
   })();
   const cacheKey = () => DEFTER_ID ? KEY + ":" + DEFTER_ID : KEY;
-  const BUILD = "15";
+  const BUILD = "16";
   const FB_VERSIONS = ["13.0.0", "12.8.0", "12.2.1"]; /* sırayla denenir */
   /* Firebase web ayarları herkese açık bilgidir. firebase-config.js okunamazsa bu yedek kullanılır. */
   const FB_DEFAULT = {
@@ -3387,10 +3387,11 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     }
     host.innerHTML = '<div class="meta">Üyeler ve başvurular yükleniyor…</div>';
     try {
-      const [members, applications, globalApplications] = await Promise.all([
+      const [members, applications, globalApplications, legacyApplications] = await Promise.all([
         fbm.getDocs(fbm.collection(fbDb, "defterler", DEFTER_ID, "uyeler")),
         fbm.getDocs(memberApplicationsRef(DEFTER_ID)),
-        isFixedAdmin(fbAuth.currentUser) ? fbm.getDocs(adminApplicationsRef()) : Promise.resolve(null)
+        isFixedAdmin(fbAuth.currentUser) ? fbm.getDocs(adminApplicationsRef()) : Promise.resolve(null),
+        isFixedAdmin(fbAuth.currentUser) ? fbm.getDocs(fbm.collectionGroup(fbDb, "uyelikBasvurulari")) : Promise.resolve(null)
       ]);
       if (token !== memberLoadToken || !host.isConnected) return;
       const rows = [];
@@ -3419,6 +3420,15 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
         const local = pending.find(x => x.ledgerId === a.defterId && x.uid === a.uid);
         if (local) { local.globalId = d.id; local.source = "global"; }
         else pending.push({ ...a, id: d.id, globalId: d.id, source: "global", ledgerId: a.defterId, uid: a.uid });
+      });
+      // Sabit yönetici için eski sürümlerde yalnız defter altına yazılmış başvuruları da geriye dönük tara.
+      if (legacyApplications) legacyApplications.forEach(d => {
+        const ledgerId = d.ref.parent.parent && d.ref.parent.parent.id;
+        const a = d.data(), uid = a.uid || d.id;
+        if (!ledgerId || a.status !== "pending") return;
+        const existing = pending.find(x => x.ledgerId === ledgerId && x.uid === uid);
+        if (existing) { existing.source ||= "legacy"; return; }
+        pending.push({ ...a, id: d.id, source: "legacy", ledgerId, uid });
       });
       pending.sort((a,b) => String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
       const requests = pending.map(a => {
@@ -3861,7 +3871,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
         role, email: app.email || "", name: app.name || "", addedAt: now, addedBy: fbAuth.currentUser.uid
       });
       batch.update(memberApplicationRef(app.defterId, app.uid), { status, handledAt: now, handledBy: fbAuth.currentUser.uid });
-      batch.update(adminApplicationRef(app.id), { status, updatedAt: now, handledAt: now, handledBy: fbAuth.currentUser.uid });
+      if (app.globalId) batch.update(adminApplicationRef(app.globalId), { status, updatedAt: now, handledAt: now, handledBy: fbAuth.currentUser.uid });
       await batch.commit();
       toast(status === "approved" ? `Başvuru onaylandı; ${ROLE_LABEL[role]} erişimi açıldı` : "Başvuru reddedildi");
       loadAdminInbox(host);
