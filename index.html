@@ -5183,7 +5183,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     location.hash = "d=" + id;
     location.reload();
   }
-  async function addNewLedger(ad) {
+  async function addNewLedger(branchName) {
     const { list, bozuk } = await loadGroup();
     if (bozuk) throw new Error("kasa çözülemedi");
     const id = newToken();
@@ -5191,9 +5191,13 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     if (!isGoogleUser(user)) throw new Error("Google hesabıyla giriş yapın");
     await fbm.setDoc(ownerRef(id), { ownerUid: user.uid, createdAt: new Date().toISOString() });
     await fbm.setDoc(memberRef(id, user.uid), { role: "owner", email: user.email || "", name: user.displayName || "", addedAt: new Date().toISOString() });
-    const o = GENEL_BOS(ad); o.silmePin = db.silmePin;
+    const companyName=db.magaza||"Firma", sube=String(branchName||"").trim(), o = GENEL_BOS(companyName); o.firma.sube=sube; o.silmePin = db.silmePin;
     await writeGenel(id, o);
-    list.push({ id, ad });
+    const now=new Date().toISOString(), info={companyName,branchName:sube};
+    await syncOrgRole(id,"owner",user);
+    await syncBranchDirectory(id,info);
+    await syncUserLedgerIndex(id,user.uid,"owner",info);
+    const ad=sube||companyName; list.push({ id, ad, branchName:sube, companyName });
     const fails = await writeGroup(list, adminPw);
     try { localStorage.setItem("kirtasiye_sahip_" + id, "1"); } catch (e) {}
     return { id, fails };
@@ -5357,8 +5361,8 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
       try { await removeFromGroup(L.id); toast("Listeden çıkarıldı"); renderLedgers(host); } catch (e) { toast("Çıkarılamadı: " + fbErr(e)); }
     });
     document.getElementById("lNew").onclick = async () => {
-      const ad = prompt("Yeni defterin adı (örn. Şube 2):"); if (!ad || !ad.trim()) return;
-      try { const r = await addNewLedger(ad.trim()); toast(r.fails.length ? "Oluşturuldu; kasa güncellenemedi: " + r.fails.join(", ") : "Defter oluşturuldu"); if (confirm(`“${ad.trim()}” defterine şimdi geçilsin mi?`)) openLedger(r.id); else renderLedgers(host); }
+      const ad = prompt("Yeni şube adı (örn. Alsancak, Bornova):"); if (!ad || !ad.trim()) return;
+      try { const r = await addNewLedger(ad.trim()); toast(r.fails.length ? "Şube oluşturuldu; kasa güncellenemedi: " + r.fails.join(", ") : "Şube defteri oluşturuldu"); if (confirm(`“${ad.trim()}” şubesine şimdi geçilsin mi?`)) openLedger(r.id); else renderLedgers(host); }
       catch (e) { toast("Oluşturulamadı: " + (e.message || fbErr(e))); }
     };
     document.getElementById("lAdd").onclick = async () => {
