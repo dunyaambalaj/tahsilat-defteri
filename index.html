@@ -3406,7 +3406,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
         const removeControl = canRemoveMember(m.role, d.id) ? `<button class="btn btn-ghost" data-member-remove="${esc(d.id)}" style="color:var(--red)">Erişimi kaldır</button>` : "";
         const transferControl = ledgerRole === "owner" && !self && ["admin","editor","viewer"].includes(m.role) ? `<button class="btn member-transfer" data-member-transfer="${esc(d.id)}">Sahipliği devret</button>` : "";
         const displayName = m.name || m.email || "İsimsiz üye";
-        const initials = String(displayName).trim().split(/\\s+/).slice(0,2).map(x=>x[0]||"").join("").toLocaleUpperCase("tr");
+        const initials = String(displayName).trim().split(/\s+/).slice(0,2).map(x=>x[0]||"").join("").toLocaleUpperCase("tr");
         rows.push(`<article class="member-card"><div class="member-avatar">${esc(initials || "Ü")}</div><div class="member-info"><div class="member-name">${esc(displayName)}${self ? ' <span class="dev-me">Siz</span>' : ""}</div><div class="member-email">${esc(m.email || "E-posta bilgisi yok")}</div><div class="member-meta">Google UID · ${esc(d.id)}</div></div><div class="member-actions">${roleControl}${removeControl}${transferControl}</div></article>`);
       });
 
