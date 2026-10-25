@@ -3350,7 +3350,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
         else pending.push({ ...a, id: d.id, globalId: d.id, source: "global", ledgerId: a.defterId, uid: a.uid });
       });
       pending.sort((a,b) => String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
-      const requests = pending.map(a => `<div class="mini-day" style="align-items:center"><div class="who"><b>${esc(a.name || a.email || a.uid || a.id)}</b><div class="meta">${esc(a.email || "")} · UID: ${esc(a.uid || a.id)}</div></div><div style="display:flex;gap:6px"><button class="btn btn-gold" data-request-approve="${esc(a.id)}">Onayla</button><button class="btn btn-ghost" data-request-reject="${esc(a.id)}">Reddet</button></div></div>`).join("");
+      const requests = pending.map(a => `<div class="mini-day" style="align-items:center"><div class="who"><b>${esc(a.name || a.email || a.uid || a.id)}</b><div class="meta">${esc(a.email || "")} · Defter: ${esc(String(a.ledgerId || DEFTER_ID).slice(0,10))}… · UID: ${esc(a.uid || a.id)}</div></div><div style="display:flex;gap:6px"><button class="btn btn-gold" data-request-approve="${esc(a.id)}">Onayla</button><button class="btn btn-ghost" data-request-reject="${esc(a.id)}">Reddet</button></div></div>`).join("");
       host.innerHTML = `
         <label class="fld">Yeni üyelik başvuruları ${pending.length ? `· ${pending.length}` : ""}</label>
         <div class="mini">${requests || '<div class="meta">Bekleyen başvuru yok.</div>'}</div>
