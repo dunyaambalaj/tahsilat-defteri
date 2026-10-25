@@ -2684,7 +2684,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
         <button class="btn btn-gold" id="sAdmin" style="width:100%">🛡 Yönetici paneli ${db.silmePin ? "🔒" : ""}</button>
         <p class="meta" style="margin:6px 2px">Firma bilgileri, defterler, aylık hedef, mesai saatleri, WhatsApp şablonları, cihaz yönetimi, silinenler, yedekleme ve şifre ayarları yönetici şifresiyle açılır.</p>` : ""}
 
-        <label class="fld">Defter erişimi · ${esc(ledgerRole || "üyelik bekleniyor")}</label>
+        <label class="fld">Defter erişimi · ${esc(ROLE_LABEL[ledgerRole] || ledgerRole || "üyelik bekleniyor")}</label>
         <div id="memberHost" class="panel" style="padding:10px"></div>
 
         <label class="fld">Kullanıcı adı (bu cihaz)</label>
@@ -3191,6 +3191,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
   const isLedgerManager = () => isFixedAdmin(fbAuth && fbAuth.currentUser) || ["owner", "admin"].includes(ledgerRole);
   const canAssignAdminRole = () => isFixedAdmin(fbAuth && fbAuth.currentUser) || ledgerRole === "owner";
   const canWriteLedger = () => !DEFTER_ID || ["owner", "admin", "editor"].includes(ledgerRole);
+  const canManageSharedSettings = () => !DEFTER_ID || ["owner", "admin"].includes(ledgerRole) || isFixedAdmin(fbAuth && fbAuth.currentUser);
   const canAssignRole = (role, targetRole = "", targetUid = "") => {
     const user = fbAuth && fbAuth.currentUser;
     if (!["admin", "editor", "viewer"].includes(role) || targetUid === (user && user.uid)) return false;
@@ -3328,16 +3329,18 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     if (!isGoogleUser(user)) return false;
     if (isFixedAdmin(user)) {
       const oref = ownerRef(id);
-      const ownerSnap = await fbm.getDoc(oref);
+      let ownerSnap = await fbm.getDoc(oref);
       if (!ownerSnap.exists()) {
         await fbm.setDoc(oref, { ownerUid: user.uid, createdAt: new Date().toISOString() });
+        ownerSnap = await fbm.getDoc(oref);
       }
+      const fixedRole = ownerSnap.exists() && ownerSnap.data().ownerUid === user.uid ? "owner" : "admin";
       const selfRef = memberRef(id, user.uid);
       const self = await fbm.getDoc(selfRef);
-      if (!self.exists() || self.data().role !== "owner") {
-        await fbm.setDoc(selfRef, { role: "owner", email: user.email || "", name: user.displayName || "", addedAt: new Date().toISOString() });
+      if (!self.exists() || self.data().role !== fixedRole) {
+        await fbm.setDoc(selfRef, { role: fixedRole, email: user.email || "", name: user.displayName || "", addedAt: new Date().toISOString(), addedBy: user.uid });
       }
-      ledgerRole = "owner";
+      ledgerRole = fixedRole;
       return true;
     }
     const oref = ownerRef(id);
@@ -3703,15 +3706,17 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
       remoteRec.set(k.id, json);
       track(fbm.setDoc(docRef("kayitlar", k.id), { d: json, u: fbm.serverTimestamp() }), () => remoteRec.delete(k.id));
     });
-    const sj = sharedSettingsJson();
-    if (remoteSet !== sj) {
-      const old = remoteSet; remoteSet = sj;
-      track(fbm.setDoc(docRef("ayar", "genel"), { d: sj, u: fbm.serverTimestamp() }), () => { remoteSet = old; });
-    }
-    const lg = db.firma.logo || "";
-    if (remoteLogo !== lg) {
-      const old = remoteLogo; remoteLogo = lg;
-      track(fbm.setDoc(docRef("ayar", "logo"), { d: lg, u: fbm.serverTimestamp() }), () => { remoteLogo = old; });
+    if (canManageSharedSettings()) {
+      const sj = sharedSettingsJson();
+      if (remoteSet !== sj) {
+        const old = remoteSet; remoteSet = sj;
+        track(fbm.setDoc(docRef("ayar", "genel"), { d: sj, u: fbm.serverTimestamp() }), () => { remoteSet = old; });
+      }
+      const lg = db.firma.logo || "";
+      if (remoteLogo !== lg) {
+        const old = remoteLogo; remoteLogo = lg;
+        track(fbm.setDoc(docRef("ayar", "logo"), { d: lg, u: fbm.serverTimestamp() }), () => { remoteLogo = old; });
+      }
     }
     if (!jobs.length) return true;
     try { await Promise.all(jobs); return true; }
