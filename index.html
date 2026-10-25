@@ -4562,6 +4562,10 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     const { list, bozuk } = await loadGroup();
     if (bozuk) throw new Error("kasa çözülemedi");
     const id = newToken();
+    const user = fbAuth && fbAuth.currentUser;
+    if (!isGoogleUser(user)) throw new Error("Google hesabıyla giriş yapın");
+    await fbm.setDoc(ownerRef(id), { ownerUid: user.uid, createdAt: new Date().toISOString() });
+    await fbm.setDoc(memberRef(id, user.uid), { role: "owner", email: user.email || "", name: user.displayName || "", addedAt: new Date().toISOString() });
     const o = GENEL_BOS(ad); o.silmePin = db.silmePin;
     await writeGenel(id, o);
     list.push({ id, ad });
@@ -4576,6 +4580,8 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     const { list, bozuk } = await loadGroup();
     if (bozuk) throw new Error("kasa çözülemedi");
     if (list.some(x => x.id === id)) throw new Error("bu defter zaten listede");
+    const access = await ensureLedgerAccess(id);
+    if (!access) throw new Error("Bu defterin yöneticisi sizi üye olarak eklemeli");
     const g = await readGenel(id);
     const snap = await fbm.getDocsFromServer(fbm.collection(fbDb, "defterler", id, "kayitlar"));
     if (!g && snap.size === 0 && !confirm("Bu bağlantıda kayıt ya da ayar bulunamadı (boş ya da yanlış olabilir). Yine de eklensin mi?")) throw new Error("vazgeçildi");
