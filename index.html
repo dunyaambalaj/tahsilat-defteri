@@ -3454,6 +3454,44 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     return true;
   }
 
+  async function saveMemberRole(userId, newRole, currentRole) {
+    const batch=fbm.writeBatch(fbDb), now=new Date().toISOString(), info=await ledgerBranchInfo(DEFTER_ID);
+    const orgSnap=await fbm.getDoc(orgMemberRef(userId));
+    if(orgSnap.exists()&&orgSnap.data().role==="owner"&&newRole!=="admin") throw new Error("Bu kullanıcı şirket sahibidir; önce sahiplik aktarılmalı");
+    if(orgSnap.exists()&&orgSnap.data().role==="admin"&&newRole!=="admin"){
+      const branches=await accessibleLedgers();
+      for(const branchInfo of branches){
+        const snap=await fbm.getDoc(memberRef(branchInfo.id,userId));
+        if(!snap.exists()||snap.data().role!=="admin")continue;
+        batch.update(memberRef(branchInfo.id,userId),{role:newRole});
+        batch.set(userLedgerIndexRef(userId,branchInfo.id),{ledgerId:branchInfo.id,role:newRole,companyName:branchInfo.companyName||"Firma",branchName:branchInfo.branchName||"",updatedAt:now});
+      }
+      batch.delete(orgMemberRef(userId));
+    }else{
+      batch.update(memberRef(DEFTER_ID,userId),{role:newRole});
+      batch.set(userLedgerIndexRef(userId,DEFTER_ID),{ledgerId:DEFTER_ID,role:newRole,companyName:info.companyName||"Firma",branchName:info.branchName||"",updatedAt:now});
+      if(newRole==="admin")batch.set(orgMemberRef(userId),{role:"admin",uid:userId,email:"",name:"",sourceLedgerId:DEFTER_ID,createdAt:now,updatedAt:now});
+    }
+    await batch.commit();
+  }
+  async function removeMemberAccess(userId, currentRole) {
+    const batch=fbm.writeBatch(fbDb), orgSnap=await fbm.getDoc(orgMemberRef(userId));
+    if(orgSnap.exists()&&orgSnap.data().role==="owner")throw new Error("Şirket sahibini kaldırmak için önce sahipliği devredin");
+    if(orgSnap.exists()&&orgSnap.data().role==="admin"){
+      const branches=await accessibleLedgers();
+      for(const branchInfo of branches){
+        const snap=await fbm.getDoc(memberRef(branchInfo.id,userId));
+        if(snap.exists()&&snap.data().role==="admin")batch.delete(memberRef(branchInfo.id,userId));
+        batch.delete(userLedgerIndexRef(userId,branchInfo.id));
+      }
+      batch.delete(orgMemberRef(userId));
+    }else{
+      batch.delete(memberRef(DEFTER_ID,userId));
+      batch.delete(userLedgerIndexRef(userId,DEFTER_ID));
+    }
+    await batch.commit();
+  }
+
   async function loadLedgerMembers(host) {
     if (!host || !DEFTER_ID || !isGoogleUser(fbAuth && fbAuth.currentUser)) return;
     const token = ++memberLoadToken;
@@ -3560,14 +3598,14 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
           const userId=select.dataset.memberRole,target=members.docs.find(d=>d.id===userId),newRole=select.value;
           if(!target||!canAssignRole(newRole,target.data().role,userId))return loadLedgerMembers(host);
           select.disabled=true;
-          try{await fbm.updateDoc(memberRef(DEFTER_ID,userId),{role:newRole});toast(`${ROLE_LABEL[newRole]} rolü kaydedildi`);closeSheet();loadLedgerMembers(host)}
+          try{await saveMemberRole(userId,newRole,target.data().role);toast(`${ROLE_LABEL[newRole]} rolü ve şirket erişimi kaydedildi`);closeSheet();loadLedgerMembers(host)}
           catch(e){toast("Rol değiştirilemedi: "+fbErr(e));loadLedgerMembers(host)}
         });
         panel.querySelectorAll("[data-member-remove]").forEach(button=>button.onclick=async()=>{
           const id=button.dataset.memberRemove,target=members.docs.find(d=>d.id===id);
           if(!target||!canRemoveMember(target.data().role,id))return toast("Bu üyeyi kaldırma yetkiniz yok");
           if(!confirm("Bu kişinin defter erişimi kaldırılsın mı? Çevrimdışı kopyası cihazında kalmış olabilir."))return;
-          try{await fbm.deleteDoc(memberRef(DEFTER_ID,id));toast("Üyenin erişimi kaldırıldı");closeSheet();loadLedgerMembers(host)}
+          try{await removeMemberAccess(id,target.data().role);toast("Üyenin erişimi kaldırıldı");closeSheet();loadLedgerMembers(host)}
           catch(e){toast("Üye kaldırılamadı: "+fbErr(e))}
         });
         panel.querySelectorAll("[data-member-transfer]").forEach(button=>button.onclick=async()=>{
@@ -3576,7 +3614,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
           const targetName=target.data().name||target.data().email||newOwnerId;
           if(!confirm(`Defter sahipliği ${targetName} kişisine devredilecek. Siz admin olarak kalacaksınız. Yeni sahip rol ve üyelik yetkilerini devralır. Devam edilsin mi?`))return;
           button.disabled=true;
-          try{const batch=fbm.writeBatch(fbDb);batch.update(ownerRef(DEFTER_ID),{ownerUid:newOwnerId});batch.update(memberRef(DEFTER_ID,fbAuth.currentUser.uid),{role:"admin"});batch.update(memberRef(DEFTER_ID,newOwnerId),{role:"owner"});await batch.commit();ledgerRole="admin";toast("Defter sahipliği devredildi; erişiminiz admin olarak sürüyor");closeSheet();loadLedgerMembers(host)}
+          try{const batch=fbm.writeBatch(fbDb),now=new Date().toISOString(),info=await ledgerBranchInfo(DEFTER_ID),me=fbAuth.currentUser;batch.update(ownerRef(DEFTER_ID),{ownerUid:newOwnerId});batch.update(memberRef(DEFTER_ID,me.uid),{role:"admin"});batch.update(memberRef(DEFTER_ID,newOwnerId),{role:"owner"});batch.set(orgMemberRef(me.uid),{role:"admin",uid:me.uid,email:me.email||"",name:me.displayName||"",sourceLedgerId:DEFTER_ID,createdAt:now,updatedAt:now});batch.set(orgMemberRef(newOwnerId),{role:"owner",uid:newOwnerId,email:target.data().email||"",name:target.data().name||"",sourceLedgerId:DEFTER_ID,createdAt:now,updatedAt:now});batch.set(userLedgerIndexRef(me.uid,DEFTER_ID),{ledgerId:DEFTER_ID,role:"admin",companyName:info.companyName||"Firma",branchName:info.branchName||"",updatedAt:now});batch.set(userLedgerIndexRef(newOwnerId,DEFTER_ID),{ledgerId:DEFTER_ID,role:"owner",companyName:info.companyName||"Firma",branchName:info.branchName||"",updatedAt:now});await batch.commit();ledgerRole="admin";toast("Defter sahipliği devredildi; erişiminiz admin olarak sürüyor");closeSheet();loadLedgerMembers(host)}
           catch(e){button.disabled=false;toast("Sahiplik devredilemedi: "+fbErr(e))}
         });
       };
