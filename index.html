@@ -3367,6 +3367,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
   async function accessibleLedgers() {
     const user = fbAuth && fbAuth.currentUser;
     if (!isGoogleUser(user)) return [];
+    if (!fbDb && !(await cloudInit())) throw new Error(diag.err || "Firebase başlatılamadı");
     if (isFixedAdmin(user) || ["owner","admin"].includes(ledgerRole)) {
       const snap = await fbm.getDocs(orgBranchesRef());
       return snap.docs.map(d => ({ id: d.id, ...d.data(), role: isFixedAdmin(user) ? "admin" : ledgerRole }));
@@ -3519,9 +3520,10 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
         const roleControl = canChange ? `<select class="inp" data-member-role="${esc(d.id)}">${roleOptions(m.role)}</select>` : `<span class="member-role-badge">${esc(ROLE_LABEL[m.role] || "Üye")}${self ? " · siz" : ""}</span>`;
         const removeControl = canRemoveMember(m.role, d.id) ? `<button class="btn btn-ghost" data-member-remove="${esc(d.id)}" style="color:var(--red)">Erişimi kaldır</button>` : "";
         const transferControl = ledgerRole === "owner" && !self && ["admin","editor","viewer"].includes(m.role) ? `<button class="btn member-transfer" data-member-transfer="${esc(d.id)}">Sahipliği devret</button>` : "";
+        const branchAssign = ["editor","viewer"].includes(m.role) && branchChoices.length>1 ? `<details style="flex:1 0 100%"><summary class="meta" style="cursor:pointer;padding:5px 0">Diğer şubelere erişim ver</summary><div class="branch-options">${branchChoices.filter(b=>b.id!==DEFTER_ID).map(b=>`<label class="branch-option"><input type="checkbox" data-member-assign="${esc(d.id)}" value="${esc(b.id)}"><span>${esc(b.branchName||b.companyName||b.id)}</span></label>`).join("")}</div><button class="btn btn-ghost" data-member-assign-save="${esc(d.id)}" style="margin-top:6px">Seçili şubelere erişim ver</button></details>` : "";
         const displayName = m.name || m.email || "İsimsiz üye";
         const initials = String(displayName).trim().split(/\s+/).slice(0,2).map(x=>x[0]||"").join("").toLocaleUpperCase("tr");
-        rows.push(`<article class="member-card"><div class="member-avatar">${esc(initials || "Ü")}</div><div class="member-info"><div class="member-name">${esc(displayName)}${self ? ' <span class="dev-me">Siz</span>' : ""}</div><div class="member-email">${esc(m.email || "E-posta bilgisi yok")}</div><div class="member-meta">Google UID · ${esc(d.id)}</div></div><div class="member-actions">${roleControl}${removeControl}${transferControl}</div></article>`);
+        rows.push(`<article class="member-card"><div class="member-avatar">${esc(initials || "Ü")}</div><div class="member-info"><div class="member-name">${esc(displayName)}${self ? ' <span class="dev-me">Siz</span>' : ""}</div><div class="member-email">${esc(m.email || "E-posta bilgisi yok")}</div><div class="member-meta">Google UID · ${esc(d.id)}</div></div><div class="member-actions">${roleControl}${removeControl}${transferControl}${branchAssign}</div></article>`);
       });
 
       const pending = [];
@@ -3607,6 +3609,15 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
           if(!confirm("Bu kişinin defter erişimi kaldırılsın mı? Çevrimdışı kopyası cihazında kalmış olabilir."))return;
           try{await removeMemberAccess(id,target.data().role);toast("Üyenin erişimi kaldırıldı");closeSheet();loadLedgerMembers(host)}
           catch(e){toast("Üye kaldırılamadı: "+fbErr(e))}
+        });
+        panel.querySelectorAll("[data-member-assign-save]").forEach(button=>button.onclick=async()=>{
+          const userId=button.dataset.memberAssignSave,target=members.docs.find(d=>d.id===userId),selected=[...panel.querySelectorAll("[data-member-assign]:checked")].filter(x=>x.dataset.memberAssign===userId).map(x=>x.value);
+          if(!target||!selected.length)return toast("En az bir şube seçin");
+          button.disabled=true;
+          try{const batch=fbm.writeBatch(fbDb),now=new Date().toISOString(),data=target.data();
+            for(const ledgerId of selected){const info=branchChoices.find(x=>x.id===ledgerId)||await ledgerBranchInfo(ledgerId);batch.set(memberRef(ledgerId,userId),{role:data.role,email:data.email||"",name:data.name||"",addedAt:now,addedBy:fbAuth.currentUser.uid});batch.set(userLedgerIndexRef(userId,ledgerId),{ledgerId,role:data.role,companyName:info.companyName||"Firma",branchName:info.branchName||"",updatedAt:now});}
+            await batch.commit();toast(`Üyeye ${selected.length} şube erişimi verildi`);closeSheet();loadLedgerMembers(host);
+          }catch(e){button.disabled=false;toast("Şube erişimi verilemedi: "+fbErr(e))}
         });
         panel.querySelectorAll("[data-member-transfer]").forEach(button=>button.onclick=async()=>{
           const newOwnerId=button.dataset.memberTransfer,target=members.docs.find(d=>d.id===newOwnerId);
@@ -4096,7 +4107,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
           <h2 style="text-align:center;margin:8px 0 4px;font-size:20px">Ortak defter</h2>
           <p class="meta" style="text-align:center;margin-bottom:14px">Defter verileri Google hesabı ve yönetici onayıyla korunur.</p>
           <button class="btn btn-gold" id="wSignIn" style="width:100%">${isGoogleUser(fbAuth && fbAuth.currentUser) ? "Google hesabı bağlı · " + esc(fbAuth.currentUser.email || "") : "Google hesabıyla giriş yap"}</button>
-          ${isGoogleUser(fbAuth && fbAuth.currentUser) ? '<p class="meta" style="text-align:center;margin:8px 0">Kullanıcı kodunuz: <code>' + esc(fbAuth.currentUser.uid) + '</code></p>' : ""}
+          ${isGoogleUser(fbAuth && fbAuth.currentUser) ? '<p class="meta" style="text-align:center;margin:8px 0">Kullanıcı kodunuz: <code>' + esc(fbAuth.currentUser.uid) + '</code></p><button class="btn btn-ghost" id="wBranches" style="width:100%;margin-top:8px">Yetkili olduğum şubeleri göster</button>' : ""}
           <button class="btn btn-gold" id="wNew" style="width:100%;margin-top:8px" ${isGoogleUser(fbAuth && fbAuth.currentUser) ? "" : "disabled"}>Yeni ortak defter oluştur</button>
           ${n ? `<p class="meta" style="margin-top:6px;text-align:center">Bu cihazdaki <b>${n}</b> kayıt yeni defter içine aktarılacak.</p>` : ""}
           <div class="meta" style="margin:16px 0 6px;text-align:center">— ya da size gönderilen bağlantıyla katılın —</div>
@@ -4111,6 +4122,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
       try { await authenticateGoogle(); } catch (e) { authButton.disabled = false; toast("Google girişi yapılamadı: " + fbErr(e)); }
     };
     document.getElementById("wNew").onclick = createDefter;
+    document.getElementById("wBranches")?.addEventListener("click", openBranchSelector);
     document.getElementById("wJoin").onclick = () => joinDefter(document.getElementById("wLink").value);
     if (isFixedAdmin(fbAuth && fbAuth.currentUser)) {
       loadAdminInbox(document.getElementById("adminInbox"));
