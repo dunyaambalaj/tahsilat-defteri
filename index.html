@@ -3322,21 +3322,64 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     if (ownRoleWatcherKey === key) return;
     if (ownRoleWatcher) ownRoleWatcher();
     ownRoleWatcherKey = key;
-    ownRoleWatcher = fbm.onSnapshot(memberRef(id, user.uid), snap => {
-      if (!snap.exists() || !["owner", "admin", "editor", "viewer"].includes(snap.data().role)) {
-        ledgerRole = null;
-        cloudOn = false;
+    let localRole = null, globalRole = null, denied = false;
+    const applyRole = () => {
+      const role = ["owner","admin"].includes(globalRole) ? globalRole : localRole;
+      if (!role || !["owner","admin","editor","viewer"].includes(role)) {
+        if (denied) return;
+        denied = true; ledgerRole = null; cloudOn = false;
         showAccountGate("Bu defterdeki erişiminiz kaldırıldı. Yöneticiyle iletişime geçin.");
         return;
       }
-      const nextRole = snap.data().role;
-      if (nextRole !== ledgerRole) {
-        ledgerRole = nextRole;
-        closeSheet();
-        render();
-        toast("Defter rolünüz güncellendi: " + (ROLE_LABEL[nextRole] || nextRole));
-      }
-    }, e => console.warn("Üyelik rolü dinlenemedi:", e));
+      denied = false;
+      if (role !== ledgerRole) { ledgerRole = role; closeSheet(); render(); toast("Defter rolünüz güncellendi: " + (ROLE_LABEL[role] || role)); }
+    };
+    const a = fbm.onSnapshot(memberRef(id, user.uid), snap => { localRole = snap.exists() ? snap.data().role : null; applyRole(); }, e => console.warn("Defter üyeliği izlenemedi:", e));
+    const b = fbm.onSnapshot(orgMemberRef(user.uid), snap => { globalRole = snap.exists() ? snap.data().role : null; applyRole(); }, e => console.warn("Şirket rolü izlenemedi:", e));
+    ownRoleWatcher = () => { a(); b(); };
+  }
+
+  async function ledgerBranchInfo(id) {
+    if (id === DEFTER_ID) return { companyName: db.magaza || "Firma", branchName: db.firma.sube || "" };
+    const g = await readGenel(id);
+    return { companyName: g?.magaza || "Defter", branchName: g?.firma?.sube || "" };
+  }
+  async function syncOrgRole(id, role, user = fbAuth && fbAuth.currentUser) {
+    if (!user || !["owner","admin"].includes(role)) return;
+    const ref = orgMemberRef(user.uid), old = await fbm.getDoc(ref);
+    if (old.exists()) return;
+    await fbm.setDoc(ref, { role, uid: user.uid, email: user.email || "", name: user.displayName || "", sourceLedgerId: id, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+  }
+  async function syncBranchDirectory(id, info) {
+    if (!id || !isLedgerManager()) return;
+    const meta = info || await ledgerBranchInfo(id);
+    await fbm.setDoc(orgBranchRef(id), { ledgerId: id, companyName: meta.companyName || "Firma", branchName: meta.branchName || "", updatedAt: new Date().toISOString(), updatedBy: fbAuth.currentUser.uid });
+  }
+  async function syncUserLedgerIndex(id, userId, role, info) {
+    if (!id || !userId || !role) return;
+    const meta = info || await ledgerBranchInfo(id);
+    await fbm.setDoc(userLedgerIndexRef(userId, id), { ledgerId: id, role, companyName: meta.companyName || "Firma", branchName: meta.branchName || "", updatedAt: new Date().toISOString() });
+  }
+  async function accessibleLedgers() {
+    const user = fbAuth && fbAuth.currentUser;
+    if (!isGoogleUser(user)) return [];
+    if (isFixedAdmin(user) || ["owner","admin"].includes(ledgerRole)) {
+      const snap = await fbm.getDocs(orgBranchesRef());
+      return snap.docs.map(d => ({ id: d.id, ...d.data(), role: isFixedAdmin(user) ? "admin" : ledgerRole }));
+    }
+    const snap = await fbm.getDocs(userLedgerIndex(user.uid));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+  async function openBranchSelector() {
+    try {
+      const branches = await accessibleLedgers();
+      const merged = new Map(branches.map(x => [x.id, x]));
+      if (DEFTER_ID && !merged.has(DEFTER_ID)) merged.set(DEFTER_ID, { id: DEFTER_ID, companyName: db.magaza, branchName: db.firma.sube || "", role: ledgerRole });
+      const list = [...merged.values()];
+      openSheet(`<div class="sheet-card full branch-picker"><div class="grab"></div><div style="display:flex;align-items:center;gap:8px"><div style="flex:1"><div class="meta">DÜNYA AMBALAJ · ŞUBELER</div><h2 style="font-size:20px">Defter seç</h2></div><button class="btn btn-ghost" id="branchPickerClose">Kapat</button></div><div class="branch-hero"><small>TAHSİLAT DEFTERİ</small><h3>İşiniz, tek yerde.</h3><p>Yetkiniz olan şubeler arasında güvenle geçiş yapın.</p></div><div>${list.map(x=>`<button class="branch-switch branch-card" data-branch-open="${esc(x.id)}"><span class="bs-icon">${icon("book")}</span><span class="bs-copy"><b>${esc(x.companyName || x.ad || "Firma")}</b><span>${esc(x.branchName ? x.branchName+" şubesi · " : "")}${esc(ROLE_LABEL[x.role] || "Yetkili üye")}</span></span>${x.id===DEFTER_ID?'<span class="branch-card bc-active">Açık</span>':icon("share")}</button>`).join("") || '<div class="empty">Henüz erişim verilen şube yok.</div>'}</div></div>`, true);
+      document.getElementById("branchPickerClose").onclick=closeSheet;
+      document.querySelectorAll("[data-branch-open]").forEach(b=>b.onclick=()=>openLedger(b.dataset.branchOpen));
+    } catch(e) { toast("Şube listesi alınamadı: "+fbErr(e)); }
   }
 
   async function ensureLedgerAccess(id) {
@@ -3356,6 +3399,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
         await fbm.setDoc(selfRef, { role: fixedRole, email: user.email || "", name: user.displayName || "", addedAt: new Date().toISOString(), addedBy: user.uid });
       }
       ledgerRole = fixedRole;
+      await syncBranchDirectory(id, await ledgerBranchInfo(id)).catch(e => console.warn("Şube kataloğu güncellenemedi:", e));
       return true;
     }
     const oref = ownerRef(id);
@@ -3374,12 +3418,21 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
       ownerSnap = await fbm.getDoc(oref);
     }
     if (!ownerSnap.exists()) throw new Error("defter sahibi kaydı oluşturulamadı");
+    const globalSnap = await fbm.getDoc(orgMemberRef(user.uid));
+    if (globalSnap.exists() && ["owner","admin"].includes(globalSnap.data().role)) {
+      ledgerRole = globalSnap.data().role;
+      await syncBranchDirectory(id, await ledgerBranchInfo(id)).catch(e => console.warn("Şube kataloğu güncellenemedi:", e));
+      return true;
+    }
     if (ownerSnap.data().ownerUid === user.uid) {
       const self = await fbm.getDoc(memberRef(id, user.uid));
       if (!self.exists() || self.data().role !== "owner") {
         await fbm.setDoc(memberRef(id, user.uid), { role: "owner", email: user.email || "", name: user.displayName || "", addedAt: new Date().toISOString() });
       }
       ledgerRole = "owner";
+      await syncOrgRole(id, "owner", user);
+      await syncUserLedgerIndex(id, user.uid, "owner", await ledgerBranchInfo(id));
+      await syncBranchDirectory(id, await ledgerBranchInfo(id));
       return true;
     }
     const member = await fbm.getDoc(memberRef(id, user.uid));
@@ -3389,6 +3442,11 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
       return false;
     }
     ledgerRole = member.data().role;
+    await syncUserLedgerIndex(id, user.uid, ledgerRole, await ledgerBranchInfo(id)).catch(e => console.warn("Şube erişimi dizine yazılamadı:", e));
+    if (["owner","admin"].includes(ledgerRole)) {
+      await syncOrgRole(id, ledgerRole, user);
+      await syncBranchDirectory(id, await ledgerBranchInfo(id)).catch(e => console.warn("Şube kataloğu güncellenemedi:", e));
+    }
     return true;
   }
 
