@@ -95,6 +95,20 @@ service cloud.firestore {
       allow list: if sabitAdmin();
     }
 
+    match /kullaniciProfilleri/{userId} {
+      allow get: if girisli() && (request.auth.uid == userId || sabitAdmin() || orgManager('dunyaambalaj'));
+      allow list: if false;
+      allow create, update: if girisli()
+          && request.auth.uid == userId
+          && request.resource.data.uid == userId
+          && request.resource.data.keys().hasOnly(['uid', 'email', 'firstName', 'lastName', 'fullName', 'department', 'updatedAt'])
+          && request.resource.data.firstName is string
+          && request.resource.data.lastName is string
+          && request.resource.data.fullName is string
+          && request.resource.data.updatedAt is string;
+      allow delete: if false;
+    }
+
     match /organizasyonlar/{orgId}/uyeler/{userId} {
       allow get: if girisli() && (request.auth.uid == userId || sabitAdmin() || orgManager(orgId));
       allow list: if sabitAdmin() || orgManager(orgId);
@@ -137,7 +151,7 @@ service cloud.firestore {
     }
 
     match /organizasyonlar/{orgId}/defterler/{ledgerId} {
-      allow get, list: if sabitAdmin() || orgManager(orgId);
+      allow get, list: if girisli();
       allow create, update: if branchManager(ledgerId)
           && request.resource.data.keys().hasOnly(['ledgerId', 'companyName', 'branchName', 'updatedAt', 'updatedBy'])
           && request.resource.data.ledgerId == ledgerId
@@ -172,7 +186,7 @@ service cloud.firestore {
       }
       function uye() {
         return girisli()
-            && (orgManager('dunyaambalaj')
+            && (orgCanView('dunyaambalaj')
                 || (exists(uyeYolu(request.auth.uid))
                     && get(uyeYolu(request.auth.uid)).data.role in ['owner', 'admin', 'editor', 'viewer']));
       }
@@ -186,7 +200,7 @@ service cloud.firestore {
       }
       function gecerliUyeVerisi() {
         return request.resource.data.role in ['owner', 'admin', 'editor', 'viewer']
-            && request.resource.data.keys().hasOnly(['role', 'email', 'name', 'addedAt', 'addedBy']);
+            && request.resource.data.keys().hasOnly(['role', 'email', 'name', 'firstName', 'lastName', 'department', 'addedAt', 'addedBy']);
       }
       function gecerliVeri() {
         return request.resource.data.d is string
@@ -232,13 +246,23 @@ service cloud.firestore {
             && request.resource.data.role in ['editor', 'viewer']
             && gecerliUyeVerisi())
           ||
+          (orgManager('dunyaambalaj') && userId != request.auth.uid
+            && request.resource.data.role in ['admin', 'editor', 'viewer']
+            && gecerliUyeVerisi())
+          ||
           (userId == request.auth.uid
             && request.resource.data.role == 'owner'
-            && request.resource.data.keys().hasOnly(['role', 'email', 'name', 'addedAt'])
+            && request.resource.data.keys().hasOnly(['role', 'email', 'name', 'firstName', 'lastName', 'department', 'addedAt'])
             && get(sahipYolu()).data.ownerUid == request.auth.uid)
         );
 
         allow update: if (
+          girisli()
+          && userId == request.auth.uid
+          && request.resource.data.role == resource.data.role
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['email', 'name', 'firstName', 'lastName', 'department'])
+          && gecerliUyeVerisi()
+        ) || (
           sabitAdmin()
           && ((userId == get(sahipYolu()).data.ownerUid && request.resource.data.role == 'owner')
             || (userId != get(sahipYolu()).data.ownerUid && request.resource.data.role in ['admin', 'editor', 'viewer']))
@@ -276,6 +300,11 @@ service cloud.firestore {
           && resource.data.role in ['editor', 'viewer']
           && request.resource.data.role in ['editor', 'viewer']
           && gecerliUyeVerisi()
+        ) || (
+          orgManager('dunyaambalaj')
+          && userId != request.auth.uid
+          && request.resource.data.role in ['admin', 'editor', 'viewer']
+          && gecerliUyeVerisi()
         );
 
         allow delete: if (sabitAdmin() && userId != get(sahipYolu()).data.ownerUid)
@@ -286,7 +315,8 @@ service cloud.firestore {
           || (uye()
             && get(uyeYolu(request.auth.uid)).data.role == 'admin'
             && userId != request.auth.uid
-            && resource.data.role in ['editor', 'viewer']);
+            && resource.data.role in ['editor', 'viewer'])
+          || (orgManager('dunyaambalaj') && userId != request.auth.uid);
       }
 
       match /uyelikBasvurulari/{userId} {
@@ -299,12 +329,12 @@ service cloud.firestore {
             && request.resource.data.uid == request.auth.uid
             && request.resource.data.email == request.auth.token.email
             && request.resource.data.status == 'pending'
-            && request.resource.data.keys().hasOnly(['uid', 'email', 'name', 'status', 'createdAt', 'updatedAt']);
+            && request.resource.data.keys().hasOnly(['uid', 'email', 'name', 'firstName', 'lastName', 'department', 'requestedRole', 'requestedLedgers', 'status', 'createdAt', 'updatedAt']);
         allow update: if (
             sahip()
             && request.resource.data.status in ['approved', 'rejected']
             && request.resource.data.handledBy == request.auth.uid
-            && request.resource.data.keys().hasOnly(['uid', 'email', 'name', 'status', 'createdAt', 'updatedAt', 'handledAt', 'handledBy'])
+            && request.resource.data.keys().hasOnly(['uid', 'email', 'name', 'firstName', 'lastName', 'department', 'requestedRole', 'requestedLedgers', 'status', 'createdAt', 'updatedAt', 'handledAt', 'handledBy'])
           ) || (
             girisli()
             && request.auth.token.email_verified == true
