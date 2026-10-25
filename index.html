@@ -2540,7 +2540,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         <div data-devhost></div>
 
         <button class="btn btn-ghost" id="sUndo" style="width:100%;margin-top:10px">${icon("undo")} Son işlemi geri al</button>
-        <p class="meta" style="margin-top:12px">Kayıtlar ortak defterde (bulutta) saklanır; bağlantıya sahip herkes aynı anda görür ve düzenler. İnternet yokken yapılan işlemler bağlantı gelince otomatik gönderilir. Tema, karanlık mod, PIN ve bildirim ayarları yalnızca bu cihaza aittir. “Ana ekrana ekle” ile uygulama gibi kullanın.</p>
+        <p class="meta" style="margin-top:12px">Kayıtlar ortak defterde (bulutta) saklanır; Google hesabı eklenmiş üyeler aynı anda görür ve düzenler. İnternet yokken yapılan işlemler bağlantı gelince otomatik gönderilir. Tema, karanlık mod, PIN ve bildirim ayarları yalnızca bu cihaza aittir. “Ana ekrana ekle” ile uygulama gibi kullanın.</p>
       </div>`, true);
     document.getElementById("sheetClose").onclick = closeSheet;
     renderShare();
@@ -4589,7 +4589,6 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     if (list.some(x => x.id === id)) throw new Error("bu defter zaten listede");
     const previousRole = ledgerRole;
     const access = await ensureLedgerAccess(id);
-    const accessRole = ledgerRole;
     ledgerRole = previousRole;
     if (!access) throw new Error("Bu defterin yöneticisi sizi üye olarak eklemeli");
     const g = await readGenel(id);
