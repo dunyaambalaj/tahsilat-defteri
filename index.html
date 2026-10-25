@@ -1189,7 +1189,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     try { const v = localStorage.getItem(ID_KEY); return ID_RE.test(v || "") ? v : null; } catch (e) { return null; }
   })();
   const cacheKey = () => DEFTER_ID ? KEY + ":" + DEFTER_ID : KEY;
-  const BUILD = "13";
+  const BUILD = "14";
   const FB_VERSIONS = ["13.0.0", "12.8.0", "12.2.1"]; /* sırayla denenir */
   /* Firebase web ayarları herkese açık bilgidir. firebase-config.js okunamazsa bu yedek kullanılır. */
   const FB_DEFAULT = {
@@ -3166,7 +3166,11 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
   const memberRef = (id, userId) => fbm.doc(fbDb, "defterler", id, "uyeler", userId);
   const memberApplicationRef = (id, userId) => fbm.doc(fbDb, "defterler", id, "uyelikBasvurulari", userId);
   const memberApplicationsRef = id => fbm.collection(fbDb, "defterler", id, "uyelikBasvurulari");
+  const adminApplicationsRef = () => fbm.collection(fbDb, "uyelikBildirimleri");
+  const adminApplicationRef = id => fbm.doc(fbDb, "uyelikBildirimleri", id);
+  const adminApplicationId = (ledgerId, userId) => ledgerId + "__" + userId;
   let applicationWatcher = null, applicationWatcherKey = "";
+  let adminApplicationsWatcher = null, adminApplicationsWatcherUid = "", adminInboxToken = 0;
   const ADMIN_EMAIL = "izmirdunyaambalaj@gmail.com";
   const isGoogleUser = user => !!user && !user.isAnonymous;
   const isFixedAdmin = user => isGoogleUser(user)
@@ -3237,21 +3241,24 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
       try {
         const ref = memberApplicationRef(DEFTER_ID, uidValue);
         const current = await fbm.getDoc(ref);
-        if (current.exists() && current.data().status === "pending") {
-          toast("Başvurunuz zaten bekliyor");
-        } else {
-          const now = new Date().toISOString();
-          await fbm.setDoc(ref, {
-            uid: uidValue,
-            email: user.email || "",
-            name: user.displayName || "",
-            status: "pending",
-            createdAt: current.exists() ? (current.data().createdAt || now) : now,
-            updatedAt: now
-          });
-          requestButton.textContent = "Başvuru gönderildi";
-          toast("Başvurunuz defter yöneticisine iletildi");
-        }
+        const now = new Date().toISOString();
+        const application = {
+          uid: uidValue,
+          email: user.email || "",
+          name: user.displayName || "",
+          status: "pending",
+          createdAt: current.exists() ? (current.data().createdAt || now) : now,
+          updatedAt: now
+        };
+        const globalId = adminApplicationId(DEFTER_ID, uidValue);
+        const batch = fbm.writeBatch(fbDb);
+        if (!(current.exists() && current.data().status === "pending")) batch.set(ref, application);
+        batch.set(adminApplicationRef(globalId), { ...application, defterId: DEFTER_ID });
+        await batch.commit();
+        requestButton.textContent = "Başvuru gönderildi";
+        toast(current.exists() && current.data().status === "pending"
+          ? "Başvurunuz yönetici bildirim kuyruğuna iletildi"
+          : "Başvurunuz defter yöneticisine iletildi");
       } catch (e) {
         requestButton.disabled = false;
         toast("Başvuru gönderilemedi: " + fbErr(e));
@@ -3320,9 +3327,10 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     }
     host.innerHTML = `<div class="meta">Üyeler ve başvurular yükleniyor…</div>`;
     try {
-      const [members, applications] = await Promise.all([
+      const [members, applications, globalApplications] = await Promise.all([
         fbm.getDocs(fbm.collection(fbDb, "defterler", DEFTER_ID, "uyeler")),
-        fbm.getDocs(memberApplicationsRef(DEFTER_ID))
+        fbm.getDocs(memberApplicationsRef(DEFTER_ID)),
+        isFixedAdmin(fbAuth.currentUser) ? fbm.getDocs(adminApplicationsRef()) : Promise.resolve(null)
       ]);
       if (token !== memberLoadToken || !host.isConnected) return;
       const rows = [];
@@ -3331,7 +3339,16 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
         rows.push(`<div class="mini-day" style="align-items:center"><div class="who"><b>${esc(m.name || m.email || d.id)}</b><div class="meta">${esc(d.id)} · ${esc(m.role || "üye")}</div></div>${d.id === fbAuth.currentUser.uid ? '<span class="dev-me">Sahip</span>' : `<button class="btn btn-ghost" data-member-remove="${esc(d.id)}" style="color:var(--red)">Kaldır</button>`}</div>`);
       });
       const pending = [];
-      applications.forEach(d => { if (d.data().status === "pending") pending.push({ id: d.id, ...d.data() }); });
+      applications.forEach(d => {
+        if (d.data().status === "pending") pending.push({ id: d.id, uid: d.id, ledgerId: DEFTER_ID, ...d.data() });
+      });
+      if (globalApplications) globalApplications.forEach(d => {
+        const a = d.data();
+        if (a.status !== "pending") return;
+        const local = pending.find(x => x.ledgerId === a.defterId && x.uid === a.uid);
+        if (local) { local.globalId = d.id; local.source = "global"; }
+        else pending.push({ ...a, id: d.id, globalId: d.id, source: "global", ledgerId: a.defterId, uid: a.uid });
+      });
       pending.sort((a,b) => String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
       const requests = pending.map(a => `<div class="mini-day" style="align-items:center"><div class="who"><b>${esc(a.name || a.email || a.uid || a.id)}</b><div class="meta">${esc(a.email || "")} · UID: ${esc(a.uid || a.id)}</div></div><div style="display:flex;gap:6px"><button class="btn btn-gold" data-request-approve="${esc(a.id)}">Onayla</button><button class="btn btn-ghost" data-request-reject="${esc(a.id)}">Reddet</button></div></div>`).join("");
       host.innerHTML = `
@@ -3359,8 +3376,10 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
         button.disabled = true;
         try {
           const batch = fbm.writeBatch(fbDb);
-          batch.set(memberRef(DEFTER_ID, id), { role: "editor", email: req.email || "", name: req.name || "", addedAt: new Date().toISOString(), addedBy: fbAuth.currentUser.uid });
-          batch.update(memberApplicationRef(DEFTER_ID, id), { status: "approved", handledAt: new Date().toISOString(), handledBy: fbAuth.currentUser.uid });
+          const ledgerId = req.ledgerId || DEFTER_ID, userId = req.uid || id, now = new Date().toISOString();
+          batch.set(memberRef(ledgerId, userId), { role: "editor", email: req.email || "", name: req.name || "", addedAt: now, addedBy: fbAuth.currentUser.uid });
+          batch.update(memberApplicationRef(ledgerId, userId), { status: "approved", handledAt: now, handledBy: fbAuth.currentUser.uid });
+          if (req.globalId) batch.update(adminApplicationRef(req.globalId), { status: "approved", updatedAt: now, handledAt: now, handledBy: fbAuth.currentUser.uid });
           await batch.commit();
           toast("Başvuru onaylandı, üye erişimi açıldı"); loadLedgerMembers(host);
         } catch (e) { button.disabled = false; toast("Başvuru onaylanamadı: " + fbErr(e)); }
@@ -3369,7 +3388,11 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
         const id = button.dataset.requestReject;
         button.disabled = true;
         try {
-          await fbm.updateDoc(memberApplicationRef(DEFTER_ID, id), { status: "rejected", handledAt: new Date().toISOString(), handledBy: fbAuth.currentUser.uid });
+          const ledgerId = req.ledgerId || DEFTER_ID, userId = req.uid || id, now = new Date().toISOString();
+          const batch = fbm.writeBatch(fbDb);
+          batch.update(memberApplicationRef(ledgerId, userId), { status: "rejected", handledAt: now, handledBy: fbAuth.currentUser.uid });
+          if (req.globalId) batch.update(adminApplicationRef(req.globalId), { status: "rejected", updatedAt: now, handledAt: now, handledBy: fbAuth.currentUser.uid });
+          await batch.commit();
           toast("Başvuru reddedildi"); loadLedgerMembers(host);
         } catch (e) { button.disabled = false; toast("Başvuru reddedilemedi: " + fbErr(e)); }
       });
@@ -3435,6 +3458,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
       diag.email = user.email || "";
       if (!(await ensureLedgerAccess(DEFTER_ID))) { cloudStarting = false; return; }
       watchMembershipApplications();
+      watchAdminApplications();
     } catch (e) {
       console.warn(e); cloudStarting = false;
       if (String(e.code || "").includes("permission-denied")) showAccountGate("Erişim reddedildi. Üyelik kurallarını ve defter davetinizi kontrol edin.");
@@ -3714,6 +3738,95 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     location.hash = "d=" + m[1];
     location.reload();
   }
+  async function resolveAdminApplication(app, status, host, button) {
+    if (!isFixedAdmin(fbAuth && fbAuth.currentUser)) return toast("Bu işlem sistem yöneticisine açıktır");
+    button.disabled = true;
+    try {
+      const now = new Date().toISOString();
+      const batch = fbm.writeBatch(fbDb);
+      if (status === "approved") {
+        batch.set(memberRef(app.defterId, app.uid), {
+          role: "editor", email: app.email || "", name: app.name || "",
+          addedAt: now, addedBy: fbAuth.currentUser.uid
+        });
+      }
+      batch.update(memberApplicationRef(app.defterId, app.uid), {
+        status, handledAt: now, handledBy: fbAuth.currentUser.uid
+      });
+      batch.update(adminApplicationRef(app.id), {
+        status, updatedAt: now, handledAt: now, handledBy: fbAuth.currentUser.uid
+      });
+      await batch.commit();
+      toast(status === "approved" ? "Başvuru onaylandı, defter erişimi açıldı" : "Başvuru reddedildi");
+      loadAdminInbox(host);
+    } catch (e) {
+      button.disabled = false;
+      toast("Başvuru işlenemedi: " + fbErr(e));
+    }
+  }
+
+  async function loadAdminInbox(host) {
+    if (!host || !isFixedAdmin(fbAuth && fbAuth.currentUser)) return;
+    const token = ++adminInboxToken;
+    host.innerHTML = '<div class="meta">Üyelik bildirimleri yükleniyor…</div>';
+    try {
+      const snap = await fbm.getDocs(adminApplicationsRef());
+      if (token !== adminInboxToken || !host.isConnected) return;
+      const pending = [];
+      snap.forEach(d => { if (d.data().status === "pending") pending.push({ id: d.id, ...d.data() }); });
+      pending.sort((a,b) => String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
+      host.innerHTML = pending.length ? pending.map(a => `
+        <div class="mini-day" style="align-items:center;margin-top:8px">
+          <div class="who" style="min-width:0;overflow-wrap:anywhere">
+            <b>${esc(a.name || a.email || a.uid)}</b>
+            <div class="meta">${esc(a.email || "")} · Defter: ${esc(String(a.defterId || "").slice(0,10))}…</div>
+            <div class="meta">UID: ${esc(a.uid || "")}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            <button class="btn btn-gold" data-admin-approve="${esc(a.id)}">Onayla</button>
+            <button class="btn btn-ghost" data-admin-reject="${esc(a.id)}">Reddet</button>
+          </div>
+        </div>`).join("") : '<div class="meta">Bekleyen üyelik talebi yok.</div>';
+      host.querySelectorAll("[data-admin-approve]").forEach(button => {
+        const app = pending.find(x => x.id === button.dataset.adminApprove);
+        button.onclick = () => app && resolveAdminApplication(app, "approved", host, button);
+      });
+      host.querySelectorAll("[data-admin-reject]").forEach(button => {
+        const app = pending.find(x => x.id === button.dataset.adminReject);
+        button.onclick = () => app && resolveAdminApplication(app, "rejected", host, button);
+      });
+    } catch (e) {
+      if (token === adminInboxToken && host.isConnected) host.innerHTML = `<div class="meta" style="color:var(--red)">Üyelik bildirimleri okunamadı: ${esc(fbErr(e))}</div>`;
+    }
+  }
+
+  function watchAdminApplications() {
+    const user = fbAuth && fbAuth.currentUser;
+    if (!isFixedAdmin(user) || !fbDb) return;
+    if (adminApplicationsWatcherUid === user.uid) return;
+    if (adminApplicationsWatcher) adminApplicationsWatcher();
+    adminApplicationsWatcherUid = user.uid;
+    let initial = true;
+    adminApplicationsWatcher = fbm.onSnapshot(adminApplicationsRef(), snap => {
+      const added = [];
+      snap.docChanges().forEach(change => {
+        const app = change.doc.data();
+        if (change.type === "added" && app.status === "pending") added.push(app);
+      });
+      const host = document.getElementById("adminInbox");
+      if (host && host.isConnected) loadAdminInbox(host);
+      if (!initial && added.length) {
+        toast(added.length === 1 ? "Yeni üyelik başvurusu geldi" : added.length + " yeni üyelik başvurusu geldi",
+          { label: "Başvuruları gör", fn: () => {
+            const inbox = document.getElementById("adminInbox");
+            if (inbox) inbox.scrollIntoView({ behavior: "smooth", block: "center" });
+            else openSettings();
+          } }, 9000);
+      }
+      initial = false;
+    }, e => console.warn("Genel üyelik bildirimleri dinlenemedi:", e));
+  }
+
   function welcomeStart() {
     let n = 0;
     try { const r = JSON.parse(localStorage.getItem(KEY) || "null"); n = r && Array.isArray(r.kayitlar) ? r.kayitlar.filter(k => !k.silindi).length : 0; } catch (e) {}
@@ -3730,6 +3843,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
           <div class="meta" style="margin:16px 0 6px;text-align:center">— ya da size gönderilen bağlantıyla katılın —</div>
           <input class="inp" id="wLink" placeholder="Defter bağlantısını buraya yapıştırın" />
           <button class="btn btn-ghost" id="wJoin" style="width:100%;margin-top:8px" ${isGoogleUser(fbAuth && fbAuth.currentUser) ? "" : "disabled"}>Bağlantıyla katıl</button>
+          ${isFixedAdmin(fbAuth && fbAuth.currentUser) ? '<div class="panel" style="margin-top:14px;padding:12px"><b style="font-size:14px">Tüm defterlerden üyelik talepleri</b><div id="adminInbox" style="margin-top:8px"></div></div>' : ""}
         </div>
       </div>`;
     const authButton = document.getElementById("wSignIn");
@@ -3739,6 +3853,10 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     };
     document.getElementById("wNew").onclick = createDefter;
     document.getElementById("wJoin").onclick = () => joinDefter(document.getElementById("wLink").value);
+    if (isFixedAdmin(fbAuth && fbAuth.currentUser)) {
+      loadAdminInbox(document.getElementById("adminInbox"));
+      watchAdminApplications();
+    }
     cloudInit();
   }
 
