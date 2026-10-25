@@ -3963,19 +3963,25 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     location.hash = "d=" + m[1];
     location.reload();
   }
-  async function resolveAdminApplication(app, status, role, host, button) {
+  async function resolveAdminApplication(app, status, role, host, button, extraBranches = []) {
     if (!isFixedAdmin(fbAuth && fbAuth.currentUser)) return toast("Bu işlem sistem yöneticisine açıktır");
     if (status === "approved" && !canAssignRole(role, "", app.uid)) return toast("Seçilen rol atanamıyor");
     button.disabled = true;
     try {
       const now = new Date().toISOString(), batch = fbm.writeBatch(fbDb);
-      if (status === "approved") batch.set(memberRef(app.defterId, app.uid), {
-        role, email: app.email || "", name: app.name || "", addedAt: now, addedBy: fbAuth.currentUser.uid
-      });
+      if (status === "approved") {
+        const ids = [...new Set([app.defterId, ...extraBranches].filter(Boolean))];
+        for (const ledgerId of ids) {
+          const info = await ledgerBranchInfo(ledgerId);
+          batch.set(memberRef(ledgerId, app.uid), { role, email: app.email || "", name: app.name || "", addedAt: now, addedBy: fbAuth.currentUser.uid });
+          batch.set(userLedgerIndexRef(app.uid, ledgerId), { ledgerId, role, companyName: info.companyName || "Firma", branchName: info.branchName || "", updatedAt: now });
+        }
+        if (role === "admin") batch.set(orgMemberRef(app.uid), { role: "admin", uid: app.uid, email: app.email || "", name: app.name || "", sourceLedgerId: app.defterId, createdAt: now, updatedAt: now });
+      }
       batch.update(memberApplicationRef(app.defterId, app.uid), { status, handledAt: now, handledBy: fbAuth.currentUser.uid });
       if (app.globalId) batch.update(adminApplicationRef(app.globalId), { status, updatedAt: now, handledAt: now, handledBy: fbAuth.currentUser.uid });
       await batch.commit();
-      toast(status === "approved" ? `Başvuru onaylandı; ${ROLE_LABEL[role]} erişimi açıldı` : "Başvuru reddedildi");
+      toast(status === "approved" ? `Başvuru onaylandı; ${ROLE_LABEL[role]} erişimi ${1 + extraBranches.length} şubeye açıldı` : "Başvuru reddedildi");
       loadAdminInbox(host);
     } catch (e) {
       button.disabled = false;
@@ -3988,35 +3994,27 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     const token = ++adminInboxToken;
     host.innerHTML = '<div class="meta">Üyelik bildirimleri yükleniyor…</div>';
     try {
-      const snap = await fbm.getDocs(adminApplicationsRef());
+      const [snap, branchChoices] = await Promise.all([fbm.getDocs(adminApplicationsRef()), accessibleLedgers()]);
       if (token !== adminInboxToken || !host.isConnected) return;
       const pending = [];
       snap.forEach(d => { if (d.data().status === "pending") pending.push({ id: d.id, ...d.data() }); });
       pending.sort((a,b) => String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
-      host.innerHTML = pending.length ? pending.map((a,i) => `
-        <div class="mini-day" style="align-items:center;margin-top:8px">
-          <div class="who" style="min-width:0;overflow-wrap:anywhere">
-            <b>${esc(a.name || a.email || a.uid)}</b>
-            <div class="meta">${esc(a.email || "")} · Defter: ${esc(String(a.defterId || "").slice(0,10))}…</div>
-            <div class="meta">UID: ${esc(a.uid || "")}</div>
-          </div>
-          <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap">
-            <select class="inp" data-admin-role="${i}" style="width:auto;min-width:132px;padding:7px">${roleOptions("editor")}</select>
-            <button class="btn btn-gold" data-admin-approve="${i}">Onayla</button>
-            <button class="btn btn-ghost" data-admin-reject="${i}">Reddet</button>
-          </div>
-        </div>`).join("") : '<div class="meta">Bekleyen üyelik talebi yok.</div>';
+      host.innerHTML = pending.length ? pending.map((a,i) => {
+        const current = a.defterId;
+        const branchChecks = branchChoices.length > 1 ? `<div class="meta" style="margin-top:8px">Erişim verilecek şubeler</div><div class="branch-options">${branchChoices.map(b=>`<label class="branch-option ${b.id===current?"on":""}"><input type="checkbox" data-admin-branch="${i}" value="${esc(b.id)}" ${b.id===current?"checked":""}><span>${esc(b.branchName||b.companyName||b.id)}</span></label>`).join("")}</div>` : "";
+        return `<div class="mini-day" style="align-items:center;margin-top:8px"><div class="who" style="min-width:0;overflow-wrap:anywhere"><b>${esc(a.name || a.email || a.uid)}</b><div class="meta">${esc(a.email || "")} · Başvuru şubesi: ${esc(String(current||"").slice(0,10))}…</div><div class="meta">UID: ${esc(a.uid || "")}</div>${branchChecks}</div><div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap"><select class="inp" data-admin-role="${i}" style="width:auto;min-width:132px;padding:7px">${roleOptions("editor")}</select><button class="btn btn-gold" data-admin-approve="${i}">Onayla</button><button class="btn btn-ghost" data-admin-reject="${i}">Reddet</button></div></div>`;
+      }).join("") : '<div class="meta">Bekleyen üyelik talebi yok.</div>';
       host.querySelectorAll("[data-admin-approve]").forEach(button => {
-        const app = pending[Number(button.dataset.adminApprove)];
-        button.onclick = () => {
-          const select = host.querySelector(`[data-admin-role="${button.dataset.adminApprove}"]`);
-          const role = select ? select.value : "editor";
-          app && resolveAdminApplication(app, "approved", role, host, button);
+        const i=Number(button.dataset.adminApprove), app=pending[i];
+        button.onclick=()=>{
+          const select=host.querySelector(`[data-admin-role="${i}"]`), role=select?select.value:"editor";
+          const branches=[...host.querySelectorAll(`[data-admin-branch="${i}"]:checked`)].map(x=>x.value).filter(id=>id!==app?.defterId);
+          app && resolveAdminApplication(app,"approved",role,host,button,branches);
         };
       });
       host.querySelectorAll("[data-admin-reject]").forEach(button => {
-        const app = pending[Number(button.dataset.adminReject)];
-        button.onclick = () => app && resolveAdminApplication(app, "rejected", "editor", host, button);
+        const app=pending[Number(button.dataset.adminReject)];
+        button.onclick=()=>app&&resolveAdminApplication(app,"rejected","editor",host,button);
       });
     } catch (e) {
       if (token === adminInboxToken && host.isConnected) host.innerHTML = `<div class="meta" style="color:var(--red)">Üyelik bildirimleri okunamadı: ${esc(fbErr(e))}</div>`;
