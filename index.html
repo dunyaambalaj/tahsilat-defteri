@@ -2529,6 +2529,9 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         <button class="btn btn-gold" id="sAdmin" style="width:100%">🛡 Yönetici paneli ${db.silmePin ? "🔒" : ""}</button>
         <p class="meta" style="margin:6px 2px">Firma bilgileri, defterler, aylık hedef, mesai saatleri, WhatsApp şablonları, cihaz yönetimi, silinenler, yedekleme ve şifre ayarları yönetici şifresiyle açılan panelde.</p>
 
+        <label class="fld">Defter erişimi · ${esc(ledgerRole || "üyelik bekleniyor")}</label>
+        <div id="memberHost" class="panel" style="padding:10px"></div>
+
         <label class="fld">Kullanıcı adı (bu cihaz)</label>
         <button class="btn btn-ghost" id="sName" style="width:100%">✎ ${ME() ? esc(ME()) : "Adınızı girin"} · değiştir</button>
         <p class="meta" style="margin:6px 2px">Kayıtlarda “kim ekledi, kim tahsil etti” bilgisi bu adla tutulur.</p>
@@ -2541,6 +2544,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       </div>`, true);
     document.getElementById("sheetClose").onclick = closeSheet;
     renderShare();
+    loadLedgerMembers(document.getElementById("memberHost"));
     document.getElementById("sName").onclick = () => openNameSheet(false);
     document.getElementById("sAdmin").onclick = openAdminPanel;
     document.querySelectorAll("[data-bt]").forEach(b => b.onclick = () => { const k = b.dataset.bt; db.ayar.bt = db.ayar.bt || {}; db.ayar.bt[k] = !btPref(k); save(); b.classList.toggle("on", btPref(k)); render(); });
@@ -2940,6 +2944,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
      Kayıtlar asla fiziksel silinmez (silindi:true işaretlenir). Tema, karanlık mod, PIN, bildirim: yalnızca bu cihazda. */
   const SEED_PREFIX = "kirtasiye_aktar_";
   let fbm = null, fbAuth = null, fbDb = null, fbInitP = null;
+  let ledgerRole = null, memberLoadToken = 0;
   let syncState = "baglaniyor", syncDetail = "";
   let remoteRec = new Map(), remoteSet = "", remoteLogo = null;
   let cloudOn = false, cloudStarting = false;
@@ -3028,6 +3033,141 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   }
   const colRef = name => fbm.collection(fbDb, "defterler", DEFTER_ID, name);
   const docRef = (name, id) => fbm.doc(fbDb, "defterler", DEFTER_ID, name, id);
+  const ownerRef = id => fbm.doc(fbDb, "defterler", id, "meta", "owner");
+  const memberRef = (id, userId) => fbm.doc(fbDb, "defterler", id, "uyeler", userId);
+  const isGoogleUser = user => !!user && !user.isAnonymous;
+
+  async function authenticateGoogle() {
+    const ok = await cloudInit();
+    if (!ok) throw new Error(diag.err || "Firebase yüklenemedi");
+    await fbAuth.authStateReady();
+    const provider = new fbm.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+    try {
+      if (fbAuth.currentUser && fbAuth.currentUser.isAnonymous) {
+        await fbm.linkWithPopup(fbAuth.currentUser, provider);
+      } else if (!fbAuth.currentUser) {
+        await fbm.signInWithPopup(fbAuth, provider);
+      }
+    } catch (e) {
+      if (e.code === "auth/credential-already-in-use" || e.code === "auth/account-exists-with-different-credential") {
+        await fbm.signInWithPopup(fbAuth, provider);
+      } else throw e;
+    }
+    const user = fbAuth.currentUser;
+    diag.uid = user ? user.uid : "";
+    diag.email = user ? (user.email || "") : "";
+    if (ME() === "" && user && user.displayName) {
+      try { localStorage.setItem(NAME_KEY, user.displayName.slice(0, 24)); } catch (e) {}
+    }
+    if (DEFTER_ID) {
+      ledgerRole = null;
+      cloudOn = false;
+      cloudStarting = false;
+      await startCloud();
+    } else welcomeStart();
+    return user;
+  }
+
+  function showAccountGate(message = "") {
+    const user = fbAuth && fbAuth.currentUser;
+    const uidValue = isGoogleUser(user) ? user.uid : "";
+    document.getElementById("app").innerHTML = `
+      <div style="min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px">
+        <div class="panel" style="max-width:460px;width:100%;padding:24px">
+          <div style="font-size:11px;letter-spacing:.18em;color:var(--mute);font-weight:700;text-align:center">ÖDEME DEFTERİ · GÜVENLİ GİRİŞ</div>
+          <h2 style="text-align:center;margin:8px 0 4px;font-size:20px">${uidValue ? "Üyelik bekleniyor" : "Google hesabınızla giriş yapın"}</h2>
+          <p class="meta" style="text-align:center;margin:12px 0">${esc(message || (uidValue ? "Bu Google hesabı henüz bu deftere eklenmemiş. Defter yöneticisine kullanıcı kodunuzu iletin." : "Hesabınız, defter erişim yetkinizi belirlemek için kullanılır."))}</p>
+          ${uidValue ? `<label class="fld">Google kullanıcı kodunuz</label><input class="inp" id="authUid" readonly value="${esc(uidValue)}" /><button class="btn btn-ghost" id="authCopy" style="width:100%;margin-top:8px">Kullanıcı kodunu kopyala</button>` : ""}
+          <button class="btn btn-gold" id="authGoogle" style="width:100%;margin-top:12px">${user && user.isAnonymous ? "Google hesabını bağla" : "Google ile giriş yap"}</button>
+          <p class="meta" style="margin-top:12px;text-align:center">Erişim yalnızca defter yöneticisinin üyeliğinizi onaylamasıyla açılır.</p>
+        </div>
+      </div>`;
+    const copy = document.getElementById("authCopy");
+    if (copy) copy.onclick = async () => {
+      try { await navigator.clipboard.writeText(uidValue); toast("Kullanıcı kodu kopyalandı"); }
+      catch (e) { prompt("Kullanıcı kodunuzu kopyalayın:", uidValue); }
+    };
+    const button = document.getElementById("authGoogle");
+    if (button) button.onclick = async () => {
+      button.disabled = true;
+      try { await authenticateGoogle(); }
+      catch (e) { button.disabled = false; toast("Giriş yapılamadı: " + fbErr(e)); }
+    };
+  }
+
+  async function ensureLedgerAccess(id) {
+    const user = fbAuth && fbAuth.currentUser;
+    if (!isGoogleUser(user)) return false;
+    const oref = ownerRef(id);
+    let ownerSnap = await fbm.getDoc(oref);
+    if (!ownerSnap.exists()) {
+      try {
+        await fbm.setDoc(oref, { ownerUid: user.uid, createdAt: new Date().toISOString() });
+      } catch (e) { /* another first user may have claimed it */ }
+      ownerSnap = await fbm.getDoc(oref);
+    }
+    if (!ownerSnap.exists()) throw new Error("defter sahibi kaydı oluşturulamadı");
+    if (ownerSnap.data().ownerUid === user.uid) {
+      const self = await fbm.getDoc(memberRef(id, user.uid));
+      if (!self.exists() || self.data().role !== "owner") {
+        await fbm.setDoc(memberRef(id, user.uid), { role: "owner", email: user.email || "", name: user.displayName || "", addedAt: new Date().toISOString() });
+      }
+      ledgerRole = "owner";
+      return true;
+    }
+    const member = await fbm.getDoc(memberRef(id, user.uid));
+    if (!member.exists() || !["editor", "reader"].includes(member.data().role)) {
+      ledgerRole = null;
+      showAccountGate("Bu Google hesabı bu deftere henüz üye değil. Kullanıcı kodunuzu defter yöneticisine gönderin.");
+      return false;
+    }
+    ledgerRole = member.data().role;
+    return true;
+  }
+
+  async function loadLedgerMembers(host) {
+    if (!host || !DEFTER_ID || !isGoogleUser(fbAuth && fbAuth.currentUser)) return;
+    const token = ++memberLoadToken;
+    if (ledgerRole !== "owner") {
+      const user = fbAuth.currentUser;
+      host.innerHTML = `<div class="meta">Bu defterdeki rolünüz: <b>${esc(ledgerRole || "üye")}</b>. Kullanıcı kodunuz: <code>${esc(user.uid)}</code>. Erişim ve rol değişiklikleri için yöneticiye iletin.</div>`;
+      return;
+    }
+    host.innerHTML = `<div class="meta">Üyeler yükleniyor…</div>`;
+    try {
+      const snap = await fbm.getDocs(fbm.collection(fbDb, "defterler", DEFTER_ID, "uyeler"));
+      if (token !== memberLoadToken || !host.isConnected) return;
+      const rows = [];
+      snap.forEach(d => {
+        const m = d.data();
+        rows.push(`<div class="mini-day" style="align-items:center"><div class="who"><b>${esc(m.name || m.email || d.id)}</b><div class="meta">${esc(d.id)} · ${esc(m.role || "üye")}</div></div>${d.id === fbAuth.currentUser.uid ? '<span class="dev-me">Sahip</span>' : `<button class="btn btn-ghost" data-member-remove="${esc(d.id)}" style="color:var(--red)">Kaldır</button>`}</div>`);
+      });
+      host.innerHTML = `
+        <div class="g2"><input class="inp" id="memberUid" placeholder="Google kullanıcı kodu" /><select class="inp" id="memberRole"><option value="editor">Düzenleyebilir</option><option value="reader">Yalnızca görüntüler</option></select></div>
+        <button class="btn btn-gold" id="memberAdd" style="width:100%;margin-top:8px">Üye ekle</button>
+        <div class="mini" style="margin-top:8px">${rows.join("") || '<div class="meta">Henüz başka üye yok.</div>'}</div>
+        <p class="meta" style="margin-top:8px">Yeni kişi önce Google ile giriş yapmalı ve kullanıcı kodunu size iletmeli.</p>`;
+      document.getElementById("memberAdd").onclick = async () => {
+        const id = document.getElementById("memberUid").value.trim();
+        const role = document.getElementById("memberRole").value;
+        if (!/^[A-Za-z0-9_-]{20,}$/.test(id)) return toast("Geçerli Google kullanıcı kodu girin");
+        if (id === fbAuth.currentUser.uid) return toast("Kendinizi tekrar ekleyemezsiniz");
+        try {
+          await fbm.setDoc(memberRef(DEFTER_ID, id), { role, addedAt: new Date().toISOString(), addedBy: fbAuth.currentUser.uid });
+          toast("Üye eklendi"); loadLedgerMembers(host);
+        } catch (e) { toast("Üye eklenemedi: " + fbErr(e)); }
+      };
+      host.querySelectorAll("[data-member-remove]").forEach(button => button.onclick = async () => {
+        const id = button.dataset.memberRemove;
+        if (!confirm("Bu kişinin defter erişimi kaldırılsın mı? Çevrimdışı kopyası cihazında kalmış olabilir.")) return;
+        try { await fbm.deleteDoc(memberRef(DEFTER_ID, id)); toast("Üyenin erişimi kaldırıldı"); loadLedgerMembers(host); }
+        catch (e) { toast("Üye kaldırılamadı: " + fbErr(e)); }
+      });
+    } catch (e) {
+      if (token === memberLoadToken && host.isConnected) host.innerHTML = `<div class="meta" style="color:var(--red)">Üyeler okunamadı: ${esc(fbErr(e))}</div>`;
+    }
+  }
 
   /* Başkasından gelen değişiklikte ekranı yenile (yazı yazarken bozma, kaydırmayı koru) */
   function scheduleRender() {
@@ -3051,11 +3191,20 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     if (!ok) { cloudStarting = false; return setSyncState(navigator.onLine ? "hata" : "cevrimdisi", diag.err || "bulut yüklenemedi"); }
     try {
       await fbAuth.authStateReady();
-      if (!fbAuth.currentUser) await fbm.signInAnonymously(fbAuth);
-      diag.uid = fbAuth.currentUser ? fbAuth.currentUser.uid : "";
+      const user = fbAuth.currentUser;
+      if (!isGoogleUser(user)) {
+        cloudStarting = false;
+        showAccountGate();
+        return;
+      }
+      diag.uid = user.uid;
+      diag.email = user.email || "";
+      if (!(await ensureLedgerAccess(DEFTER_ID))) { cloudStarting = false; return; }
     } catch (e) {
       console.warn(e); cloudStarting = false;
-      return setSyncState(navigator.onLine ? "hata" : "cevrimdisi", fbErr(e));
+      if (String(e.code || "").includes("permission-denied")) showAccountGate("Erişim reddedildi. Üyelik kurallarını ve defter davetinizi kontrol edin.");
+      else setSyncState(navigator.onLine ? "hata" : "cevrimdisi", fbErr(e));
+      return;
     }
 
     try {
@@ -3251,7 +3400,8 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       ["Firebase ayarı", cloudReady() ? "okundu (" + (c.projectId || "?") + ")" : "OKUNAMADI"],
       ["Defter kodu", DEFTER_ID ? DEFTER_ID.slice(0, 6) + "…" : "YOK (cihaz bir defterle bağlı değil)"],
       ["Firebase SDK", diag.sdk || "yüklenmedi"],
-      ["Anonim giriş", diag.uid ? "tamam" : "yok"],
+      ["Google hesabı", diag.email || (diag.uid ? "oturum açık" : "giriş yapılmadı")],
+      ["Defter rolü", ledgerRole || "üyelik bekleniyor"],
       ["Canlı dinleme", diag.snaps ? diag.snaps + " güncelleme · son: " + diag.lastSnap : "henüz veri gelmedi"],
       ["Düzenleme göstergesi", diag.aktifErr ? "kapalı (" + diag.aktifErr + ")" : "açık"],
       ["Cihaz listesi", diag.cihazErr ? "kapalı (" + diag.cihazErr + ")" : "açık"],
@@ -3305,7 +3455,8 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   document.addEventListener("click", e => { if (e.target.closest && e.target.closest("#syncDot")) openStatusSheet(); });
 
   /* ---------- Karşılama ekranı (cihaz henüz bir defterle bağlı değilse) ---------- */
-  function createDefter() {
+  async function createDefter() {
+    if (!isGoogleUser(fbAuth && fbAuth.currentUser)) return toast("Önce Google hesabınızla giriş yapın");
     const id = newToken();
     try {
       const legacy = localStorage.getItem(KEY);
@@ -3320,6 +3471,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     location.reload();
   }
   function joinDefter(text) {
+    if (!isGoogleUser(fbAuth && fbAuth.currentUser)) return toast("Önce Google hesabınızla giriş yapın");
     const t = String(text || "").trim();
     const m = t.match(/[#&?]d=([A-Za-z0-9_-]{16,})/) || t.match(/^([A-Za-z0-9_-]{16,})$/);
     if (!m) return toast("Geçerli bir defter bağlantısı değil");
@@ -3335,16 +3487,24 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         <div class="panel" style="max-width:440px;width:100%;padding:24px">
           <div style="font-size:11px;letter-spacing:.18em;color:var(--mute);font-weight:700;text-align:center">ÖDEME DEFTERİ</div>
           <h2 style="text-align:center;margin:8px 0 4px;font-size:20px">Ortak defter</h2>
-          <p class="meta" style="text-align:center;margin-bottom:14px">Bağlantıya sahip herkes aynı defteri canlı görür ve düzenler.</p>
-          <button class="btn btn-gold" id="wNew" style="width:100%">Yeni ortak defter oluştur</button>
+          <p class="meta" style="text-align:center;margin-bottom:14px">Defter verileri Google hesabı ve yönetici onayıyla korunur.</p>
+          <button class="btn btn-gold" id="wSignIn" style="width:100%">${isGoogleUser(fbAuth && fbAuth.currentUser) ? "Google hesabı bağlı · " + esc(fbAuth.currentUser.email || "") : "Google hesabıyla giriş yap"}</button>
+          ${isGoogleUser(fbAuth && fbAuth.currentUser) ? '<p class="meta" style="text-align:center;margin:8px 0">Kullanıcı kodunuz: <code>' + esc(fbAuth.currentUser.uid) + '</code></p>' : ""}
+          <button class="btn btn-gold" id="wNew" style="width:100%;margin-top:8px" ${isGoogleUser(fbAuth && fbAuth.currentUser) ? "" : "disabled"}>Yeni ortak defter oluştur</button>
           ${n ? `<p class="meta" style="margin-top:6px;text-align:center">Bu cihazdaki <b>${n}</b> kayıt yeni defter içine aktarılacak.</p>` : ""}
           <div class="meta" style="margin:16px 0 6px;text-align:center">— ya da size gönderilen bağlantıyla katılın —</div>
           <input class="inp" id="wLink" placeholder="Defter bağlantısını buraya yapıştırın" />
-          <button class="btn btn-ghost" id="wJoin" style="width:100%;margin-top:8px">Bağlantıyla katıl</button>
+          <button class="btn btn-ghost" id="wJoin" style="width:100%;margin-top:8px" ${isGoogleUser(fbAuth && fbAuth.currentUser) ? "" : "disabled"}>Bağlantıyla katıl</button>
         </div>
       </div>`;
+    const authButton = document.getElementById("wSignIn");
+    authButton.onclick = async () => {
+      authButton.disabled = true;
+      try { await authenticateGoogle(); } catch (e) { authButton.disabled = false; toast("Google girişi yapılamadı: " + fbErr(e)); }
+    };
     document.getElementById("wNew").onclick = createDefter;
     document.getElementById("wJoin").onclick = () => joinDefter(document.getElementById("wLink").value);
+    cloudInit();
   }
 
   /* ================= KİM YAPTI · ÇAKIŞMASIZ İŞLEM · SİLİNENLER · SİLME PIN'İ · CANLI BİLDİRİM · DÜZENLEME GÖSTERGESİ ================= */
