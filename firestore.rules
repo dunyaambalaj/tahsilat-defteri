@@ -19,6 +19,10 @@ service cloud.firestore {
       return girisli() && exists(orgMemberYolu(orgId, request.auth.uid))
           && get(orgMemberYolu(orgId, request.auth.uid)).data.role in ['owner', 'admin'];
     }
+    function orgCanView(orgId) {
+      return girisli() && exists(orgMemberYolu(orgId, request.auth.uid))
+          && get(orgMemberYolu(orgId, request.auth.uid)).data.role in ['owner', 'admin', 'accounting'];
+    }
     function branchManager(ledgerId) {
       return sabitAdmin() || orgManager('dunyaambalaj')
           || (girisli() && exists(ledgerMemberYolu(ledgerId, request.auth.uid))
@@ -34,7 +38,7 @@ service cloud.firestore {
         return exists(/databases/$(database)/documents/defterler/$(defterId)/meta/owner);
       }
       function bekleyenBasvuruAlanlari() {
-        return ['defterId', 'uid', 'email', 'name', 'status', 'createdAt', 'updatedAt'];
+        return ['defterId', 'uid', 'email', 'name', 'firstName', 'lastName', 'department', 'requestedRole', 'requestedLedgers', 'status', 'createdAt', 'updatedAt'];
       }
 
       allow get: if sabitAdmin()
@@ -49,6 +53,14 @@ service cloud.firestore {
           && request.resource.data.uid == request.auth.uid
           && request.resource.data.email == request.auth.token.email
           && request.resource.data.name is string
+          && request.resource.data.firstName is string && request.resource.data.firstName.size() > 0 && request.resource.data.firstName.size() <= 40
+          && request.resource.data.lastName is string && request.resource.data.lastName.size() > 0 && request.resource.data.lastName.size() <= 50
+          && request.resource.data.department in ['satis', 'operasyon', 'muhasebe', 'diger']
+          && request.resource.data.requestedRole in ['admin', 'accounting', 'editor', 'viewer']
+          && request.resource.data.requestedLedgers is list
+          && request.resource.data.requestedLedgers.size() > 0
+          && request.resource.data.requestedLedgers.size() <= 100
+          && request.resource.data.requestedLedgers.hasAny([request.resource.data.defterId])
           && request.resource.data.status == 'pending'
           && request.resource.data.createdAt is string
           && request.resource.data.updatedAt is string
@@ -58,7 +70,7 @@ service cloud.firestore {
           sabitAdmin()
           && request.resource.data.keys().hasAll(bekleyenBasvuruAlanlari())
           && request.resource.data.keys().hasAll(['handledAt', 'handledBy'])
-          && request.resource.data.keys().hasOnly(['defterId', 'uid', 'email', 'name', 'status', 'createdAt', 'updatedAt', 'handledAt', 'handledBy'])
+          && request.resource.data.keys().hasOnly(['defterId', 'uid', 'email', 'name', 'firstName', 'lastName', 'department', 'requestedRole', 'requestedLedgers', 'status', 'createdAt', 'updatedAt', 'handledAt', 'handledBy'])
           && request.resource.data.status in ['approved', 'rejected']
           && request.resource.data.handledBy == request.auth.uid
           && request.resource.data.handledAt is string
@@ -73,7 +85,7 @@ service cloud.firestore {
           && request.resource.data.createdAt == resource.data.createdAt
           && request.resource.data.keys().hasAll(bekleyenBasvuruAlanlari())
           && request.resource.data.keys().hasOnly(bekleyenBasvuruAlanlari())
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'status', 'updatedAt'])
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'firstName', 'lastName', 'department', 'requestedRole', 'requestedLedgers', 'status', 'updatedAt'])
         );
       allow delete: if false;
     }
@@ -91,31 +103,36 @@ service cloud.firestore {
       allow create: if sabitAdmin() || (
           girisli()
           && request.auth.uid == userId
-          && request.resource.data.keys().hasOnly(['role', 'uid', 'email', 'name', 'sourceLedgerId', 'createdAt', 'updatedAt'])
+          && request.resource.data.keys().hasOnly(['role', 'uid', 'email', 'name', 'firstName', 'lastName', 'department', 'sourceLedgerId', 'createdAt', 'updatedAt'])
           && request.resource.data.uid == userId
           && request.resource.data.role in ['owner', 'admin']
           && request.resource.data.sourceLedgerId is string
           && get(ledgerMemberYolu(request.resource.data.sourceLedgerId, userId)).data.role == request.resource.data.role
         ) || (
           orgManager(orgId)
-          && request.resource.data.keys().hasOnly(['role', 'uid', 'email', 'name', 'sourceLedgerId', 'createdAt', 'updatedAt'])
+          && request.resource.data.keys().hasOnly(['role', 'uid', 'email', 'name', 'firstName', 'lastName', 'department', 'sourceLedgerId', 'createdAt', 'updatedAt'])
           && request.resource.data.uid == userId
-          && request.resource.data.role in ['owner', 'admin']
+          && request.resource.data.role in ['owner', 'admin', 'accounting']
           && request.resource.data.sourceLedgerId is string
-          && getAfter(ledgerMemberYolu(request.resource.data.sourceLedgerId, userId)).data.role == request.resource.data.role
+          && ((request.resource.data.role in ['owner','admin'] && getAfter(ledgerMemberYolu(request.resource.data.sourceLedgerId, userId)).data.role == request.resource.data.role)
+            || (request.resource.data.role == 'accounting' && getAfter(ledgerMemberYolu(request.resource.data.sourceLedgerId, userId)).data.role == 'viewer' && getAfter(ledgerMemberYolu(request.resource.data.sourceLedgerId, userId)).data.department == 'muhasebe'))
         );
       allow update: if sabitAdmin() || (
           orgManager(orgId)
-          && request.resource.data.keys().hasOnly(['role', 'uid', 'email', 'name', 'sourceLedgerId', 'createdAt', 'updatedAt'])
+          && request.resource.data.keys().hasOnly(['role', 'uid', 'email', 'name', 'firstName', 'lastName', 'department', 'sourceLedgerId', 'createdAt', 'updatedAt'])
           && request.resource.data.uid == userId
-          && request.resource.data.role in ['owner', 'admin']
+          && request.resource.data.role in ['owner', 'admin', 'accounting']
           && request.resource.data.sourceLedgerId is string
-          && getAfter(ledgerMemberYolu(request.resource.data.sourceLedgerId, userId)).data.role == request.resource.data.role
+          && ((request.resource.data.role in ['owner','admin'] && getAfter(ledgerMemberYolu(request.resource.data.sourceLedgerId, userId)).data.role == request.resource.data.role)
+            || (request.resource.data.role == 'accounting' && getAfter(ledgerMemberYolu(request.resource.data.sourceLedgerId, userId)).data.role == 'viewer' && getAfter(ledgerMemberYolu(request.resource.data.sourceLedgerId, userId)).data.department == 'muhasebe'))
         );
       allow delete: if sabitAdmin() || (
           orgManager(orgId)
           && resource.data.sourceLedgerId is string
-          && getAfter(ledgerMemberYolu(resource.data.sourceLedgerId, userId)).data.role in ['editor', 'viewer']
+          && (!existsAfter(ledgerMemberYolu(resource.data.sourceLedgerId, userId))
+              || getAfter(ledgerMemberYolu(resource.data.sourceLedgerId, userId)).data.role in ['editor', 'viewer'])
+        ) || (
+          girisli() && request.auth.uid == userId && request.resource == null
         );
     }
 
