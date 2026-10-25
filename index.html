@@ -5272,6 +5272,13 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
       document.getElementById("gReset").onclick = async () => { if (!confirm("Defter listesi sıfırlansın mı? Defterlerin kendisi silinmez; yalnızca liste.")) return; await writeGroup([{ id: DEFTER_ID, ad: db.magaza }], adminPw); renderLedgers(host); };
       return;
     }
+    if (isLedgerManager()) {
+      for (const L of g.list) { try { const info = L.id===DEFTER_ID ? {companyName:db.magaza,branchName:db.firma.sube||""} : await ledgerBranchInfo(L.id); await syncBranchDirectory(L.id,info); } catch(e) {} }
+      const directory=await accessibleLedgers().catch(()=>[]);
+      if(directory.length)g.list=directory.map(x=>({...x,ad:x.companyName||x.ad}));
+    } else { const assigned=await accessibleLedgers().catch(()=>[]); g.list=assigned.map(x=>({...x,ad:x.companyName||x.ad})); }
+    if (!g.list.some(x=>x.id===DEFTER_ID)) g.list.unshift({id:DEFTER_ID,ad:db.magaza,companyName:db.magaza,branchName:db.firma.sube||"",role:ledgerRole});
+    const branchManager=isLedgerManager();
     const sums = await Promise.all(g.list.map(L => L.id === DEFTER_ID ? Promise.resolve(localSummary()) : ledgerSummary(L.id)));
     const tBak = round2(sums.reduce((a, s) => a + (s.bak || 0), 0)), tBug = round2(sums.reduce((a, s) => a + (s.bugun || 0), 0));
     host.innerHTML = `
@@ -5282,20 +5289,18 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
             <div class="ledger-top"><b>${esc(s.ad || L.ad)}</b>${cur ? `<span class="dev-me">Bu defter</span>` : ""}</div>
             <div class="meta">${s.err ? "Okunamadı: " + esc(s.err) : `${s.n} kayıt · açık <b>${money0(s.bak)}</b> · bugün tahsil <b>${money0(s.bugun)}</b> · ertelenen ${s.ert} · son işlem ${agoIso(s.son)}`}</div>
             <div class="tpl-acts">
-              ${cur ? "" : `<button class="btn btn-gold" data-lopen="${esc(L.id)}">Aç ve yönet</button>`}
-              <button class="btn btn-ghost" data-lren="${esc(L.id)}">Adı değiştir</button>
-              ${cur ? "" : `<button class="btn btn-ghost" data-ldel="${esc(L.id)}" style="color:var(--red)">Listeden çıkar</button>`}
+              ${cur ? "" : `<button class="btn btn-gold" data-lopen="${esc(L.id)}">Şubeyi aç</button>`}
+              ${branchManager ? `<button class="btn btn-ghost" data-lren="${esc(L.id)}">Şube adını değiştir</button>` : ""}
             </div>
           </div>`; }).join("")}
       </div>
       <div class="tpl-acts" style="margin-top:8px">
-        <button class="btn btn-leather" id="lNew">＋ Yeni defter</button>
-        <button class="btn btn-ghost" id="lAdd">🔗 Mevcut defteri ekle</button>
+        ${branchManager ? `<button class="btn btn-leather" id="lNew">＋ Yeni şube defteri</button><button class="btn btn-ghost" id="lAdd">🔗 Mevcut defteri ekle</button>` : ""}
       </div>
       <p class="meta" style="margin-top:8px">Defter listesi yönetici şifrenizle <b>şifrelenerek</b> saklanır; çalışanlar diğer defterlerin bağlantısını göremez. Tüm defterlerde aynı yönetici şifresi geçerlidir.</p>`;
     host.querySelectorAll("[data-lopen]").forEach(b => b.onclick = () => openLedger(b.dataset.lopen));
     host.querySelectorAll("[data-lren]").forEach(b => b.onclick = async () => {
-      const L = g.list.find(x => x.id === b.dataset.lren); const ad = prompt("Defter adı:", L.ad); if (!ad || !ad.trim()) return;
+      const L = g.list.find(x => x.id === b.dataset.lren); const ad = prompt("Şube adı:", L.branchName || L.ad); if (!ad || !ad.trim()) return;
       try { await renameLedger(L.id, ad.trim()); toast("Ad değiştirildi"); renderAdminPanel(); } catch (e) { toast("Değiştirilemedi: " + fbErr(e)); }
     });
     host.querySelectorAll("[data-ldel]").forEach(b => b.onclick = async () => {
