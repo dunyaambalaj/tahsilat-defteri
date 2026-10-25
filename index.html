@@ -1529,7 +1529,9 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
               ${db.firma.sube ? `<div class="branch-label">${esc(db.firma.sube)} şubesi</div>` : ""}
             </div>
             <div class="hbar">
-              ${hbtn("btnThemeToggle", isDark ? "sun" : "moon", isDark ? "Aydınlık mod" : "Karanlık mod")}
+              ${hbtn("btnBranches", "book", "Şubeler")}
+              ${hbtn("btnBranches", "book", "Şubeler")}
+            ${hbtn("btnThemeToggle", isDark ? "sun" : "moon", isDark ? "Aydınlık mod" : "Karanlık mod")}
               ${hbtn("btnBell", "bell", "Bildirimler", nNot ? `<span class="bell-badge">${nNot > 9 ? "9+" : nNot}</span>` : "")}
               ${hbtn("btnShareTop", "share", "Paylaş")}
               ${hbtn("btnSettings", "gear", "Ayarlar")}
@@ -2142,6 +2144,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
   function bind() {
     document.querySelectorAll("[data-view]").forEach(b => b.onclick = () => { view = b.dataset.view; render(); });
     document.getElementById("btnSettings")?.addEventListener("click", openSettings);
+    document.getElementById("btnBranches")?.addEventListener("click", openBranchSelector);
     document.getElementById("btnThemeToggle")?.addEventListener("click", () => {
       db.karanlik = !db.karanlik;
       save();
@@ -5366,7 +5369,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     $("sSave").onclick = () => {
       db.magaza = $("sAd").value.trim() || db.magaza;
       db.firma.sube = $("sSube").value.trim(); db.firma.tel = $("sTel").value.trim(); db.firma.vergi = $("sVergi").value.trim(); db.firma.adres = $("sAdres").value.trim();
-      save(); closeSheet(); render(); toast("Ayarlar kaydedildi");
+      save(); if (cloudOn && isLedgerManager()) syncBranchDirectory(DEFTER_ID, { companyName: db.magaza, branchName: db.firma.sube }).catch(e => console.warn(e)); closeSheet(); render(); toast("Ayarlar kaydedildi");
     };
     $("sLogoBtn").onclick = () => $("sLogoFile").click();
     $("sLogoFile").onchange = e => { const f = e.target.files?.[0]; if (f) processLogo(f); };
