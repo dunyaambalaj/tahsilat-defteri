@@ -3102,6 +3102,13 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     const oref = ownerRef(id);
     let ownerSnap = await fbm.getDoc(oref);
     if (!ownerSnap.exists()) {
+      let ownsThisDevice = false;
+      try { ownsThisDevice = localStorage.getItem("kirtasiye_sahip_" + id) === "1"; } catch (e) {}
+      if (!ownsThisDevice) {
+        ledgerRole = null;
+        showAccountGate("Defter sahibi önce kendi oluşturduğu cihazdan Google girişi yapmalı. Bu tamamlanınca sahibi sizi ekleyebilir.");
+        return false;
+      }
       try {
         await fbm.setDoc(oref, { ownerUid: user.uid, createdAt: new Date().toISOString() });
       } catch (e) { /* another first user may have claimed it */ }
