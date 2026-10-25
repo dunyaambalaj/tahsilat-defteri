@@ -67,7 +67,7 @@ service cloud.firestore {
             && koleksiyon in ['kayitlar', 'ayar', 'aktif', 'cihaz']
             && gecerliVeri()
             && (kayitYazabilir() || koleksiyon in ['aktif', 'cihaz']);
-        allow delete: if uye() && koleksiyon in ['aktif', 'cihaz'];
+        allow delete: if uye() && (koleksiyon in ['aktif', 'cihaz'] || (koleksiyon == 'ayar' && belgeId == 'kasa' && sahip()));
       }
     }
   }
