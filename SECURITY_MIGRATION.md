@@ -10,7 +10,7 @@ Mevcut kurallar anonim olarak giriş yapan herkese, defter bağlantısını bild
 2. Firebase Authentication → Sign-in method içinde **Google** sağlayıcısını etkinleştirin. **Anonymous** sağlayıcısını geçiş bitene kadar açık bırakın. Eski anonim oturum, uygulamanın Google hesabını aynı Firebase kullanıcısına bağlaması için kullanılır.
 3. Firestore Rules sekmesinde **firestore.rules.migration** içeriğini yayımlayın. Bu geçiş kuralları, uygulamanın sahip ve üyelik metaverisini yazmasını sağlar; kayıt verilerinin eski erişim biçimini geçici olarak korur.
 4. **index.html** ve **sw.js** dosyalarını yayımlayın. Geçici kurallar eski link tabanlı erişimi korur; bu aşamada linki bilen oturum açmış kişiler hâlâ eski erişim sınırları içindedir. Bu nedenle geçişi kısa sürede tamamlayın. Kullanıcılar aynı cihaz ve tarayıcı profiliyle uygulamayı açıp **Google hesabıyla giriş yap** seçsin. Her mevcut defterin sahibi, sahiplik belgesini oluşturmak için o defteri ilk kez kendi oluşturduğu cihaz ve aynı tarayıcı profiliyle açmalıdır. Sabit sistem yöneticisi tüm defterlere bu cihaz kontrolünden bağımsız erişir ve üyeleri yönetebilir.
-5. Her kullanıcı, giriş ekranında gösterilen Google kullanıcı kodunu defter sahibine iletsin. Sahip **Ayarlar → Defter erişimi** bölümünde kodu eklesin. Her kullanıcıya erişeceği her defter için ayrı üyelik verin.
+5. Çalışanlar defter bağlantısını açıp Google ile giriş yapsın ve **Üyelik başvurusu gönder** düğmesine bassın. Sahip veya sabit sistem yöneticisi, **Ayarlar → Defter erişimi** ekranındaki anlık bildirimi açıp başvuruyu onaylasın. Elle ekleme de kullanıcı koduyla yapılabilir.
 6. Tüm gerekli kişiler ve defterler hazır olduktan sonra Firestore Rules sekmesinde **firestore.rules** içeriğini yayımlayın. Bu son adım üyelikte olmayan hesapların bulut verilerine erişimini keser.
 7. Üyeliği kaldırılan bir cihazın önceden indirdiği çevrimdışı kopya cihazdan silinmez. Kullanıcıların cihazlarına erişimin de kontrol edilmesi gerekir.
 
@@ -31,5 +31,5 @@ Yeni ve boş bir defter için Google girişini etkinleştirin, **firestore.rules
 
 - **firestore.rules.migration**: Eski kullanıcıları içeri alırken geçici olarak kullanılacak kurallar.
 - **firestore.rules**: Üyelik bazlı nihai kurallar.
-- **index.html**: Google girişi, üyelik bekleme ekranı, sahip/düzenleyici akışı.
+- **index.html**: Google girişi, üyelik başvurusu, sahip/düzenleyici ve anlık bildirim akışı.
 - **sw.js**: Yeni uygulama sürümünün önbellek anahtarı.
