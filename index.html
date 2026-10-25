@@ -3104,6 +3104,16 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     const user = fbAuth && fbAuth.currentUser;
     if (!isGoogleUser(user)) return false;
     if (isFixedAdmin(user)) {
+      const oref = ownerRef(id);
+      const ownerSnap = await fbm.getDoc(oref);
+      if (!ownerSnap.exists()) {
+        await fbm.setDoc(oref, { ownerUid: user.uid, createdAt: new Date().toISOString() });
+      }
+      const selfRef = memberRef(id, user.uid);
+      const self = await fbm.getDoc(selfRef);
+      if (!self.exists() || self.data().role !== "owner") {
+        await fbm.setDoc(selfRef, { role: "owner", email: user.email || "", name: user.displayName || "", addedAt: new Date().toISOString() });
+      }
       ledgerRole = "owner";
       return true;
     }
