@@ -59,6 +59,41 @@
       --input: #ffffff; --pill: #f0ddcf; --badge: #f3e4da; --ghost: #eddcd0;
       --stripe: rgba(190,140,120,.16);
     }
+    [data-theme="okyanus"] {
+      --leather: #123b49; --leather-2: #1e5967;
+      --gold: #63b9b0; --gold-dim: #378b85;
+      --paper: #eaf3f3; --sheet: #fbffff; --line: #d2e2e2; --mute: #526a6c;
+      --input: #ffffff; --pill: #deebeb; --badge: #e0efeb; --ghost: #e1eceb;
+      --stripe: rgba(56,120,125,.13);
+    }
+    [data-theme="adacayi"] {
+      --leather: #30483b; --leather-2: #486453;
+      --gold: #b99b62; --gold-dim: #90784b;
+      --paper: #edf1e8; --sheet: #fbfcf7; --line: #d8e1d3; --mute: #5e6e62;
+      --input: #ffffff; --pill: #e4eadf; --badge: #e2ebe2; --ghost: #e5ebdf;
+      --stripe: rgba(82,119,93,.12);
+    }
+    [data-theme="lavanta"] {
+      --leather: #383553; --leather-2: #504a71;
+      --gold: #ad95d5; --gold-dim: #7d679f;
+      --paper: #f0eff8; --sheet: #fcfbff; --line: #dedceb; --mute: #68647a;
+      --input: #ffffff; --pill: #e9e5f2; --badge: #e7e7f1; --ghost: #e7e5ef;
+      --stripe: rgba(112,100,153,.13);
+    }
+    [data-theme="gul"] {
+      --leather: #603b48; --leather-2: #82515e;
+      --gold: #d49aa1; --gold-dim: #a96f7b;
+      --paper: #f7edef; --sheet: #fff9fa; --line: #ead9de; --mute: #78636b;
+      --input: #ffffff; --pill: #f0e3e7; --badge: #f0e4e9; --ghost: #f2e7e9;
+      --stripe: rgba(160,92,113,.12);
+    }
+    [data-theme="kiremit"] {
+      --leather: #5a3b32; --leather-2: #795247;
+      --gold: #d3976f; --gold-dim: #ad7251;
+      --paper: #f5ece5; --sheet: #fffaf6; --line: #e7d8cd; --mute: #746056;
+      --input: #ffffff; --pill: #f0e4d9; --badge: #efe5dd; --ghost: #ede2d8;
+      --stripe: rgba(158,104,72,.14);
+    }
     [data-theme="gece"] {
       --ink: #ece7dd; --mute: #9aa5a1;
       --leather: #101a17; --leather-2: #16231f;
@@ -83,7 +118,6 @@
     [data-mode="dark"] .chip.on { background: #2a3d35; color: #f6edd8; border-color: #4f7a68; }
     [data-mode="dark"] .wk-day.on { background: #2a3d35; }
     [data-mode="dark"] .cal .d.on { background: #2a3d35; }
-    [data-mode="dark"] .share-sheet { background: #fff8ec; }
     [data-mode="dark"] .sheet { background: rgba(0,0,0,.66); }
     [data-mode="dark"] .card { border-color: var(--line); }
     [data-mode="dark"] .nav { background: #141a1c; }
@@ -113,8 +147,8 @@
     /* ---------- DERİ BAŞLIK (mobil/tablet) ---------- */
     .leather {
       background:
-        radial-gradient(1200px 220px at 20% -40%, rgba(201,162,39,.22), transparent 50%),
-        linear-gradient(180deg, #1c3b32 0%, #142923 100%);
+        radial-gradient(1200px 220px at 20% -40%, color-mix(in srgb, var(--gold) 24%, transparent), transparent 50%),
+        linear-gradient(180deg, var(--leather-2) 0%, var(--leather) 100%);
       color: #f6edd8;
       padding-top: calc(var(--safe-top) + 10px);
     }
@@ -145,10 +179,10 @@
       overflow: auto;
       overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
-      padding: 12px 14px calc(92px + var(--safe-bot));
+      padding: 12px 14px calc(112px + var(--safe-bot));
       background:
-        repeating-linear-gradient(0deg, transparent 0 31px, rgba(196,168,120,.18) 31px 32px),
-        linear-gradient(90deg, #d9b36a 0 7px, transparent 7px),
+        repeating-linear-gradient(0deg, transparent 0 31px, var(--stripe) 31px 32px),
+        linear-gradient(90deg, var(--gold) 0 7px, transparent 7px),
         var(--paper);
     }
     .page-inner { width: 100%; max-width: 720px; margin: 0 auto; min-width: 0; }
@@ -287,7 +321,7 @@
     .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
     /* ---------- MİNİ SATIRLAR ---------- */
-    .mini { display: grid; gap: 6px; }
+    .mini { display: grid; gap: 8px; }
     .mini-day {
       display: flex; align-items: baseline; gap: 8px;
       background: var(--sheet); border: 1px solid var(--line); border-radius: 12px;
@@ -299,30 +333,35 @@
 
     /* ---------- FAB ---------- */
     .fab {
-      position: fixed; right: 16px; bottom: calc(76px + var(--safe-bot));
-      width: 58px; height: 58px; border-radius: 18px; border: 0;
-      background: linear-gradient(180deg, #d4b03a, #b8901e);
-      color: #1a1612; font-size: 32px; font-weight: 700;
-      box-shadow: 0 10px 24px rgba(180, 140, 30, .45);
-      z-index: 20;
+      flex: 0 0 56px; width: 56px; height: 56px; border-radius: 50%; border: 0;
+      margin: -18px 8px 0; position: relative; z-index: 34;
+      display: grid; place-items: center;
+      background: radial-gradient(120% 120% at 30% 18%, rgba(255,255,255,.9), color-mix(in srgb, var(--gold) 60%, #fff) 38%, var(--gold));
+      color: #1a1612; font-size: 32px; font-weight: 600; line-height: 1;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.92), inset 0 -3px 8px color-mix(in srgb, var(--gold-dim) 45%, transparent), 0 10px 24px color-mix(in srgb, var(--gold) 40%, transparent);
+      cursor: pointer; transition: transform .22s cubic-bezier(.3,1.5,.5,1), box-shadow .22s;
     }
+    .fab:active { transform: scale(.94); }
 
     /* ---------- ALT GEZİNME ---------- */
     .nav {
       position: fixed; left: 0; right: 0; bottom: 0;
-      background: var(--sheet);
-      border-top: 1px solid var(--line);
-      display: grid; grid-template-columns: repeat(5, 1fr);
-      padding: 6px 4px calc(8px + var(--safe-bot));
-      z-index: 30;
+      min-height: calc(68px + var(--safe-bot));
+      background: var(--sheet); border-top: 1px solid var(--line);
+      display: flex; align-items: center; justify-content: center;
+      padding: 7px 8px calc(8px + var(--safe-bot)); z-index: 30;
     }
-    .nav button {
+    .nav-group { display: flex; align-items: center; flex: 1 1 0; min-width: 0; }
+    .nav-group:first-of-type, .nav-group:last-of-type { width: calc((100% - 80px) / 2); }
+    .nav-group:first-of-type { margin-right: 2px; }
+    .nav-group:last-of-type { margin-left: 2px; }
+    .nav button:not(.fab) {
+      flex: 1 1 0; min-width: 0;
       background: none; border: 0; color: var(--mute);
-      display: flex; flex-direction: column; align-items: center; gap: 2px;
-      font-size: 9.5px; font-weight: 700; letter-spacing: .02em;
-      padding: 6px 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+      font-size: 9.5px; font-weight: 700; letter-spacing: .02em; padding: 6px 1px;
     }
-    .nav button.on { color: var(--leather); }
+    .nav button.on:not(.fab) { color: var(--leather); }
     .nav svg { width: 22px; height: 22px; }
 
     /* ---------- ALTLIK / DİYALOG ---------- */
@@ -392,11 +431,6 @@
     .search-wrap { position: relative; margin-bottom: 10px; min-width: 0; }
     .search-wrap svg { position: absolute; left: 12px; top: 12px; color: var(--mute); }
 
-    .share-sheet {
-      background: #fff; color: #111; border: 1px dashed #c9b48a;
-      border-radius: 8px; padding: 18px 16px; font-family: Georgia, serif;
-    }
-
     /* ---------- TOAST + GERİ AL ---------- */
     .toast {
       position: fixed; left: 50%; bottom: calc(90px + var(--safe-bot));
@@ -415,8 +449,8 @@
     .lockwrap {
       position: fixed; inset: 0; z-index: 140;
       background:
-        radial-gradient(900px 300px at 50% -10%, rgba(201,162,39,.16), transparent 55%),
-        linear-gradient(180deg, #1c3b32, #0f211c);
+        radial-gradient(900px 300px at 50% -10%, color-mix(in srgb, var(--gold) 20%, transparent), transparent 55%),
+        linear-gradient(180deg, var(--leather-2), var(--leather));
       display: flex; align-items: center; justify-content: center; padding: 20px;
     }
     .lockcard { width: min(320px, 92vw); text-align: center; color: #f6edd8; }
@@ -445,6 +479,11 @@
     h1,h2,h3 { margin: 0; }
 
     /* ---------- TABLET ---------- */
+    @media (max-width: 420px) {
+      .notify-row .mini-day { grid-template-columns: 44px minmax(0,1fr) auto; gap: 4px 6px; padding: 9px 8px; }
+      .notify-row .mini-day .v { max-width: 84px; font-size: 11.5px; }
+      .notify-wa { width: 36px; height: 38px; flex-basis: 36px; }
+    }
     @media (min-width: 760px) {
       .page-inner { max-width: 940px; }
       .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -464,25 +503,22 @@
 
     /* ---------- PC ---------- */
     @media (min-width: 1100px) {
-      .page { padding: 28px 32px 130px; }
+      .page { padding: 28px 32px 148px; }
       .page-inner { max-width: 1120px; }
       .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
     /* ---------- ALT MENÜ: tablet/PC'de hap biçiminde merkez bar ---------- */
     @media (min-width: 760px) {
-      .page { padding-bottom: 130px; }
+      .page { padding-bottom: 148px; }
       .nav {
         left: 50%; right: auto; bottom: calc(14px + var(--safe-bot));
-        transform: translateX(-50%);
-        width: min(620px, 94vw);
-        border: 1px solid var(--line);
-        border-radius: 22px;
-        box-shadow: 0 14px 34px rgba(15, 25, 20, .22);
-        padding: 8px 10px;
+        transform: translateX(-50%); width: min(720px, 96vw); min-height: 76px;
+        border: 1px solid var(--line); border-radius: 24px;
+        box-shadow: 0 14px 34px rgba(15, 25, 20, .22); padding: 8px 12px;
       }
-      .nav button { font-size: 11px; padding: 8px 0; }
+      .nav button:not(.fab) { font-size: 11px; padding: 8px 0; }
       .nav svg { width: 24px; height: 24px; }
-      .fab { right: 30px; bottom: 110px; }
+      .nav .fab { margin-left: 12px; margin-right: 12px; }
     }
     /* ---------- BİLDİRİM ZİLİ + LOGO ---------- */
     .hdr-ico { position: relative; }
@@ -507,9 +543,22 @@
     }
     .brand-mark img { width: 100%; height: 100%; object-fit: cover; border-radius: 9px; display: block; }
     .theme-dot { width: 100%; height: 22px; border-radius: 7px; margin-bottom: 5px; border: 1px solid rgba(0,0,0,.12); }
-    .notify-row { display: flex; align-items: center; gap: 8px; }
-    .notify-row .mini-day { flex: 1; }
-    .notify-wa { width: 40px; height: 40px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 40px; }
+    .notify-row { display: grid; grid-template-columns: minmax(0,1fr) 40px; align-items: center; gap: 6px; min-width: 0; }
+    .notify-row .mini-day {
+      display: grid; grid-template-columns: 48px minmax(0,1fr) auto; align-items: center;
+      gap: 4px 8px; min-height: 56px; padding: 10px; flex: 1; min-width: 0;
+    }
+    .notify-row .mini-day .d { width: auto; flex: none; font-size: 12px; }
+    .notify-copy { display: grid; gap: 2px; min-width: 0; text-align: left; }
+    .notify-row .mini-day .who {
+      display: block; min-width: 0; white-space: normal; overflow: visible; text-overflow: clip;
+      overflow-wrap: anywhere; font-size: 13px; font-weight: 800; line-height: 1.28;
+    }
+    .notify-type { color: var(--mute); font-size: 11px; line-height: 1.25; overflow-wrap: anywhere; }
+    .notify-row .mini-day .v { white-space: nowrap; font-size: 12px; max-width: 100px; }
+    .notify-wa { width: 40px; height: 40px; border-radius: 13px; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 40px; }
+    .digest-list { grid-template-columns: 1fr; }
+    .reminder-sheet { max-height: min(92dvh, 920px); padding-bottom: calc(20px + var(--safe-bot)); }
 
 
     /* ===== ORTAK + KLASİK ===== */
@@ -664,8 +713,8 @@
 html[data-look="cam"], html[data-look="cam"][data-theme] {
       --serif: "New York", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
       --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Avenir Next", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
-      --cream: #f6edd8;
-      --gold-hi: #efd679;
+      --cream: color-mix(in srgb, var(--sheet) 92%, #fff);
+      --gold-hi: color-mix(in srgb, var(--gold) 54%, #fff);
       --rim-hi: rgba(255,255,255,.95);
       --rim-lo: rgba(255,255,255,.10);
       --glass-a: color-mix(in srgb, var(--sheet) 74%, transparent);
@@ -1027,6 +1076,98 @@ html[data-look="cam"] .goal { border-radius: 24px; }
 html[data-look="cam"] .goal-top span { color: var(--gold-dim); }
 html[data-look="cam"] .goal-empty { color: var(--mute); box-shadow: var(--glass-inset), 0 0 0 1.5px color-mix(in srgb, var(--gold) 40%, transparent), var(--glass-shadow); }
 html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--leather) 7%, transparent); }
+  
+/* Final responsive navigation and reminder polish */
+.nav {
+  position: fixed !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: calc(10px + var(--safe-bot)) !important;
+  transform: translateX(-50%) !important;
+  width: min(720px, calc(100vw - 20px)) !important;
+  max-width: none !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  padding: 6px !important;
+  z-index: 40 !important;
+}
+.nav-group {
+  display: flex !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  align-items: center !important;
+  justify-content: space-around !important;
+}
+.nav-group button {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+}
+.nav .fab {
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+  flex: 0 0 58px !important;
+  width: 58px !important;
+  height: 58px !important;
+  margin: -20px 5px 0 !important;
+  z-index: 2 !important;
+  display: grid !important;
+  place-items: center !important;
+}
+html[data-look="cam"] .nav { display: flex !important; }
+html[data-look="cam"] .nav button:not(.fab) { flex: 1 1 0; min-width: 0; }
+html[data-look="cam"] .fab {
+  position: relative !important;
+  inset: auto !important;
+  flex: 0 0 62px !important;
+  width: 62px !important;
+  height: 62px !important;
+  margin: -20px 5px 0 !important;
+  color: var(--leather) !important;
+  background: radial-gradient(120% 120% at 30% 18%, rgba(255,255,255,.9), color-mix(in srgb, var(--gold-hi) 78%, white) 40%, var(--gold)) !important;
+}
+html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 2px; }
+.page { padding-bottom: calc(118px + var(--safe-bot)) !important; }
+@media (min-width: 980px) {
+  html[data-look="cam"] .tb-nav { display: none !important; }
+  html[data-look="cam"] .tb-inner { display: flex !important; justify-content: space-between !important; }
+  html[data-look="cam"] .hbar { margin-left: auto; }
+  html[data-look="cam"] .page { padding-bottom: 138px !important; }
+}
+.notify-row { align-items: stretch; }
+.notify-row .mini-day {
+  display: grid !important;
+  grid-template-columns: auto minmax(0,1fr) auto !important;
+  align-items: center !important;
+  gap: 4px 9px !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  min-height: 54px;
+}
+.notify-row .notify-copy { min-width: 0 !important; white-space: normal !important; overflow: visible !important; }
+.notify-row .who {
+  display: block !important;
+  min-width: 0 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+  text-overflow: clip !important;
+  line-height: 1.25 !important;
+}
+.notify-row .notify-type { display: block; white-space: normal; line-height: 1.25; }
+.notify-row .v { white-space: nowrap; max-width: 34vw; }
+@media (max-width: 380px) {
+  .nav { width: calc(100vw - 12px) !important; gap: 1px !important; padding: 5px !important; }
+  .nav .fab { flex-basis: 52px !important; width: 52px !important; height: 52px !important; margin-left: 2px !important; margin-right: 2px !important; }
+  html[data-look="cam"] .fab { flex-basis: 54px !important; width: 54px !important; height: 54px !important; }
+  html[data-look="cam"] .nav button:not(.fab) { font-size: 9px !important; }
+  .notify-row .mini-day { gap: 4px 6px !important; }
+}
+
   </style>
 </head>
 <body>
@@ -1048,7 +1189,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     try { const v = localStorage.getItem(ID_KEY); return ID_RE.test(v || "") ? v : null; } catch (e) { return null; }
   })();
   const cacheKey = () => DEFTER_ID ? KEY + ":" + DEFTER_ID : KEY;
-  const BUILD = "12";
+  const BUILD = "13";
   const FB_VERSIONS = ["13.0.0", "12.8.0", "12.2.1"]; /* sırayla denenir */
   /* Firebase web ayarları herkese açık bilgidir. firebase-config.js okunamazsa bu yedek kullanılır. */
   const FB_DEFAULT = {
@@ -1120,7 +1261,12 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     { id:"deri", ad:"Deri Yeşil", c1:"#142923", c2:"#c9a227", c3:"#f3ead8" },
     { id:"lacivert", ad:"Lacivert", c1:"#152238", c2:"#d2a83a", c3:"#e8edf4" },
     { id:"kahve", ad:"Kahve", c1:"#3a2718", c2:"#d1a33c", c3:"#f0e6d3" },
-      { id:"bordo", ad:"Bordo", c1:"#3f1622", c2:"#d4a73a", c3:"#f5ece2" }
+    { id:"bordo", ad:"Bordo", c1:"#3f1622", c2:"#d4a73a", c3:"#f5ece2" },
+    { id:"okyanus", ad:"Okyanus", c1:"#123b49", c2:"#63b9b0", c3:"#eaf3f3" },
+    { id:"adacayi", ad:"Adaçayı", c1:"#30483b", c2:"#b99b62", c3:"#edf1e8" },
+    { id:"lavanta", ad:"Lavanta", c1:"#383553", c2:"#ad95d5", c3:"#f0eff8" },
+    { id:"gul", ad:"Gül Kurusu", c1:"#603b48", c2:"#d49aa1", c3:"#f7edef" },
+    { id:"kiremit", ad:"Kiremit", c1:"#5a3b32", c2:"#d3976f", c3:"#f5ece5" }
   ];
   function defaultDB() {
     return {
@@ -1427,7 +1573,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     return `<div class="notify-row">
       <button class="mini-day" data-setdate="${k.vade}">
         <span class="d">${fmtDate(k.vade).slice(0,5)}</span>
-        <span class="who">${esc(k.musteri)} · ${esc(typeAd(k.tur, k))}</span>
+        <span class="notify-copy"><span class="who">${esc(k.musteri)}</span><span class="notify-type">${esc(typeAd(k.tur, k))}</span></span>
         <span class="v">${fmtTRY(remaining(k))}</span>
       </button>
       ${wa ? `<a class="btn btn-wa notify-wa" href="${waLink(k)}" target="_blank" rel="noopener" data-wa="1" title="WhatsApp hatırlat">${icon("msg")}</a>` : ""}
@@ -1439,7 +1585,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     const sec = (title, color, arr, wa) => arr.length ? `
       <div class="sec-title" style="margin-top:14px;color:${color}">${title} <span class="cnt">${arr.length}</span></div>
       <div class="meta" style="margin:-4px 0 8px">Toplam ${fmtTRY(sumGroup(arr))}</div>
-      <div class="mini">${arr.map(k => digestRow(k, wa)).join("")}</div>` : "";
+      <div class="mini digest-list">${arr.map(k => digestRow(k, wa)).join("")}</div>` : "";
     openSheet(`
       <div class="sheet-card">
         <div class="grab"></div>
@@ -1485,7 +1631,8 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   }
 
   function nav() {
-    return `<nav class="nav">${db.gorunum === "klasik" ? "" : `<i class="gi"></i>`}${VIEWS.map(([id,ad,ic]) => `<button data-view="${id}" class="${view===id?"on":""}">${icon(ic)}<span>${ad}</span></button>`).join("")}</nav>`;
+    const items = VIEWS.map(([id,ad,ic]) => `<button data-view="${id}" class="${view===id?"on":""}">${icon(ic)}<span>${ad}</span></button>`);
+    return `<nav class="nav" aria-label="Ana menü"><div class="nav-group nav-left">${items.slice(0,2).join("")}</div><button class="fab" id="fab" aria-label="Tahsilat ekle" title="Tahsilat ekle">+</button><div class="nav-group nav-right">${items.slice(2).join("")}</div></nav>`;
   }
 
   function waLink(k) {
@@ -1590,7 +1737,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         </button>`).join("")
       ).join("")}</div>` : `<div class="panel meta" style="padding:14px">Önümüzdeki 7 günde vadeli alacak görünmüyor.</div>`}
       ${recentActivityHtml()}
-      <button class="fab" id="fab">+</button>
+
     `;
   }
 
@@ -1655,7 +1802,6 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       ${selectedDate === todayISO() && overdueList().filter(k => !isErt(k)).length ? `
         <div class="sec-title" style="color:var(--red)">Geciken açık bakiyeler <span class="cnt">${overdueList().filter(k => !isErt(k)).length}</span></div>
         ${cardsGrid(overdueList().filter(k => !isErt(k)))}` : ""}
-      <button class="fab" id="fab">+</button>
     `;
   }
 
@@ -1813,7 +1959,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     } else {
       body = dayDetail(selectedDate, events, true);
     }
-    return head + body + `<button class="fab" id="fab">+</button>`;
+    return head + body;
   }
 
   /* ---------- MÜŞTERİ ---------- */
@@ -1867,7 +2013,6 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
           </div>
         </article>`).join("") : `<div class="empty">Müşteri bulunamadı.</div>`}
       </div>
-      <button class="fab" id="fab">+</button>
     `;
   }
 
@@ -2483,8 +2628,8 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   }
   function openSettings() {
     const temaHtml = TEMALAR.map(x => `
-      <button class="type-opt ${db.tema===x.id?"on":""}" data-tema="${x.id}" style="padding:8px 6px">
-        <span class="theme-dot" style="background:linear-gradient(90deg, ${x.c1} 58%, ${x.c2} 58%)"></span>
+      <button class="type-opt ${db.tema===x.id?"on":""}" data-tema="${x.id}" aria-label="Tema: ${x.ad}" title="${x.ad}" style="padding:8px 6px">
+        <span class="theme-dot" style="background:linear-gradient(90deg, ${x.c1} 42%, ${x.c2} 42% 68%, ${x.c3} 68%)"></span>
         <span style="font-size:11px">${x.ad}</span>
       </button>`).join("");
     openSheet(`
@@ -2796,9 +2941,17 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     const c = document.createElement("canvas");
     c.width = W; c.height = H;
     const ctx = c.getContext("2d");
-    ctx.fillStyle = "#f3ead8"; ctx.fillRect(0,0,W,H);
-    ctx.fillStyle = "#142923"; ctx.fillRect(0,0,W,210);
-    ctx.fillStyle = "#c9a227"; ctx.fillRect(0,210,W,6);
+    const css = getComputedStyle(document.documentElement);
+    const color = (key, fallback) => css.getPropertyValue(key).trim() || fallback;
+    const C = {
+      ink: color("--ink", "#1a1612"), primary: color("--leather", "#142923"),
+      accent: color("--gold", "#c9a227"), paper: color("--paper", "#f3ead8"),
+      sheet: color("--sheet", "#fff8ec"), line: color("--line", "#e4d5b8"),
+      mute: color("--mute", "#6b5e4a")
+    };
+    ctx.fillStyle = C.paper; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle = C.primary; ctx.fillRect(0,0,W,210);
+    ctx.fillStyle = C.accent; ctx.fillRect(0,210,W,6);
     let tx = 64;
     if (logoImg) {
       try {
@@ -2811,49 +2964,49 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         tx = 184;
       } catch(e) { tx = 64; }
     }
-    ctx.font = "700 20px sans-serif"; ctx.fillStyle = "#c9a227";
+    ctx.font = "700 20px sans-serif"; ctx.fillStyle = C.accent;
     ctx.fillText("ÖDEME DEFTERİ", tx, 62);
-    ctx.fillStyle = "#fff8ec"; ctx.font = "800 38px sans-serif";
+    ctx.fillStyle = "#fff"; ctx.font = "800 38px sans-serif";
     ctx.fillText(db.magaza.slice(0, 30), tx, 106);
-    ctx.font = "600 17px sans-serif"; ctx.fillStyle = "#b9c9c0";
+    ctx.font = "600 17px sans-serif"; ctx.fillStyle = "rgba(255,255,255,.76)";
     if (db.firma.tel) ctx.fillText(("Tel: " + db.firma.tel).slice(0, 46), tx, 134);
-    ctx.font = "600 26px sans-serif"; ctx.fillStyle = "#ead889";
+    ctx.font = "600 26px sans-serif"; ctx.fillStyle = "#fff";
     ctx.fillText(title.slice(0, 50), 64, 182);
-    ctx.fillStyle = "#1a1612"; ctx.font = "700 22px sans-serif";
+    ctx.fillStyle = C.ink; ctx.font = "700 22px sans-serif";
     ctx.fillText("Müşteri · Ödeme türü · Vade", 64, 262);
     ctx.textAlign = "right"; ctx.fillText("Tutar", W-64, 262); ctx.textAlign = "left";
     rows.forEach((k, i) => {
       const y = head + i * rowH;
-      ctx.fillStyle = i % 2 ? "#fff8ec" : "#fffdf7";
+      ctx.fillStyle = i % 2 ? C.sheet : C.paper;
       rr(ctx, 48, y, W-96, rowH-12, 14); ctx.fill();
-      ctx.fillStyle = "#1a1612"; ctx.font = "700 27px sans-serif";
+      ctx.fillStyle = C.ink; ctx.font = "700 27px sans-serif";
       ctx.fillText((k.musteri || "").slice(0, 28), 72, y + 36);
       const tl = typeAd(k.tur, k);
       ctx.font = "700 19px sans-serif";
       const tw = ctx.measureText(tl).width + 26;
-      ctx.fillStyle = "#e4d5b8"; rr(ctx, 72, y + 50, tw, 32, 16); ctx.fill();
-      ctx.fillStyle = "#142923"; ctx.fillText(tl, 85, y + 73);
-      ctx.fillStyle = "#6b5e4a"; ctx.font = "500 19px sans-serif";
+      ctx.fillStyle = C.line; rr(ctx, 72, y + 50, tw, 32, 16); ctx.fill();
+      ctx.fillStyle = C.primary; ctx.fillText(tl, 85, y + 73);
+      ctx.fillStyle = C.mute; ctx.font = "500 19px sans-serif";
       ctx.fillText(`${statusLabel(statusOf(k))}  ·  Vade ${fmtDate(k.vade)}`, 72 + tw + 14, y + 73);
-      ctx.fillStyle = "#1a1612"; ctx.font = "800 26px sans-serif";
+      ctx.fillStyle = C.ink; ctx.font = "800 26px sans-serif";
       ctx.textAlign = "right"; ctx.fillText(fmtTRY(k.tutar), W-72, y + 40);
       if ((k.tahsilTutar || 0) > 0 && statusOf(k) !== "tahsil") {
-        ctx.font = "600 18px sans-serif"; ctx.fillStyle = "#6b5e4a";
+        ctx.font = "600 18px sans-serif"; ctx.fillStyle = C.mute;
         ctx.fillText(`Kalan ${fmtTRY(remaining(k))}`, W-72, y + 68);
       }
       ctx.textAlign = "left";
     });
     if (list.length > 12) {
-      ctx.fillStyle = "#6b5e4a"; ctx.font = "600 20px sans-serif";
+      ctx.fillStyle = C.mute; ctx.font = "600 20px sans-serif";
       ctx.fillText(`ve ${list.length - 12} kayıt daha…`, 64, head + rows.length * rowH + 4);
     }
     const fy = H - 170;
-    ctx.fillStyle = "#142923"; ctx.fillRect(48, fy, W-96, 120);
-    ctx.fillStyle = "#ead889"; ctx.font = "700 20px sans-serif";
+    ctx.fillStyle = C.primary; ctx.fillRect(48, fy, W-96, 120);
+    ctx.fillStyle = C.accent; ctx.font = "700 20px sans-serif";
     ctx.fillText("Bekleyen", 80, fy+40); ctx.fillText("Tahsil", 420, fy+40); ctx.fillText("Ertelenen", 760, fy+40);
-    ctx.fillStyle = "#fff8ec"; ctx.font = "800 27px sans-serif";
+    ctx.fillStyle = "#fff"; ctx.font = "800 27px sans-serif";
     ctx.fillText(fmtTRY(s.bek), 80, fy+84); ctx.fillText(fmtTRY(s.tah), 420, fy+84); ctx.fillText(fmtTRY(s.ert), 760, fy+84);
-    ctx.fillStyle = "#6b5e4a"; ctx.font = "500 16px sans-serif";
+    ctx.fillStyle = C.mute; ctx.font = "500 16px sans-serif";
     ctx.fillText("Ortak defter · " + new Date().toLocaleString("tr-TR"), 64, H - 28);
     return c;
   }
@@ -2870,30 +3023,6 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
             <div style="display:flex;align-items:center;gap:8px">
               <h2 style="flex:1;font-size:18px">Görsel paylaşım</h2>
               <button class="btn btn-ghost" id="sheetClose">Kapat</button>
-            </div>
-            <div class="share-sheet">
-              <div style="display:flex;gap:12px;align-items:center">
-                ${db.firma.logo ? `<img src="${db.firma.logo}" style="width:44px;height:44px;object-fit:cover;border-radius:10px;flex:0 0 44px">` : ""}
-                <div style="min-width:0">
-                  <div style="letter-spacing:.2em;font-size:11px;color:#7a6a4e">ÖDEME FİŞİ</div>
-                  <div style="font-weight:800;font-size:20px">${esc(db.magaza)}</div>
-                  ${db.firma.tel ? `<div style="font-size:12px;color:#7a6a4e">${esc(db.firma.tel)}</div>` : ""}
-                </div>
-              </div>
-              <div style="margin:4px 0 10px">${esc(title)}</div>
-              <div style="border-top:1px dashed #c9b48a;padding-top:8px">
-                ${list.slice(0,12).map(k => `<div style="display:flex;justify-content:space-between;gap:8px;margin:6px 0;font-size:13px">
-                  <span style="min-width:0"><b>${esc(k.musteri)}</b><br/><span style="color:#7a6a4e">${esc(typeAd(k.tur, k))} · ${statusLabel(statusOf(k))}</span></span>
-                  <span style="font-weight:800;white-space:nowrap">${fmtTRY(k.tutar)}</span>
-                </div>`).join("") || "<div>Kayıt yok</div>"}
-                ${list.length>12 ? `<div style="color:#7a6a4e;font-size:12px">ve ${list.length-12} kayıt daha</div>` : ""}
-              </div>
-              <div style="border-top:1px dashed #c9b48a;margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;gap:8px;font-size:13px">
-                <span>Bekleyen<br/><b>${fmtTRY(s.bek)}</b></span>
-                <span>Tahsil<br/><b>${fmtTRY(s.tah)}</b></span>
-                <span>Ertelenen<br/><b>${fmtTRY(s.ert)}</b></span>
-              </div>
-              ${db.firma.adres ? `<div style="margin-top:8px;font-size:11px;color:#7a6a4e">${esc(db.firma.adres)}</div>` : ""}
             </div>
             <p class="meta" style="margin:10px 0">“Görseli paylaş” ile fişi doğrudan WhatsApp ve diğer uygulamalara gönderin ya da “PNG indir” ile kaydedin.</p>
             <img src="${url}" alt="rapor" style="width:100%;border-radius:12px;border:1px solid var(--line)" />
