@@ -1189,7 +1189,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     try { const v = localStorage.getItem(ID_KEY); return ID_RE.test(v || "") ? v : null; } catch (e) { return null; }
   })();
   const cacheKey = () => DEFTER_ID ? KEY + ":" + DEFTER_ID : KEY;
-  const BUILD = "14";
+  const BUILD = "15";
   const FB_VERSIONS = ["13.0.0", "12.8.0", "12.2.1"]; /* sırayla denenir */
   /* Firebase web ayarları herkese açık bilgidir. firebase-config.js okunamazsa bu yedek kullanılır. */
   const FB_DEFAULT = {
@@ -1375,6 +1375,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     pendingUndo = null;
   }
   function undoLast() {
+    if (!canWriteLedger()) return toast("Bu defterde salt görüntüleme yetkiniz var");
     const u = undoStack.pop();
     if (!u) return toast("Geri alınacak işlem yok");
     u.touched.forEach(id => {
@@ -1632,7 +1633,8 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
 
   function nav() {
     const items = VIEWS.map(([id,ad,ic]) => `<button data-view="${id}" class="${view===id?"on":""}">${icon(ic)}<span>${ad}</span></button>`);
-    return `<nav class="nav" aria-label="Ana menü"><div class="nav-group nav-left">${items.slice(0,2).join("")}</div><button class="fab" id="fab" aria-label="Tahsilat ekle" title="Tahsilat ekle">+</button><div class="nav-group nav-right">${items.slice(2).join("")}</div></nav>`;
+    const addButton = canWriteLedger() ? '<button class="fab" id="fab" aria-label="Tahsilat ekle" title="Tahsilat ekle">+</button>' : "";
+    return `<nav class="nav" aria-label="Ana menü"><div class="nav-group nav-left">${items.slice(0,2).join("")}</div>${addButton}<div class="nav-group nav-right">${items.slice(2).join("")}</div></nav>`;
   }
 
   function waLink(k) {
@@ -1644,7 +1646,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
   function paymentCard(k) {
     const st = statusOf(k);
     const late = isLate(k);
-    const showActs = isOpen(k);
+    const showActs = isOpen(k) && canWriteLedger();
     const stamp = st !== "bekliyor" ? `<span class="stamp ${st}">${statusLabel(st)}</span>` : "";
     const rem = remaining(k);
     const amtLine = st === "kismi"
@@ -2140,7 +2142,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     });
     document.getElementById("btnBell")?.addEventListener("click", openNotifCenter);
     document.getElementById("btnShareTop")?.addEventListener("click", () => openShare(selectedDate, ofDate(selectedDate), fmtLong(selectedDate)));
-    document.getElementById("fab")?.addEventListener("click", () => openForm());
+    document.getElementById("fab")?.addEventListener("click", () => canWriteLedger() ? openForm() : toast("Bu defterde salt görüntüleme yetkiniz var"));
     document.getElementById("goalOpen")?.addEventListener("click", openGoalSheet);
     document.getElementById("actAll")?.addEventListener("click", openActivity);
     const pgEl = document.querySelector(".page"), tbEl = document.querySelector(".topbar");
@@ -2190,6 +2192,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     document.querySelectorAll("[data-cust]").forEach(b => b.onclick = () => openCustomer(b.dataset.cust));
     document.querySelectorAll("[data-act]").forEach(b => b.onclick = e => {
       e.stopPropagation();
+      if (!canWriteLedger()) return toast("Bu defterde salt görüntüleme yetkiniz var");
       const k = kayitlar().find(x => x.id === b.dataset.id);
       if (!k) return;
       if (b.dataset.act === "tahsil") openTahsil(k);
@@ -2228,6 +2231,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
 
   /* ---------- KAYIT FORMU ---------- */
   function openForm(edit, prefill) {
+    if (!canWriteLedger()) return toast("Bu defterde salt görüntüleme yetkiniz var");
     const k = edit || {
       id: uid(), musteri: (prefill && prefill.musteri) || "", telefon: "", tutar: "", tur: "nakit", turKayit: "soz",
       taksitSayisi: 1,
@@ -2346,7 +2350,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
 
   /* ---------- DETAY ---------- */
   function openDetail(k) {
-    const st = statusOf(k);
+    const st = statusOf(k), canEdit = canWriteLedger();
     openSheet(`
       <div class="sheet-card">
         <div class="grab"></div>
@@ -2367,21 +2371,24 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
         ${authorLine(k)}
         ${(k.ertelemeGecmisi||[]).length ? `<label class="fld">Erteleme geçmişi</label><ul class="hist">${k.ertelemeGecmisi.map(e => `<li>${fmtDate(e.eski)} → ${fmtDate(e.yeni)}${e.neden ? ` · ${esc(e.neden)}` : ""}${e.k ? ` · ${esc(e.k)}` : ""}</li>`).join("")}</ul>` : ""}
         ${(k.gecmis||[]).length ? `<label class="fld">Hareket geçmişi</label><ul class="hist">${(k.gecmis||[]).slice().reverse().map(h => `<li>${esc(ACT_AD[h.a] || h.a)} · ${esc(h.d)}<br/><span>${new Date(h.t).toLocaleString("tr-TR")}${h.k ? " · " + esc(h.k) : ""}</span></li>`).join("")}</ul>` : ""}
-        ${st!=="tahsil" && st!=="iptal" ? `<div class="acts" style="margin-top:14px">
+${canEdit && st!=="tahsil" && st!=="iptal" ? `<div class="acts" style="margin-top:14px">
           <button class="btn btn-tahsil" id="dTahsil">Tahsil</button>
           <button class="btn btn-erte" id="dErtele">Ertele</button>
         </div>
         <a class="btn btn-wa owner" style="width:100%;margin-top:8px" href="${waLink(k)}" target="_blank" rel="noopener" data-wak="${k.id}">${icon("msg")} WhatsApp hatırlat</a>` : ""}
-        <div class="g2" style="margin-top:8px">
+        ${canEdit ? `<div class="g2" style="margin-top:8px">
           <button class="btn btn-ghost" id="dEdit">Düzenle</button>
           <button class="btn btn-ghost" id="dDel" style="color:#8b2e2e">Sil</button>
-        </div>
+        </div>` : ""}
       </div>`);
     document.getElementById("sheetClose").onclick = closeSheet;
     document.getElementById("dTahsil")?.addEventListener("click", () => openTahsil(k));
     document.getElementById("dErtele")?.addEventListener("click", () => openErtele(k));
-    document.getElementById("dEdit").onclick = () => openForm(k);
-    document.getElementById("dDel").onclick = async () => {
+    const editButton = document.getElementById("dEdit");
+    if (editButton) editButton.onclick = () => openForm(k);
+    const deleteButton = document.getElementById("dDel");
+    if (deleteButton) deleteButton.onclick = async () => {
+      if (!canWriteLedger()) return toast("Bu defterde salt görüntüleme yetkiniz var");
       if (!confirm("Bu kayıt silinsin mi?")) return;
       if (!(await guardDelete())) return;
       pushUndo("Silme");
@@ -2393,6 +2400,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
 
   /* ---------- TAHSİL ---------- */
   function openTahsil(k) {
+    if (!canWriteLedger()) return toast("Bu defterde salt görüntüleme yetkiniz var");
     const kalan = remaining(k);
     const mVal = liveMask(String(kalan).replace(".",","));
     openSheet(`
@@ -2467,6 +2475,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
 
   /* ---------- ERTELE ---------- */
   function openErtele(k) {
+    if (!canWriteLedger()) return toast("Bu defterde salt görüntüleme yetkiniz var");
     openSheet(`
       <div class="sheet-card">
         <div class="grab"></div>
@@ -2540,6 +2549,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     document.getElementById("cAdd").onclick = () => { closeSheet(); openForm(null, { musteri: ad }); };
     document.querySelectorAll("[data-act]").forEach(b => b.onclick = e => {
       e.stopPropagation();
+      if (!canWriteLedger()) return toast("Bu defterde salt görüntüleme yetkiniz var");
       const k = kayitlar().find(x => x.id === b.dataset.id);
       if (b.dataset.act === "tahsil") openTahsil(k);
       if (b.dataset.act === "ertele") openErtele(k);
@@ -2660,7 +2670,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
         <div class="chips" id="btChips">${Object.keys(KIND_AD).map(k => `<button class="chip ${btPref(k) ? "on" : ""}" data-bt="${k}">${KIND_AD[k]}</button>`).join("")}</div>
         <p class="meta" style="margin:6px 2px">Seçili türlerdeki işlemler için uyarı gelir; zil düğmesindeki Bildirimler ekranında hepsi listelenir.</p>
 
-        <label class="fld">Ortak defter (herkes ekleyip düzenleyebilir)</label>
+        <label class="fld">Ortak defter · rol bazlı erişim</label>
         <div id="shareHost"></div>
 
         <label class="fld">Cihaz kilidi (yalnızca bu cihaza özel PIN)</label>
@@ -2670,9 +2680,9 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
         </div>
         ${db.pin ? `<button class="btn btn-ghost" id="sLockNow" style="width:100%;margin-top:8px">${icon("lock")} Şimdi kilitle</button>` : ""}
 
-        <label class="fld">Yönetici</label>
+${isLedgerManager() ? `<label class="fld">Yönetici</label>
         <button class="btn btn-gold" id="sAdmin" style="width:100%">🛡 Yönetici paneli ${db.silmePin ? "🔒" : ""}</button>
-        <p class="meta" style="margin:6px 2px">Firma bilgileri, defterler, aylık hedef, mesai saatleri, WhatsApp şablonları, cihaz yönetimi, silinenler, yedekleme ve şifre ayarları yönetici şifresiyle açılan panelde.</p>
+        <p class="meta" style="margin:6px 2px">Firma bilgileri, defterler, aylık hedef, mesai saatleri, WhatsApp şablonları, cihaz yönetimi, silinenler, yedekleme ve şifre ayarları yönetici şifresiyle açılır.</p>` : ""}
 
         <label class="fld">Defter erişimi · ${esc(ledgerRole || "üyelik bekleniyor")}</label>
         <div id="memberHost" class="panel" style="padding:10px"></div>
@@ -3170,12 +3180,35 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
   const adminApplicationRef = id => fbm.doc(fbDb, "uyelikBildirimleri", id);
   const adminApplicationId = (ledgerId, userId) => ledgerId + "__" + userId;
   let applicationWatcher = null, applicationWatcherKey = "";
+  let ownRoleWatcher = null, ownRoleWatcherKey = "";
   let adminApplicationsWatcher = null, adminApplicationsWatcherUid = "", adminInboxToken = 0;
   const ADMIN_EMAIL = "izmirdunyaambalaj@gmail.com";
   const isGoogleUser = user => !!user && !user.isAnonymous;
   const isFixedAdmin = user => isGoogleUser(user)
     && !!user.emailVerified
     && String(user.email || "").toLowerCase() === ADMIN_EMAIL;
+  const ROLE_LABEL = { owner: "Sahip", admin: "Admin", editor: "Düzenleme", viewer: "Salt görüntüleme" };
+  const isLedgerManager = () => isFixedAdmin(fbAuth && fbAuth.currentUser) || ["owner", "admin"].includes(ledgerRole);
+  const canAssignAdminRole = () => isFixedAdmin(fbAuth && fbAuth.currentUser) || ledgerRole === "owner";
+  const canWriteLedger = () => !DEFTER_ID || ["owner", "admin", "editor"].includes(ledgerRole);
+  const canAssignRole = (role, targetRole = "", targetUid = "") => {
+    const user = fbAuth && fbAuth.currentUser;
+    if (!["admin", "editor", "viewer"].includes(role) || targetUid === (user && user.uid)) return false;
+    if (isFixedAdmin(user) || ledgerRole === "owner") return targetRole !== "owner";
+    return ledgerRole === "admin"
+      && ["editor", "viewer"].includes(role)
+      && (!targetRole || ["editor", "viewer"].includes(targetRole));
+  };
+  const canRemoveMember = (targetRole, targetUid) => {
+    const user = fbAuth && fbAuth.currentUser;
+    if (targetUid === (user && user.uid) || targetRole === "owner") return false;
+    if (isFixedAdmin(user) || ledgerRole === "owner") return true;
+    return ledgerRole === "admin" && ["editor", "viewer"].includes(targetRole);
+  };
+  const roleOptions = (selected = "editor", forAdmin = canAssignAdminRole()) => {
+    const roles = forAdmin ? ["admin", "editor", "viewer"] : ["editor", "viewer"];
+    return roles.map(role => `<option value="${role}" ${role === selected ? "selected" : ""}>${ROLE_LABEL[role]}</option>`).join("");
+  };
 
   async function authenticateGoogle() {
     const ok = await cloudInit();
@@ -3266,6 +3299,30 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     };
   }
 
+  function watchOwnLedgerRole(id) {
+    const user = fbAuth && fbAuth.currentUser;
+    if (!isGoogleUser(user) || isFixedAdmin(user)) return;
+    const key = id + ":" + user.uid;
+    if (ownRoleWatcherKey === key) return;
+    if (ownRoleWatcher) ownRoleWatcher();
+    ownRoleWatcherKey = key;
+    ownRoleWatcher = fbm.onSnapshot(memberRef(id, user.uid), snap => {
+      if (!snap.exists() || !["owner", "admin", "editor", "viewer"].includes(snap.data().role)) {
+        ledgerRole = null;
+        cloudOn = false;
+        showAccountGate("Bu defterdeki erişiminiz kaldırıldı. Yöneticiyle iletişime geçin.");
+        return;
+      }
+      const nextRole = snap.data().role;
+      if (nextRole !== ledgerRole) {
+        ledgerRole = nextRole;
+        closeSheet();
+        render();
+        toast("Defter rolünüz güncellendi: " + (ROLE_LABEL[nextRole] || nextRole));
+      }
+    }, e => console.warn("Üyelik rolü dinlenemedi:", e));
+  }
+
   async function ensureLedgerAccess(id) {
     const user = fbAuth && fbAuth.currentUser;
     if (!isGoogleUser(user)) return false;
@@ -3308,9 +3365,9 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
       return true;
     }
     const member = await fbm.getDoc(memberRef(id, user.uid));
-    if (!member.exists() || member.data().role !== "editor") {
+    if (!member.exists() || !["admin", "editor", "viewer"].includes(member.data().role)) {
       ledgerRole = null;
-      showAccountGate("Bu Google hesabı bu deftere henüz üye değil. Kullanıcı kodunuzu defter yöneticisine gönderin.");
+      showAccountGate("Bu Google hesabı bu deftere henüz üye değil. Defter bağlantısından üyelik başvurusu gönderebilirsiniz.");
       return false;
     }
     ledgerRole = member.data().role;
@@ -3320,12 +3377,12 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
   async function loadLedgerMembers(host) {
     if (!host || !DEFTER_ID || !isGoogleUser(fbAuth && fbAuth.currentUser)) return;
     const token = ++memberLoadToken;
-    if (ledgerRole !== "owner") {
+    if (!isLedgerManager()) {
       const user = fbAuth.currentUser;
-      host.innerHTML = `<div class="meta">Bu defterdeki rolünüz: <b>${esc(ledgerRole || "üye")}</b>. Kullanıcı kodunuz: <code>${esc(user.uid)}</code>. Üyelik başvurularını ve erişimi defter sahibi yönetir.</div>`;
+      host.innerHTML = `<div class="meta">Bu defterdeki rolünüz: <b>${esc(ROLE_LABEL[ledgerRole] || "üye")}</b>. Kullanıcı kodunuz: <code>${esc(user.uid)}</code>. Üye ve başvuru yönetimi defter yöneticilerine açıktır.</div>`;
       return;
     }
-    host.innerHTML = `<div class="meta">Üyeler ve başvurular yükleniyor…</div>`;
+    host.innerHTML = '<div class="meta">Üyeler ve başvurular yükleniyor…</div>';
     try {
       const [members, applications, globalApplications] = await Promise.all([
         fbm.getDocs(fbm.collection(fbDb, "defterler", DEFTER_ID, "uyeler")),
@@ -3335,9 +3392,20 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
       if (token !== memberLoadToken || !host.isConnected) return;
       const rows = [];
       members.forEach(d => {
-        const m = d.data();
-        rows.push(`<div class="mini-day" style="align-items:center"><div class="who"><b>${esc(m.name || m.email || d.id)}</b><div class="meta">${esc(d.id)} · ${esc(m.role || "üye")}</div></div>${d.id === fbAuth.currentUser.uid ? '<span class="dev-me">Sahip</span>' : `<button class="btn btn-ghost" data-member-remove="${esc(d.id)}" style="color:var(--red)">Kaldır</button>`}</div>`);
+        const m = d.data(), self = d.id === fbAuth.currentUser.uid;
+        const canChange = !self && canAssignRole(m.role, m.role, d.id);
+        const roleControl = canChange
+          ? `<select class="inp" data-member-role="${esc(d.id)}" style="width:auto;min-width:132px;padding:7px">${roleOptions(m.role)}</select>`
+          : `<span class="dev-me">${esc(ROLE_LABEL[m.role] || "Üye")}${self ? " · siz" : ""}</span>`;
+        const removeControl = canRemoveMember(m.role, d.id)
+          ? `<button class="btn btn-ghost" data-member-remove="${esc(d.id)}" style="color:var(--red)">Kaldır</button>`
+          : "";
+        rows.push(`<div class="mini-day" style="align-items:center;gap:8px">
+          <div class="who" style="min-width:0;flex:1"><b>${esc(m.name || m.email || d.id)}</b><div class="meta">${esc(d.id)}</div></div>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${roleControl}${removeControl}</div>
+        </div>`);
       });
+
       const pending = [];
       applications.forEach(d => {
         if (d.data().status === "pending") pending.push({ id: d.id, uid: d.id, ledgerId: DEFTER_ID, ...d.data() });
@@ -3350,45 +3418,81 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
         else pending.push({ ...a, id: d.id, globalId: d.id, source: "global", ledgerId: a.defterId, uid: a.uid });
       });
       pending.sort((a,b) => String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
-      const requests = pending.map(a => `<div class="mini-day" style="align-items:center"><div class="who"><b>${esc(a.name || a.email || a.uid || a.id)}</b><div class="meta">${esc(a.email || "")} · Defter: ${esc(String(a.ledgerId || DEFTER_ID).slice(0,10))}… · UID: ${esc(a.uid || a.id)}</div></div><div style="display:flex;gap:6px"><button class="btn btn-gold" data-request-approve="${esc(a.id)}">Onayla</button><button class="btn btn-ghost" data-request-reject="${esc(a.id)}">Reddet</button></div></div>`).join("");
+      const requests = pending.map(a => {
+        const key = (a.ledgerId || DEFTER_ID) + "/" + (a.uid || a.id);
+        return `<div class="mini-day" style="align-items:center;gap:8px">
+          <div class="who" style="min-width:0;flex:1"><b>${esc(a.name || a.email || a.uid || a.id)}</b>
+            <div class="meta">${esc(a.email || "")} · Defter: ${esc(String(a.ledgerId || DEFTER_ID).slice(0,10))}… · UID: ${esc(a.uid || a.id)}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <select class="inp" data-request-role="${esc(key)}" style="width:auto;min-width:126px;padding:7px">${roleOptions("editor")}</select>
+            <button class="btn btn-gold" data-request-approve="${esc(key)}">Onayla</button>
+            <button class="btn btn-ghost" data-request-reject="${esc(key)}">Reddet</button>
+          </div>
+        </div>`;
+      }).join("");
+      const managerNote = ledgerRole === "admin" && !isFixedAdmin(fbAuth.currentUser)
+        ? '<p class="meta" style="margin-top:8px">Admin rolü diğer adminleri ve sahipleri değiştiremez; yeni üyeleri düzenleyici veya salt görüntüleyici olarak ekleyebilir.</p>' : "";
       host.innerHTML = `
         <label class="fld">Yeni üyelik başvuruları ${pending.length ? `· ${pending.length}` : ""}</label>
         <div class="mini">${requests || '<div class="meta">Bekleyen başvuru yok.</div>'}</div>
-        <label class="fld" style="margin-top:12px">Kullanıcı koduyla üye ekle</label>
-        <div class="g2"><input class="inp" id="memberUid" placeholder="Google kullanıcı kodu" /><div class="inp" style="display:flex;align-items:center">Düzenleyebilir</div></div>
-        <button class="btn btn-gold" id="memberAdd" style="width:100%;margin-top:8px">Üye ekle</button>
+        <label class="fld" style="margin-top:12px">Google kullanıcı koduyla üye ekle</label>
+        <div class="g2">
+          <input class="inp" id="memberUid" placeholder="Google kullanıcı kodu" />
+          <select class="inp" id="memberRole">${roleOptions("editor")}</select>
+        </div>
+        <button class="btn btn-gold" id="memberAdd" style="width:100%;margin-top:8px">Seçilen rolle üye ekle</button>
+        ${managerNote}
         <label class="fld" style="margin-top:12px">Defter üyeleri</label>
-        <div class="mini" style="margin-top:8px">${rows.join("") || '<div class="meta">Henüz başka üye yok.</div>'}</div>
-        <p class="meta" style="margin-top:8px">Kullanıcılar Google ile giriş yapıp bu ekrandan üyelik isteği gönderebilir.</p>`;
+        <div class="mini" style="margin-top:8px">${rows.join("") || '<div class="meta">Henüz başka üye yok.</div>'}</div>`;
       document.getElementById("memberAdd").onclick = async () => {
         const id = document.getElementById("memberUid").value.trim();
+        const role = document.getElementById("memberRole").value;
         if (!/^[A-Za-z0-9_-]{20,}$/.test(id)) return toast("Geçerli Google kullanıcı kodu girin");
-        if (id === fbAuth.currentUser.uid) return toast("Kendinizi tekrar ekleyemezsiniz");
+        if (!canAssignRole(role, "", id)) return toast("Bu rolü atama yetkiniz yok");
         try {
-          await fbm.setDoc(memberRef(DEFTER_ID, id), { role: "editor", addedAt: new Date().toISOString(), addedBy: fbAuth.currentUser.uid });
-          toast("Üye eklendi"); loadLedgerMembers(host);
+          await fbm.setDoc(memberRef(DEFTER_ID, id), {
+            role, email: "", name: "", addedAt: new Date().toISOString(), addedBy: fbAuth.currentUser.uid
+          });
+          toast(`${ROLE_LABEL[role]} rolüyle üye eklendi`); loadLedgerMembers(host);
         } catch (e) { toast("Üye eklenemedi: " + fbErr(e)); }
       };
+      host.querySelectorAll("[data-member-role]").forEach(select => select.onchange = async () => {
+        const userId = select.dataset.memberRole;
+        const target = members.docs.find(d => d.id === userId);
+        const newRole = select.value;
+        if (!target || !canAssignRole(newRole, target.data().role, userId)) return loadLedgerMembers(host);
+        select.disabled = true;
+        try {
+          await fbm.updateDoc(memberRef(DEFTER_ID, userId), { role: newRole });
+          toast(`${ROLE_LABEL[newRole]} rolü kaydedildi`); loadLedgerMembers(host);
+        } catch (e) { toast("Rol değiştirilemedi: " + fbErr(e)); loadLedgerMembers(host); }
+      });
       host.querySelectorAll("[data-request-approve]").forEach(button => button.onclick = async () => {
-        const id = button.dataset.requestApprove;
-        const req = pending.find(x => x.id === id);
+        const key = button.dataset.requestApprove;
+        const req = pending.find(x => (x.ledgerId || DEFTER_ID) + "/" + (x.uid || x.id) === key);
         if (!req) return;
+        const roleSelect = [...host.querySelectorAll("[data-request-role]")].find(x => x.dataset.requestRole === key);
+        const role = roleSelect ? roleSelect.value : "editor";
+        if (!canAssignRole(role, "", req.uid || req.id)) return toast("Bu rolü atama yetkiniz yok");
         button.disabled = true;
         try {
+          const now = new Date().toISOString(), ledgerId = req.ledgerId || DEFTER_ID, userId = req.uid || req.id;
           const batch = fbm.writeBatch(fbDb);
-          const ledgerId = req.ledgerId || DEFTER_ID, userId = req.uid || id, now = new Date().toISOString();
-          batch.set(memberRef(ledgerId, userId), { role: "editor", email: req.email || "", name: req.name || "", addedAt: now, addedBy: fbAuth.currentUser.uid });
+          batch.set(memberRef(ledgerId, userId), { role, email: req.email || "", name: req.name || "", addedAt: now, addedBy: fbAuth.currentUser.uid });
           batch.update(memberApplicationRef(ledgerId, userId), { status: "approved", handledAt: now, handledBy: fbAuth.currentUser.uid });
           if (req.globalId) batch.update(adminApplicationRef(req.globalId), { status: "approved", updatedAt: now, handledAt: now, handledBy: fbAuth.currentUser.uid });
           await batch.commit();
-          toast("Başvuru onaylandı, üye erişimi açıldı"); loadLedgerMembers(host);
+          toast(`Başvuru onaylandı; ${ROLE_LABEL[role]} erişimi açıldı`); loadLedgerMembers(host);
         } catch (e) { button.disabled = false; toast("Başvuru onaylanamadı: " + fbErr(e)); }
       });
       host.querySelectorAll("[data-request-reject]").forEach(button => button.onclick = async () => {
-        const id = button.dataset.requestReject;
+        const key = button.dataset.requestReject;
+        const req = pending.find(x => (x.ledgerId || DEFTER_ID) + "/" + (x.uid || x.id) === key);
+        if (!req) return;
         button.disabled = true;
         try {
-          const ledgerId = req.ledgerId || DEFTER_ID, userId = req.uid || id, now = new Date().toISOString();
+          const now = new Date().toISOString(), ledgerId = req.ledgerId || DEFTER_ID, userId = req.uid || req.id;
           const batch = fbm.writeBatch(fbDb);
           batch.update(memberApplicationRef(ledgerId, userId), { status: "rejected", handledAt: now, handledBy: fbAuth.currentUser.uid });
           if (req.globalId) batch.update(adminApplicationRef(req.globalId), { status: "rejected", updatedAt: now, handledAt: now, handledBy: fbAuth.currentUser.uid });
@@ -3398,6 +3502,8 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
       });
       host.querySelectorAll("[data-member-remove]").forEach(button => button.onclick = async () => {
         const id = button.dataset.memberRemove;
+        const target = members.docs.find(d => d.id === id);
+        if (!target || !canRemoveMember(target.data().role, id)) return toast("Bu üyeyi kaldırma yetkiniz yok");
         if (!confirm("Bu kişinin defter erişimi kaldırılsın mı? Çevrimdışı kopyası cihazında kalmış olabilir.")) return;
         try { await fbm.deleteDoc(memberRef(DEFTER_ID, id)); toast("Üyenin erişimi kaldırıldı"); loadLedgerMembers(host); }
         catch (e) { toast("Üye kaldırılamadı: " + fbErr(e)); }
@@ -3409,7 +3515,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
 
   function watchMembershipApplications() {
     const user = fbAuth && fbAuth.currentUser;
-    if (!DEFTER_ID || !isGoogleUser(user) || ledgerRole !== "owner") return;
+    if (!DEFTER_ID || !isGoogleUser(user) || !isLedgerManager()) return;
     const key = DEFTER_ID + ":" + user.uid;
     if (applicationWatcherKey === key) return;
     if (applicationWatcher) applicationWatcher();
@@ -3457,6 +3563,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
       diag.uid = user.uid;
       diag.email = user.email || "";
       if (!(await ensureLedgerAccess(DEFTER_ID))) { cloudStarting = false; return; }
+      watchOwnLedgerRole(DEFTER_ID);
       watchMembershipApplications();
       watchAdminApplications();
     } catch (e) {
@@ -3578,7 +3685,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
   }
 
   function schedulePush() {
-    if (!cloudOn) return;
+    if (!cloudOn || !canWriteLedger()) return;
     clearTimeout(pushTimer);
     pushTimer = setTimeout(pushNow, 400);
   }
@@ -3587,6 +3694,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
   async function pushNow() {
     clearTimeout(pushTimer);
     if (!cloudOn) return false;
+    if (!canWriteLedger()) { setSyncState("hazir"); return false; }
     const jobs = [];
     const track = (p, undo) => jobs.push(p.catch(e => { undo(); throw e; }));
     db.kayitlar.forEach(k => {
@@ -3738,26 +3846,19 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
     location.hash = "d=" + m[1];
     location.reload();
   }
-  async function resolveAdminApplication(app, status, host, button) {
+  async function resolveAdminApplication(app, status, role, host, button) {
     if (!isFixedAdmin(fbAuth && fbAuth.currentUser)) return toast("Bu işlem sistem yöneticisine açıktır");
+    if (status === "approved" && !canAssignRole(role, "", app.uid)) return toast("Seçilen rol atanamıyor");
     button.disabled = true;
     try {
-      const now = new Date().toISOString();
-      const batch = fbm.writeBatch(fbDb);
-      if (status === "approved") {
-        batch.set(memberRef(app.defterId, app.uid), {
-          role: "editor", email: app.email || "", name: app.name || "",
-          addedAt: now, addedBy: fbAuth.currentUser.uid
-        });
-      }
-      batch.update(memberApplicationRef(app.defterId, app.uid), {
-        status, handledAt: now, handledBy: fbAuth.currentUser.uid
+      const now = new Date().toISOString(), batch = fbm.writeBatch(fbDb);
+      if (status === "approved") batch.set(memberRef(app.defterId, app.uid), {
+        role, email: app.email || "", name: app.name || "", addedAt: now, addedBy: fbAuth.currentUser.uid
       });
-      batch.update(adminApplicationRef(app.id), {
-        status, updatedAt: now, handledAt: now, handledBy: fbAuth.currentUser.uid
-      });
+      batch.update(memberApplicationRef(app.defterId, app.uid), { status, handledAt: now, handledBy: fbAuth.currentUser.uid });
+      batch.update(adminApplicationRef(app.id), { status, updatedAt: now, handledAt: now, handledBy: fbAuth.currentUser.uid });
       await batch.commit();
-      toast(status === "approved" ? "Başvuru onaylandı, defter erişimi açıldı" : "Başvuru reddedildi");
+      toast(status === "approved" ? `Başvuru onaylandı; ${ROLE_LABEL[role]} erişimi açıldı` : "Başvuru reddedildi");
       loadAdminInbox(host);
     } catch (e) {
       button.disabled = false;
@@ -3775,25 +3876,30 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
       const pending = [];
       snap.forEach(d => { if (d.data().status === "pending") pending.push({ id: d.id, ...d.data() }); });
       pending.sort((a,b) => String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
-      host.innerHTML = pending.length ? pending.map(a => `
+      host.innerHTML = pending.length ? pending.map((a,i) => `
         <div class="mini-day" style="align-items:center;margin-top:8px">
           <div class="who" style="min-width:0;overflow-wrap:anywhere">
             <b>${esc(a.name || a.email || a.uid)}</b>
             <div class="meta">${esc(a.email || "")} · Defter: ${esc(String(a.defterId || "").slice(0,10))}…</div>
             <div class="meta">UID: ${esc(a.uid || "")}</div>
           </div>
-          <div style="display:flex;gap:6px;flex-shrink:0">
-            <button class="btn btn-gold" data-admin-approve="${esc(a.id)}">Onayla</button>
-            <button class="btn btn-ghost" data-admin-reject="${esc(a.id)}">Reddet</button>
+          <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap">
+            <select class="inp" data-admin-role="${i}" style="width:auto;min-width:132px;padding:7px">${roleOptions("editor")}</select>
+            <button class="btn btn-gold" data-admin-approve="${i}">Onayla</button>
+            <button class="btn btn-ghost" data-admin-reject="${i}">Reddet</button>
           </div>
         </div>`).join("") : '<div class="meta">Bekleyen üyelik talebi yok.</div>';
       host.querySelectorAll("[data-admin-approve]").forEach(button => {
-        const app = pending.find(x => x.id === button.dataset.adminApprove);
-        button.onclick = () => app && resolveAdminApplication(app, "approved", host, button);
+        const app = pending[Number(button.dataset.adminApprove)];
+        button.onclick = () => {
+          const select = host.querySelector(`[data-admin-role="${button.dataset.adminApprove}"]`);
+          const role = select ? select.value : "editor";
+          app && resolveAdminApplication(app, "approved", role, host, button);
+        };
       });
       host.querySelectorAll("[data-admin-reject]").forEach(button => {
-        const app = pending.find(x => x.id === button.dataset.adminReject);
-        button.onclick = () => app && resolveAdminApplication(app, "rejected", host, button);
+        const app = pending[Number(button.dataset.adminReject)];
+        button.onclick = () => app && resolveAdminApplication(app, "rejected", "editor", host, button);
       });
     } catch (e) {
       if (token === adminInboxToken && host.isConnected) host.innerHTML = `<div class="meta" style="color:var(--red)">Üyelik bildirimleri okunamadı: ${esc(fbErr(e))}</div>`;
@@ -3896,6 +4002,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
      Bulut açıkken işlem Firestore'da "işlem (transaction)" olarak yapılır: aynı anda iki kişi aynı kayda
      tahsilat girse bile tutarlar birbirinin üzerine yazılmaz, toplanır. İnternet yoksa yerelde yapılır. */
   async function mutateRecord(id, label, fn, opts = {}) {
+    if (!canWriteLedger()) { if (!opts.auto) toast("Bu defterde salt görüntüleme yetkiniz var"); return false; }
     const auto = !!opts.auto;
     const local = db.kayitlar.find(x => x.id === id);
     if (!local) { if (!auto) toast("Kayıt artık yok"); return false; }
@@ -4974,6 +5081,7 @@ html[data-look="cam"] .nav button:not(.fab) { padding-left: 2px; padding-right: 
   /* ---- Yönetici paneli ---- */
   const adminTouch = () => { if (db.silmePin) adminUntil = Date.now() + 10 * 60000; };
   async function openAdminPanel() {
+    if (!isLedgerManager()) return toast("Bu defterde yönetici yetkisi gerekli");
     if (!db.silmePin) return openAdminSetup();
     if (!adminActive() || !adminPw) {
       const p = await askPin("Yönetici girişi", "Yönetici şifresini girin");
