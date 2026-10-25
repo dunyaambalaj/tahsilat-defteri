@@ -346,11 +346,18 @@ service cloud.firestore {
             girisli()
             && request.auth.token.email_verified == true
             && userId == request.auth.uid
-            && resource.data.status in ['approved', 'rejected']
+            && resource.data.status in ['pending', 'approved', 'rejected']
             && request.resource.data.status == 'pending'
             && request.resource.data.uid == request.auth.uid
             && request.resource.data.email == request.auth.token.email
-            && request.resource.data.keys().hasOnly(['uid', 'email', 'name', 'status', 'createdAt', 'updatedAt'])
+            && request.resource.data.keys().hasOnly(['uid', 'email', 'name', 'firstName', 'lastName', 'department', 'requestedRole', 'requestedLedgers', 'status', 'createdAt', 'updatedAt'])
+            && request.resource.data.firstName is string && request.resource.data.firstName.size() > 0 && request.resource.data.firstName.size() <= 40
+            && request.resource.data.lastName is string && request.resource.data.lastName.size() > 0 && request.resource.data.lastName.size() <= 50
+            && request.resource.data.department in ['satis', 'operasyon', 'muhasebe', 'diger']
+            && request.resource.data.requestedRole in ['admin', 'accounting', 'editor', 'viewer']
+            && request.resource.data.requestedLedgers is list
+            && request.resource.data.requestedLedgers.size() > 0 && request.resource.data.requestedLedgers.size() <= 100
+            && request.resource.data.requestedLedgers.hasAny([defterId])
           );
         allow delete: if false;
       }
