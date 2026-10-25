@@ -3565,7 +3565,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
             ${branchChoices.length>1?`<div class="meta" style="margin-top:8px">Erişim verilecek şubeler</div><div class="branch-options">${branchChoices.map(b=>`<label class="branch-option ${b.id===(a.ledgerId||DEFTER_ID)?"on":""}"><input type="checkbox" data-request-branch="${esc(key)}" value="${esc(b.id)}" ${b.id===(a.ledgerId||DEFTER_ID)?"checked":""}><span>${esc(b.branchName||b.companyName||b.id)}</span></label>`).join("")}</div>`: `<input type="hidden" data-request-branch="${esc(key)}" value="${esc(a.ledgerId||DEFTER_ID)}">`}
           </div>
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-            <select class="inp" data-request-role="${esc(key)}" style="width:auto;min-width:126px;padding:7px">${roleOptions("editor")}</select>
+            <select class="inp" data-request-role="${esc(key)}" style="width:auto;min-width:126px;padding:7px">${roleOptions(a.requestedRole || (a.department==="muhasebe"?"accounting":"editor"))}</select>
             <button class="btn btn-gold" data-request-approve="${esc(key)}">Onayla</button>
             <button class="btn btn-ghost" data-request-reject="${esc(key)}">Reddet</button>
           </div>
@@ -3645,20 +3645,22 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
         if(!req)return;
         const roleSelect=[...host.querySelectorAll("[data-request-role]")].find(x=>x.dataset.requestRole===key), role=roleSelect?roleSelect.value:"editor";
         if(!canAssignRole(role,"",req.uid||req.id))return toast("Bu rolü atama yetkiniz yok");
-        const branchIds=[...host.querySelectorAll("[data-request-branch]")].filter(x=>x.dataset.requestBranch===key&&x.checked!==false).map(x=>x.value);
+        let branchIds=[...host.querySelectorAll("[data-request-branch]")].filter(x=>x.dataset.requestBranch===key&&x.checked!==false).map(x=>x.value);
         if(!branchIds.includes(req.ledgerId||DEFTER_ID))branchIds.unshift(req.ledgerId||DEFTER_ID);
+        if(["admin","accounting"].includes(role))branchIds=branchChoices.map(x=>x.id);
+        const memberRole=role==="accounting"?"viewer":role;
         button.disabled=true;
         try{
           const now=new Date().toISOString(), userId=req.uid||req.id, batch=fbm.writeBatch(fbDb);
           for(const ledgerId of [...new Set(branchIds)]){
             const meta=branchChoices.find(x=>x.id===ledgerId)||await ledgerBranchInfo(ledgerId);
-            batch.set(memberRef(ledgerId,userId),{role,email:req.email||"",name:req.name||"",addedAt:now,addedBy:fbAuth.currentUser.uid});
-            batch.set(userLedgerIndexRef(userId,ledgerId),{ledgerId,role,companyName:meta.companyName||"Firma",branchName:meta.branchName||"",updatedAt:now});
+            batch.set(memberRef(ledgerId,userId),{role:memberRole,email:req.email||"",name:req.name||"",firstName:req.firstName||"",lastName:req.lastName||"",department:req.department||"",addedAt:now,addedBy:fbAuth.currentUser.uid});
+            batch.set(userLedgerIndexRef(userId,ledgerId),{ledgerId,role:memberRole,companyName:meta.companyName||"Firma",branchName:meta.branchName||"",updatedAt:now});
           }
-          if(role==="admin")batch.set(orgMemberRef(userId),{role:"admin",uid:userId,email:req.email||"",name:req.name||"",sourceLedgerId:req.ledgerId||DEFTER_ID,createdAt:now,updatedAt:now});
+          if(["admin","accounting"].includes(role))batch.set(orgMemberRef(userId),{role,uid:userId,email:req.email||"",name:req.name||"",firstName:req.firstName||"",lastName:req.lastName||"",department:req.department||"",sourceLedgerId:req.ledgerId||DEFTER_ID,createdAt:now,updatedAt:now});
           batch.update(memberApplicationRef(req.ledgerId||DEFTER_ID,userId),{status:"approved",handledAt:now,handledBy:fbAuth.currentUser.uid});
           if(req.globalId)batch.update(adminApplicationRef(req.globalId),{status:"approved",updatedAt:now,handledAt:now,handledBy:fbAuth.currentUser.uid});
-          await batch.commit();toast(`Başvuru onaylandı; ${branchIds.length} şubeye ${ROLE_LABEL[role]} erişimi açıldı`);loadLedgerMembers(host);
+          await batch.commit();toast(`Başvuru onaylandı; ${["admin","accounting"].includes(role)?"tüm defterlere":branchIds.length+" şubeye"} ${ROLE_LABEL[role]} erişimi açıldı`);loadLedgerMembers(host);
         }catch(e){button.disabled=false;toast("Başvuru onaylanamadı: "+fbErr(e));}
       });
       host.querySelectorAll("[data-request-reject]").forEach(button => button.onclick = async () => {
@@ -4030,18 +4032,21 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     try {
       const now = new Date().toISOString(), batch = fbm.writeBatch(fbDb);
       if (status === "approved") {
-        const ids = [...new Set([app.defterId, ...extraBranches].filter(Boolean))];
+        const branchChoices=await accessibleLedgers();
+        const ids = ["admin","accounting"].includes(role) ? branchChoices.map(x=>x.id) : [...new Set([app.defterId, ...extraBranches].filter(Boolean))];
+        const memberRole=role==="accounting"?"viewer":role;
         for (const ledgerId of ids) {
-          const info = await ledgerBranchInfo(ledgerId);
-          batch.set(memberRef(ledgerId, app.uid), { role, email: app.email || "", name: app.name || "", addedAt: now, addedBy: fbAuth.currentUser.uid });
-          batch.set(userLedgerIndexRef(app.uid, ledgerId), { ledgerId, role, companyName: info.companyName || "Firma", branchName: info.branchName || "", updatedAt: now });
+          const info = branchChoices.find(x=>x.id===ledgerId) || await ledgerBranchInfo(ledgerId);
+          batch.set(memberRef(ledgerId, app.uid), { role:memberRole, email:app.email||"", name:app.name||"", firstName:app.firstName||"", lastName:app.lastName||"", department:app.department||"", addedAt:now, addedBy:fbAuth.currentUser.uid });
+          batch.set(userLedgerIndexRef(app.uid, ledgerId), { ledgerId, role:memberRole, companyName:info.companyName||"Firma", branchName:info.branchName||"", updatedAt:now });
         }
-        if (role === "admin") batch.set(orgMemberRef(app.uid), { role: "admin", uid: app.uid, email: app.email || "", name: app.name || "", sourceLedgerId: app.defterId, createdAt: now, updatedAt: now });
+        if (["admin","accounting"].includes(role)) batch.set(orgMemberRef(app.uid), { role, uid:app.uid, email:app.email||"", name:app.name||"", firstName:app.firstName||"", lastName:app.lastName||"", department:app.department||"", sourceLedgerId:app.defterId, createdAt:now, updatedAt:now });
+        batch.set(userProfileRef(app.uid),{uid:app.uid,email:app.email||"",firstName:app.firstName||"",lastName:app.lastName||"",fullName:app.name||"",department:app.department||"",updatedAt:now},{merge:true});
       }
-      batch.update(memberApplicationRef(app.defterId, app.uid), { status, handledAt: now, handledBy: fbAuth.currentUser.uid });
-      if (app.globalId) batch.update(adminApplicationRef(app.globalId), { status, updatedAt: now, handledAt: now, handledBy: fbAuth.currentUser.uid });
+      batch.update(memberApplicationRef(app.defterId, app.uid), { status, handledAt:now, handledBy:fbAuth.currentUser.uid });
+      if (app.globalId) batch.update(adminApplicationRef(app.globalId), { status, updatedAt:now, handledAt:now, handledBy:fbAuth.currentUser.uid });
       await batch.commit();
-      toast(status === "approved" ? `Başvuru onaylandı; ${ROLE_LABEL[role]} erişimi ${1 + extraBranches.length} şubeye açıldı` : "Başvuru reddedildi");
+      toast(status === "approved" ? `Başvuru onaylandı; ${["admin","accounting"].includes(role)?"tüm defterlere":(1+extraBranches.length)+" şubeye"} ${ROLE_LABEL[role]} erişimi açıldı` : "Başvuru reddedildi");
       loadAdminInbox(host);
     } catch (e) {
       button.disabled = false;
