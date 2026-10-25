@@ -3562,7 +3562,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
         const key = (a.ledgerId || DEFTER_ID) + "/" + (a.uid || a.id);
         return `<div class="mini-day" style="align-items:center;gap:8px">
           <div class="who" style="min-width:0;flex:1"><b>${esc(a.name || a.email || a.uid || a.id)}</b><div class="meta">${esc(a.email || "")} · Başvuru şubesi: ${esc(String(a.ledgerId || DEFTER_ID).slice(0,10))}…</div><div class="meta">UID: ${esc(a.uid || a.id)}</div>
-            ${branchChoices.length>1?`<div class="meta" style="margin-top:8px">Erişim verilecek şubeler</div><div class="branch-options">${branchChoices.map(b=>`<label class="branch-option ${b.id===(a.ledgerId||DEFTER_ID)?"on":""}"><input type="checkbox" data-request-branch="${esc(key)}" value="${esc(b.id)}" ${b.id===(a.ledgerId||DEFTER_ID)?"checked":""}><span>${esc(b.branchName||b.companyName||b.id)}</span></label>`).join("")}</div>`: `<input type="hidden" data-request-branch="${esc(key)}" value="${esc(a.ledgerId||DEFTER_ID)}">`}
+            ${branchChoices.length>1?`<div class="meta" style="margin-top:8px">Erişim verilecek şubeler</div><div class="branch-options">${branchChoices.map(b=>`<label class="branch-option ${(Array.isArray(a.requestedLedgers)?a.requestedLedgers:[a.ledgerId||DEFTER_ID]).includes(b.id)?"on":""}"><input type="checkbox" data-request-branch="${esc(key)}" value="${esc(b.id)}" ${(Array.isArray(a.requestedLedgers)?a.requestedLedgers:[a.ledgerId||DEFTER_ID]).includes(b.id)?"checked":""}><span>${esc(b.branchName||b.companyName||b.id)}</span></label>`).join("")}</div>`: `<input type="hidden" data-request-branch="${esc(key)}" value="${esc(a.ledgerId||DEFTER_ID)}">`}
           </div>
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
             <select class="inp" data-request-role="${esc(key)}" style="width:auto;min-width:126px;padding:7px">${roleOptions(a.requestedRole || (a.department==="muhasebe"?"accounting":"editor"))}</select>
@@ -3590,15 +3590,17 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
         if (!/^[A-Za-z0-9_-]{20,}$/.test(id)) return toast("Geçerli Google kullanıcı kodu girin");
         if (!canAssignRole(role, "", id)) return toast("Bu rolü atama yetkiniz yok");
         try {
-          const selected = [...document.querySelectorAll("[data-member-branch]:checked")].map(x=>x.value);
+          let selected = [...document.querySelectorAll("[data-member-branch]:checked")].map(x=>x.value);
           if (!selected.includes(DEFTER_ID)) selected.unshift(DEFTER_ID);
+          if(["admin","accounting"].includes(role))selected=branchChoices.map(x=>x.id);
+          const memberRole=role==="accounting"?"viewer":role;
           const batch=fbm.writeBatch(fbDb), now=new Date().toISOString();
           for (const ledgerId of selected) {
             const meta=branchChoices.find(x=>x.id===ledgerId)||await ledgerBranchInfo(ledgerId);
-            batch.set(memberRef(ledgerId,id),{role,email:"",name:"",addedAt:now,addedBy:fbAuth.currentUser.uid});
-            batch.set(userLedgerIndexRef(id,ledgerId),{ledgerId,role,companyName:meta.companyName||"Firma",branchName:meta.branchName||"",updatedAt:now});
+            batch.set(memberRef(ledgerId,id),{role:memberRole,email:"",name:"",firstName:"",lastName:"",department:role==="accounting"?"muhasebe":"",addedAt:now,addedBy:fbAuth.currentUser.uid});
+            batch.set(userLedgerIndexRef(id,ledgerId),{ledgerId,role:memberRole,companyName:meta.companyName||"Firma",branchName:meta.branchName||"",updatedAt:now});
           }
-          if(role==="admin") batch.set(orgMemberRef(id),{role:"admin",uid:id,email:"",name:"",sourceLedgerId:DEFTER_ID,createdAt:now,updatedAt:now});
+          if(["admin","accounting"].includes(role)) batch.set(orgMemberRef(id),{role,uid:id,email:"",name:"",firstName:"",lastName:"",department:role==="accounting"?"muhasebe":"",sourceLedgerId:DEFTER_ID,createdAt:now,updatedAt:now});
           await batch.commit();
           toast(`${ROLE_LABEL[role]} rolüyle ${selected.length} şubeye üye eklendi`); loadLedgerMembers(host);
         } catch (e) { toast("Üye eklenemedi: " + fbErr(e)); }
