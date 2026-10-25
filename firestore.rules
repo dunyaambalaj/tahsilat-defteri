@@ -34,13 +34,13 @@ service cloud.firestore {
       }
 
       match /meta/owner {
-        // Sadece rastgele defter kodunu bilen, oturum açmış kişi ilk sahibi olabilir.
+        // Sistem yöneticisi sabit hesaptır; diğer sahipler legacy cihaz işaretiyle uygulama üzerinden başlar.
         allow get: if girisli();
         allow list: if false;
         allow create: if girisli()
             && request.resource.data.keys().hasOnly(['ownerUid', 'createdAt'])
             && (sabitAdmin() || (request.resource.data.ownerUid == request.auth.uid && !exists(sahipYolu())));
-        allow update, delete: if false;
+        allow update, delete: if sabitAdmin();
       }
 
       match /uyeler/{userId} {
