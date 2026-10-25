@@ -3291,35 +3291,43 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
       try { await authenticateGoogle(); }
       catch (e) { button.disabled = false; toast("Giriş yapılamadı: " + fbErr(e)); }
     };
-    const requestButton = document.getElementById("membershipRequest");
-    if (requestButton) requestButton.onclick = async () => {
-      requestButton.disabled = true;
-      try {
-        const ref = memberApplicationRef(DEFTER_ID, uidValue);
-        const current = await fbm.getDoc(ref);
-        const now = new Date().toISOString();
-        const application = {
-          uid: uidValue,
-          email: user.email || "",
-          name: user.displayName || "",
-          status: "pending",
-          createdAt: current.exists() ? (current.data().createdAt || now) : now,
-          updatedAt: now
-        };
-        const globalId = adminApplicationId(DEFTER_ID, uidValue);
-        const batch = fbm.writeBatch(fbDb);
-        if (!(current.exists() && current.data().status === "pending")) batch.set(ref, application);
-        batch.set(adminApplicationRef(globalId), { ...application, defterId: DEFTER_ID });
-        await batch.commit();
-        requestButton.textContent = "Başvuru gönderildi";
-        toast(current.exists() && current.data().status === "pending"
-          ? "Başvurunuz yönetici bildirim kuyruğuna iletildi"
-          : "Başvurunuz defter yöneticisine iletildi");
-      } catch (e) {
-        requestButton.disabled = false;
-        toast("Başvuru gönderilemedi: " + fbErr(e));
-      }
-    };
+    const requestButton=document.getElementById("membershipRequest");
+    if(requestButton)requestButton.onclick=()=>openMembershipApplication(requestButton);
+  }
+
+  async function openMembershipApplication(trigger) {
+    const user=fbAuth&&fbAuth.currentUser;if(!isGoogleUser(user)||!DEFTER_ID)return toast("Önce Google hesabıyla giriş yapıp bir defter bağlantısı açın");
+    try {
+      const [branchSnap,profileSnap]=await Promise.all([fbm.getDocs(orgBranchesRef()),fbm.getDoc(userProfileRef(user.uid)).catch(()=>null)]);
+      const branches=branchSnap.docs.map(d=>({id:d.id,...d.data()}));
+      if(!branches.some(b=>b.id===DEFTER_ID))branches.unshift({id:DEFTER_ID,companyName:"Bu defter",branchName:"Bağlantıdaki şube"});
+      const profile=profileSnap&&profileSnap.exists()?profileSnap.data():{};
+      const storedFirst=localStorage.getItem(FIRST_NAME_KEY)||profile.firstName||"",storedLast=localStorage.getItem(LAST_NAME_KEY)||profile.lastName||"";
+      const selected=Array.isArray((await fbm.getDoc(memberApplicationRef(DEFTER_ID,user.uid))).data()?.requestedLedgers)?(await fbm.getDoc(memberApplicationRef(DEFTER_ID,user.uid))).data().requestedLedgers:[DEFTER_ID];
+      openSheet(`<div class="sheet-card full branch-picker"><div class="grab"></div><div style="display:flex;align-items:center;gap:8px"><div style="flex:1"><div class="meta">ÜYELİK BAŞVURUSU</div><h2 style="font-size:21px">Şube erişimi iste</h2></div><button class="btn btn-ghost" id="appClose">Kapat</button></div><div class="branch-hero"><small>EKİBİNİZE KATILIN</small><h3>Doğru şubeler, doğru erişim.</h3><p>Ad soyadınızı ve erişmek istediğiniz defterleri seçin.</p></div><label class="fld">Ad</label><input class="inp" id="appFirst" maxlength="40" autocomplete="given-name" value="${esc(storedFirst)}" placeholder="Adınız"><label class="fld">Soyad</label><input class="inp" id="appLast" maxlength="50" autocomplete="family-name" value="${esc(storedLast)}" placeholder="Soyadınız"><label class="fld">Departman</label><select class="inp" id="appDepartment"><option value="satis">Satış</option><option value="operasyon">Operasyon</option><option value="muhasebe">Muhasebe</option><option value="diger">Diğer</option></select><label class="fld">Talep edilen erişim</label><select class="inp" id="appRole"><option value="viewer">Salt görüntüleme</option><option value="editor">Düzenleme</option><option value="admin">Admin · tüm defterler</option></select><p class="meta" id="appRoleNote" style="margin:6px 0">Admin veya Muhasebe erişimi onaylanırsa tüm defterler açılır. Erişim onay bekler.</p><label class="fld">Erişim istediğiniz şubeler</label><div class="branch-options" style="flex-wrap:wrap;overflow:visible">${branches.map(b=>`<label class="branch-option ${selected.includes(b.id)?"on":""}"><input type="checkbox" data-app-ledger value="${esc(b.id)}" ${selected.includes(b.id)?"checked":""}><span>${esc(b.companyName||"Firma")}${b.branchName?" · "+esc(b.branchName):""}</span></label>`).join("")}</div><div class="meta" style="margin-top:8px">Google hesabı · <b>${esc(user.email||"")}</b></div><button class="btn btn-gold" id="appSubmit" style="width:100%;margin-top:14px">Başvuruyu gönder</button></div>`,true);
+      document.getElementById("appClose").onclick=closeSheet;
+      const dep=document.getElementById("appDepartment"),role=document.getElementById("appRole"),note=document.getElementById("appRoleNote");
+      if(profile.department)dep.value=profile.department;
+      const updateRole=()=>{const accounting=dep.value==="muhasebe";if(accounting){role.value="viewer";role.disabled=true;note.textContent="Muhasebe departmanı tüm defterleri salt görüntüleme yetkisiyle görür."}else{role.disabled=false;note.textContent=role.value==="admin"?"Admin yetkisi onaylanırsa tüm defterlere erişim otomatik verilir.":"Seçtiğiniz şube erişimleri yönetici onayına gönderilir."}};
+      dep.onchange=updateRole;role.onchange=updateRole;updateRole();
+      document.getElementById("appSubmit").onclick=async()=>{
+        const button=document.getElementById("appSubmit"),firstName=document.getElementById("appFirst").value.trim(),lastName=document.getElementById("appLast").value.trim();
+        if(!firstName||!lastName)return toast("Ad ve soyad zorunludur");
+        const selectedIds=[...document.querySelectorAll("[data-app-ledger]:checked")].map(x=>x.value);
+        if(!selectedIds.includes(DEFTER_ID))selectedIds.unshift(DEFTER_ID);
+        button.disabled=true;
+        try{
+          const now=new Date().toISOString(),ref=memberApplicationRef(DEFTER_ID,user.uid),current=await fbm.getDoc(ref);
+          const roleRequest=dep.value==="muhasebe"?"accounting":role.value,fullName=firstName+" "+lastName;
+          const application={uid:user.uid,email:user.email||"",name:fullName,firstName,lastName,department:dep.value,requestedRole:roleRequest,requestedLedgers:[...new Set(selectedIds)],status:"pending",createdAt:current.exists()?(current.data().createdAt||now):now,updatedAt:now};
+          const batch=fbm.writeBatch(fbDb);batch.set(ref,application);batch.set(adminApplicationRef(adminApplicationId(DEFTER_ID,user.uid)),{...application,defterId:DEFTER_ID});
+          batch.set(userProfileRef(user.uid),{uid:user.uid,email:user.email||"",firstName,lastName,fullName,department:dep.value,updatedAt:now},{merge:true});
+          await batch.commit();
+          try{localStorage.setItem(FIRST_NAME_KEY,firstName);localStorage.setItem(LAST_NAME_KEY,lastName);localStorage.setItem(NAME_KEY,fullName)}catch(e){}
+          closeSheet();if(trigger){trigger.textContent="Başvuru gönderildi";trigger.disabled=true}toast("Başvurunuz seçtiğiniz şubeler ve erişim rolüyle iletildi");
+        }catch(e){button.disabled=false;toast("Başvuru gönderilemedi: "+fbErr(e))}
+      };
+    } catch(e) { toast("Şubeler yüklenemedi: "+fbErr(e)); }
   }
 
   function watchOwnLedgerRole(id) {
