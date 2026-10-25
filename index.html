@@ -4587,7 +4587,10 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     const { list, bozuk } = await loadGroup();
     if (bozuk) throw new Error("kasa çözülemedi");
     if (list.some(x => x.id === id)) throw new Error("bu defter zaten listede");
+    const previousRole = ledgerRole;
     const access = await ensureLedgerAccess(id);
+    const accessRole = ledgerRole;
+    ledgerRole = previousRole;
     if (!access) throw new Error("Bu defterin yöneticisi sizi üye olarak eklemeli");
     const g = await readGenel(id);
     const snap = await fbm.getDocsFromServer(fbm.collection(fbDb, "defterler", id, "kayitlar"));
