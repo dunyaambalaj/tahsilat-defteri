@@ -9,7 +9,7 @@ Mevcut kurallar anonim olarak giriş yapan herkese, defter bağlantısını bild
 1. Her defter sahibi, uygulamadaki **Ayarlar → JSON indir** ile yedek alsın. Çoklu defter kullanılıyorsa her defterin yedeği ayrı alınsın.
 2. Firebase Authentication → Sign-in method içinde **Google** sağlayıcısını etkinleştirin. **Anonymous** sağlayıcısını geçiş bitene kadar açık bırakın. Eski anonim oturum, uygulamanın Google hesabını aynı Firebase kullanıcısına bağlaması için kullanılır.
 3. Firestore Rules sekmesinde **firestore.rules.migration** içeriğini yayımlayın. Bu geçiş kuralları, uygulamanın sahip ve üyelik metaverisini yazmasını sağlar; kayıt verilerinin eski erişim biçimini geçici olarak korur.
-4. **index.html** ve **sw.js** dosyalarını yayımlayın. Kullanıcılar aynı cihaz ve tarayıcı profiliyle uygulamayı açıp **Google hesabıyla giriş yap** seçsin. İlk açan defter sahibi olacağından her defterin mevcut yöneticisi o defteri önce açmalıdır.
+4. **index.html** ve **sw.js** dosyalarını yayımlayın. Geçici kurallar eski link tabanlı erişimi korur; bu aşamada linki bilen oturum açmış kişiler hâlâ eski erişim sınırları içindedir. Bu nedenle geçişi kısa sürede tamamlayın. Kullanıcılar aynı cihaz ve tarayıcı profiliyle uygulamayı açıp **Google hesabıyla giriş yap** seçsin. Her mevcut defterin sahibinin, o defteri ilk kez kendi oluşturduğu cihaz ve aynı tarayıcı profiliyle açması gerekir. Uygulama bu cihazdaki eski sahip işaretini doğrular; işaret yoksa sahip kaydı oluşturmaz.
 5. Her kullanıcı, giriş ekranında gösterilen Google kullanıcı kodunu defter sahibine iletsin. Sahip **Ayarlar → Defter erişimi** bölümünde kodu eklesin. Her kullanıcıya erişeceği her defter için ayrı üyelik verin.
 6. Tüm gerekli kişiler ve defterler hazır olduktan sonra Firestore Rules sekmesinde **firestore.rules** içeriğini yayımlayın. Bu son adım üyelikte olmayan hesapların bulut verilerine erişimini keser.
 7. Üyeliği kaldırılan bir cihazın önceden indirdiği çevrimdışı kopya cihazdan silinmez. Kullanıcıların cihazlarına erişimin de kontrol edilmesi gerekir.
@@ -18,13 +18,13 @@ Mevcut kurallar anonim olarak giriş yapan herkese, defter bağlantısını bild
 
 - **firestore.rules.migration** geçicidir. Geçiş sırasında eski bağlantı erişimi sürdüğü için bu dosyayı son kural olarak bırakmayın.
 - Son kuralları sahip üyelikleri ve davetler hazırlanmadan önce yayımlamak çalışanların eşitlemesini keser. Önce her kullanıcı kodunu davet edip, ardından son kuralı yayımlayın.
-- Bir defterin ilk Google kullanıcısı, henüz sahip kaydı yoksa sahibi olur. Bu nedenle mevcut her defteri önce doğru yönetici açmalı.
+- Mevcut defterlerde uygulama, eski sahip işaretini yalnızca orijinal oluşturucu cihazda bulur. Her defterin sahibi, geçiş sırasında o cihazdan en az bir kez açmalıdır. Cihaz/tarayıcı verisi kayıpsa otomatik sahiplenme yapılmaz; sahiplik için kontrollü bir yönetici müdahalesi gerekir.
 - Google hesabı bir cihazda anonim hesabı yükseltmeye çalışır. Google hesabı başka bir Firebase hesabında zaten kayıtlıysa kullanıcı mevcut hesabıyla giriş yapar; sahip bu hesabın kodunu deftere ekler.
 - Firebase Web API anahtarı istemci uygulamasında yer alır; tek başına veriye erişim yetkisi vermez. Gerçek erişim denetimi Firestore kurallarıyla yapılır.
 
 ## Yeni kurulum
 
-Yeni ve boş bir defter için Google girişini etkinleştirin, **firestore.rules** kurallarını doğrudan yayımlayın ve uygulamayı dağıtın. İlk Google hesabı defter sahibi olur. Sonraki kullanıcılar giriş yapıp kullanıcı kodlarını sahibine iletir.
+Yeni ve boş bir defter için Google girişini etkinleştirin, **firestore.rules** kurallarını doğrudan yayımlayın ve uygulamayı dağıtın. Defteri oluşturan Google hesabı sahip olur. Sonraki kullanıcılar giriş yapıp kullanıcı kodlarını sahibine iletir.
 
 ## Dosyalar
 
