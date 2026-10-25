@@ -3339,7 +3339,7 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
     ownRoleWatcherKey = key;
     let localRole = null, globalRole = null, denied = false;
     const applyRole = () => {
-      const role = ["owner","admin","accounting"].includes(globalRole) ? globalRole : localRole;
+      const role = localRole === "owner" ? "owner" : (["owner","admin"].includes(globalRole) ? "admin" : globalRole === "accounting" ? "accounting" : localRole);
       if (!role || !["owner","admin","editor","viewer"].includes(role)) {
         if (denied) return;
         denied = true; ledgerRole = null; cloudOn = false;
@@ -3434,21 +3434,21 @@ ${isLedgerManager() ? `<label class="fld">Yönetici</label>
       ownerSnap = await fbm.getDoc(oref);
     }
     if (!ownerSnap.exists()) throw new Error("defter sahibi kaydı oluşturulamadı");
-    const globalSnap = await fbm.getDoc(orgMemberRef(user.uid));
-    if (globalSnap.exists() && ["owner","admin","accounting"].includes(globalSnap.data().role)) {
-      ledgerRole = globalSnap.data().role;
-      await syncBranchDirectory(id, await ledgerBranchInfo(id)).catch(e => console.warn("Şube kataloğu güncellenemedi:", e));
-      return true;
-    }
     if (ownerSnap.data().ownerUid === user.uid) {
       const self = await fbm.getDoc(memberRef(id, user.uid));
       if (!self.exists() || self.data().role !== "owner") {
-        await fbm.setDoc(memberRef(id, user.uid), { role: "owner", email: user.email || "", name: user.displayName || "", addedAt: new Date().toISOString() });
+        await fbm.setDoc(memberRef(id, user.uid), { role: "owner", email: user.email || "", name: user.displayName || "", firstName:"", lastName:"", department:"", addedAt: new Date().toISOString() });
       }
       ledgerRole = "owner";
       await syncOrgRole(id, "owner", user);
       await syncUserLedgerIndex(id, user.uid, "owner", await ledgerBranchInfo(id));
       await syncBranchDirectory(id, await ledgerBranchInfo(id));
+      return true;
+    }
+    const globalSnap = await fbm.getDoc(orgMemberRef(user.uid));
+    if (globalSnap.exists() && ["owner","admin","accounting"].includes(globalSnap.data().role)) {
+      ledgerRole = globalSnap.data().role === "accounting" ? "accounting" : "admin";
+      await syncBranchDirectory(id, await ledgerBranchInfo(id)).catch(e => console.warn("Şube kataloğu güncellenemedi:", e));
       return true;
     }
     const member = await fbm.getDoc(memberRef(id, user.uid));
