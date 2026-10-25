@@ -3035,6 +3035,9 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   const docRef = (name, id) => fbm.doc(fbDb, "defterler", DEFTER_ID, name, id);
   const ownerRef = id => fbm.doc(fbDb, "defterler", id, "meta", "owner");
   const memberRef = (id, userId) => fbm.doc(fbDb, "defterler", id, "uyeler", userId);
+  const memberApplicationRef = (id, userId) => fbm.doc(fbDb, "defterler", id, "uyelikBasvurulari", userId);
+  const memberApplicationsRef = id => fbm.collection(fbDb, "defterler", id, "uyelikBasvurulari");
+  let applicationWatcher = null, applicationWatcherKey = "";
   const ADMIN_EMAIL = "izmirdunyaambalaj@gmail.com";
   const isGoogleUser = user => !!user && !user.isAnonymous;
   const isFixedAdmin = user => isGoogleUser(user)
@@ -3084,7 +3087,8 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
           <p class="meta" style="text-align:center;margin:12px 0">${esc(message || (uidValue ? "Bu Google hesabı henüz bu deftere eklenmemiş. Defter yöneticisine kullanıcı kodunuzu iletin." : "Hesabınız, defter erişim yetkinizi belirlemek için kullanılır."))}</p>
           ${uidValue ? `<label class="fld">Google kullanıcı kodunuz</label><input class="inp" id="authUid" readonly value="${esc(uidValue)}" /><button class="btn btn-ghost" id="authCopy" style="width:100%;margin-top:8px">Kullanıcı kodunu kopyala</button>` : ""}
           <button class="btn btn-gold" id="authGoogle" style="width:100%;margin-top:12px">${user && user.isAnonymous ? "Google hesabını bağla" : uidValue ? "Üyeliği yeniden kontrol et" : "Google ile giriş yap"}</button>
-          <p class="meta" style="margin-top:12px;text-align:center">Erişim yalnızca defter yöneticisinin üyeliğinizi onaylamasıyla açılır.</p>
+          ${uidValue && DEFTER_ID ? '<button class="btn btn-ghost" id="membershipRequest" style="width:100%;margin-top:8px">Bu deftere üyelik başvurusu gönder</button>' : ""}
+          <p class="meta" style="margin-top:12px;text-align:center">Erişim, defter sahibinin veya sistem yöneticisinin başvurunuzu onaylamasıyla açılır.</p>
         </div>
       </div>`;
     const copy = document.getElementById("authCopy");
@@ -3097,6 +3101,32 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       button.disabled = true;
       try { await authenticateGoogle(); }
       catch (e) { button.disabled = false; toast("Giriş yapılamadı: " + fbErr(e)); }
+    };
+    const requestButton = document.getElementById("membershipRequest");
+    if (requestButton) requestButton.onclick = async () => {
+      requestButton.disabled = true;
+      try {
+        const ref = memberApplicationRef(DEFTER_ID, uidValue);
+        const current = await fbm.getDoc(ref);
+        if (current.exists() && current.data().status === "pending") {
+          toast("Başvurunuz zaten bekliyor");
+        } else {
+          const now = new Date().toISOString();
+          await fbm.setDoc(ref, {
+            uid: uidValue,
+            email: user.email || "",
+            name: user.displayName || "",
+            status: "pending",
+            createdAt: current.exists() ? (current.data().createdAt || now) : now,
+            updatedAt: now
+          });
+          requestButton.textContent = "Başvuru gönderildi";
+          toast("Başvurunuz defter yöneticisine iletildi");
+        }
+      } catch (e) {
+        requestButton.disabled = false;
+        toast("Başvuru gönderilemedi: " + fbErr(e));
+      }
     };
   }
 
@@ -3156,33 +3186,64 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     const token = ++memberLoadToken;
     if (ledgerRole !== "owner") {
       const user = fbAuth.currentUser;
-      host.innerHTML = `<div class="meta">Bu defterdeki rolünüz: <b>${esc(ledgerRole || "üye")}</b>. Kullanıcı kodunuz: <code>${esc(user.uid)}</code>. Erişim ve rol değişiklikleri için yöneticiye iletin.</div>`;
+      host.innerHTML = `<div class="meta">Bu defterdeki rolünüz: <b>${esc(ledgerRole || "üye")}</b>. Kullanıcı kodunuz: <code>${esc(user.uid)}</code>. Üyelik başvurularını ve erişimi defter sahibi yönetir.</div>`;
       return;
     }
-    host.innerHTML = `<div class="meta">Üyeler yükleniyor…</div>`;
+    host.innerHTML = `<div class="meta">Üyeler ve başvurular yükleniyor…</div>`;
     try {
-      const snap = await fbm.getDocs(fbm.collection(fbDb, "defterler", DEFTER_ID, "uyeler"));
+      const [members, applications] = await Promise.all([
+        fbm.getDocs(fbm.collection(fbDb, "defterler", DEFTER_ID, "uyeler")),
+        fbm.getDocs(memberApplicationsRef(DEFTER_ID))
+      ]);
       if (token !== memberLoadToken || !host.isConnected) return;
       const rows = [];
-      snap.forEach(d => {
+      members.forEach(d => {
         const m = d.data();
         rows.push(`<div class="mini-day" style="align-items:center"><div class="who"><b>${esc(m.name || m.email || d.id)}</b><div class="meta">${esc(d.id)} · ${esc(m.role || "üye")}</div></div>${d.id === fbAuth.currentUser.uid ? '<span class="dev-me">Sahip</span>' : `<button class="btn btn-ghost" data-member-remove="${esc(d.id)}" style="color:var(--red)">Kaldır</button>`}</div>`);
       });
+      const pending = [];
+      applications.forEach(d => { if (d.data().status === "pending") pending.push({ id: d.id, ...d.data() }); });
+      pending.sort((a,b) => String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
+      const requests = pending.map(a => `<div class="mini-day" style="align-items:center"><div class="who"><b>${esc(a.name || a.email || a.uid || a.id)}</b><div class="meta">${esc(a.email || "")} · UID: ${esc(a.uid || a.id)}</div></div><div style="display:flex;gap:6px"><button class="btn btn-gold" data-request-approve="${esc(a.id)}">Onayla</button><button class="btn btn-ghost" data-request-reject="${esc(a.id)}">Reddet</button></div></div>`).join("");
       host.innerHTML = `
+        <label class="fld">Yeni üyelik başvuruları ${pending.length ? `· ${pending.length}` : ""}</label>
+        <div class="mini">${requests || '<div class="meta">Bekleyen başvuru yok.</div>'}</div>
+        <label class="fld" style="margin-top:12px">Kullanıcı koduyla üye ekle</label>
         <div class="g2"><input class="inp" id="memberUid" placeholder="Google kullanıcı kodu" /><div class="inp" style="display:flex;align-items:center">Düzenleyebilir</div></div>
         <button class="btn btn-gold" id="memberAdd" style="width:100%;margin-top:8px">Üye ekle</button>
+        <label class="fld" style="margin-top:12px">Defter üyeleri</label>
         <div class="mini" style="margin-top:8px">${rows.join("") || '<div class="meta">Henüz başka üye yok.</div>'}</div>
-        <p class="meta" style="margin-top:8px">Yeni kişi önce Google ile giriş yapmalı ve kullanıcı kodunu size iletmeli.</p>`;
+        <p class="meta" style="margin-top:8px">Kullanıcılar Google ile giriş yapıp bu ekrandan üyelik isteği gönderebilir.</p>`;
       document.getElementById("memberAdd").onclick = async () => {
         const id = document.getElementById("memberUid").value.trim();
-        const role = "editor";
         if (!/^[A-Za-z0-9_-]{20,}$/.test(id)) return toast("Geçerli Google kullanıcı kodu girin");
         if (id === fbAuth.currentUser.uid) return toast("Kendinizi tekrar ekleyemezsiniz");
         try {
-          await fbm.setDoc(memberRef(DEFTER_ID, id), { role, addedAt: new Date().toISOString(), addedBy: fbAuth.currentUser.uid });
+          await fbm.setDoc(memberRef(DEFTER_ID, id), { role: "editor", addedAt: new Date().toISOString(), addedBy: fbAuth.currentUser.uid });
           toast("Üye eklendi"); loadLedgerMembers(host);
         } catch (e) { toast("Üye eklenemedi: " + fbErr(e)); }
       };
+      host.querySelectorAll("[data-request-approve]").forEach(button => button.onclick = async () => {
+        const id = button.dataset.requestApprove;
+        const req = pending.find(x => x.id === id);
+        if (!req) return;
+        button.disabled = true;
+        try {
+          const batch = fbm.writeBatch(fbDb);
+          batch.set(memberRef(DEFTER_ID, id), { role: "editor", email: req.email || "", name: req.name || "", addedAt: new Date().toISOString(), addedBy: fbAuth.currentUser.uid });
+          batch.update(memberApplicationRef(DEFTER_ID, id), { status: "approved", handledAt: new Date().toISOString(), handledBy: fbAuth.currentUser.uid });
+          await batch.commit();
+          toast("Başvuru onaylandı, üye erişimi açıldı"); loadLedgerMembers(host);
+        } catch (e) { button.disabled = false; toast("Başvuru onaylanamadı: " + fbErr(e)); }
+      });
+      host.querySelectorAll("[data-request-reject]").forEach(button => button.onclick = async () => {
+        const id = button.dataset.requestReject;
+        button.disabled = true;
+        try {
+          await fbm.updateDoc(memberApplicationRef(DEFTER_ID, id), { status: "rejected", handledAt: new Date().toISOString(), handledBy: fbAuth.currentUser.uid });
+          toast("Başvuru reddedildi"); loadLedgerMembers(host);
+        } catch (e) { button.disabled = false; toast("Başvuru reddedilemedi: " + fbErr(e)); }
+      });
       host.querySelectorAll("[data-member-remove]").forEach(button => button.onclick = async () => {
         const id = button.dataset.memberRemove;
         if (!confirm("Bu kişinin defter erişimi kaldırılsın mı? Çevrimdışı kopyası cihazında kalmış olabilir.")) return;
@@ -3192,6 +3253,25 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     } catch (e) {
       if (token === memberLoadToken && host.isConnected) host.innerHTML = `<div class="meta" style="color:var(--red)">Üyeler okunamadı: ${esc(fbErr(e))}</div>`;
     }
+  }
+
+  function watchMembershipApplications() {
+    const user = fbAuth && fbAuth.currentUser;
+    if (!DEFTER_ID || !isGoogleUser(user) || ledgerRole !== "owner") return;
+    const key = DEFTER_ID + ":" + user.uid;
+    if (applicationWatcherKey === key) return;
+    if (applicationWatcher) applicationWatcher();
+    applicationWatcherKey = key;
+    applicationWatcher = fbm.onSnapshot(memberApplicationsRef(DEFTER_ID), snap => {
+      snap.docChanges().forEach(change => {
+        if (change.type !== "added") return;
+        const data = change.doc.data();
+        if (data.status !== "pending" || change.doc.id === user.uid) return;
+        toast("Yeni üyelik başvurusu geldi", { label: "Başvuruları gör", fn: () => openSettings() }, 8000);
+      });
+      const host = document.getElementById("memberHost");
+      if (host && host.isConnected) loadLedgerMembers(host);
+    }, e => console.warn("Üyelik başvuruları dinlenemedi:", e));
   }
 
   /* Başkasından gelen değişiklikte ekranı yenile (yazı yazarken bozma, kaydırmayı koru) */
@@ -3225,6 +3305,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       diag.uid = user.uid;
       diag.email = user.email || "";
       if (!(await ensureLedgerAccess(DEFTER_ID))) { cloudStarting = false; return; }
+      watchMembershipApplications();
     } catch (e) {
       console.warn(e); cloudStarting = false;
       if (String(e.code || "").includes("permission-denied")) showAccountGate("Erişim reddedildi. Üyelik kurallarını ve defter davetinizi kontrol edin.");
