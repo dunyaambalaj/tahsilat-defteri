@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function girisli() {
+      return request.auth != null;
+    }
+    function gecerliVeri() {
+      return request.resource.data.d is string
+          && request.resource.data.d.size() < 600000;
+    }
+
+    // GEÇİŞ KURALI: Eski veri erişimini korur; yeni uygulamanın üyelik metaverisini
+    // oluşturmasına izin verir. Tüm kullanıcılar davet edildikten sonra firestore.rules'i yayınlayın.
+    match /defterler/{defterId}/{koleksiyon}/{belgeId} {
+      allow read, delete: if girisli() && koleksiyon in ['kayitlar', 'ayar', 'aktif', 'cihaz'];
+      allow create, update: if girisli()
+          && koleksiyon in ['kayitlar', 'ayar', 'aktif', 'cihaz']
+          && gecerliVeri();
+    }
+    match /defterler/{defterId}/meta/{docId} {
+      allow read, write: if girisli() && docId == 'owner';
+    }
+    match /defterler/{defterId}/uyeler/{userId} {
+      allow read, write: if girisli();
+    }
+  }
+}

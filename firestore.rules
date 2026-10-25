@@ -1,0 +1,118 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function girisli() {
+      return request.auth != null;
+    }
+    function sabitAdmin() {
+      return girisli()
+          && request.auth.token.email_verified == true
+          && request.auth.token.email == 'izmirdunyaambalaj@gmail.com';
+    }
+
+    match /defterler/{defterId} {
+      function uyeYolu(userId) {
+        return /databases/$(database)/documents/defterler/$(defterId)/uyeler/$(userId);
+      }
+      function basvuruYolu(userId) {
+        return /databases/$(database)/documents/defterler/$(defterId)/uyelikBasvurulari/$(userId);
+      }
+      function sahipYolu() {
+        return /databases/$(database)/documents/defterler/$(defterId)/meta/owner;
+      }
+      function uye() {
+        return girisli() && exists(uyeYolu(request.auth.uid));
+      }
+      function sahip() {
+        return sabitAdmin()
+            || (uye() && get(uyeYolu(request.auth.uid)).data.role == 'owner');
+      }
+      function kayitYazabilir() {
+        return sabitAdmin()
+            || (uye() && get(uyeYolu(request.auth.uid)).data.role in ['owner', 'editor']);
+      }
+      function gecerliVeri() {
+        return request.resource.data.d is string
+            && request.resource.data.d.size() < 600000;
+      }
+
+      match /meta/owner {
+        // Sistem yöneticisi sabit hesaptır; diğer sahipler legacy cihaz işaretiyle uygulama üzerinden başlar.
+        allow get: if girisli();
+        allow list: if false;
+        allow create: if girisli()
+            && request.resource.data.keys().hasOnly(['ownerUid', 'createdAt'])
+            && (sabitAdmin() || (request.resource.data.ownerUid == request.auth.uid && !exists(sahipYolu())));
+        allow update, delete: if sabitAdmin();
+      }
+
+      match /uyeler/{userId} {
+        allow get: if girisli() && (userId == request.auth.uid || sahip());
+        allow list: if sahip();
+        allow create: if girisli() && (
+          (sabitAdmin()
+            && request.resource.data.role in ['owner', 'editor']
+            && request.resource.data.keys().hasOnly(['role', 'email', 'name', 'addedAt', 'addedBy']))
+          ||
+          (sahip()
+            && userId != request.auth.uid
+            && request.resource.data.role == 'editor'
+            && request.resource.data.keys().hasOnly(['role', 'email', 'name', 'addedAt', 'addedBy']))
+          ||
+          (userId == request.auth.uid
+            && request.resource.data.role == 'owner'
+            && request.resource.data.keys().hasOnly(['role', 'email', 'name', 'addedAt'])
+            && get(sahipYolu()).data.ownerUid == request.auth.uid)
+        );
+        allow update: if sabitAdmin()
+            ? request.resource.data.role in ['owner', 'editor']
+                && request.resource.data.keys().hasOnly(['role', 'email', 'name', 'addedAt', 'addedBy'])
+            : sahip()
+                && userId != request.auth.uid
+                && request.resource.data.role == 'editor'
+                && request.resource.data.keys().hasOnly(['role', 'email', 'name', 'addedAt', 'addedBy']);
+        allow delete: if sahip()
+            && (sabitAdmin() || (userId != request.auth.uid && userId != get(sahipYolu()).data.ownerUid));
+      }
+
+      match /uyelikBasvurulari/{userId} {
+        allow get: if girisli() && (userId == request.auth.uid || sahip());
+        allow list: if sahip();
+        allow create: if girisli()
+            && request.auth.token.email_verified == true
+            && userId == request.auth.uid
+            && !exists(uyeYolu(userId))
+            && request.resource.data.uid == request.auth.uid
+            && request.resource.data.email == request.auth.token.email
+            && request.resource.data.status == 'pending'
+            && request.resource.data.keys().hasOnly(['uid', 'email', 'name', 'status', 'createdAt', 'updatedAt']);
+        allow update: if (
+            sahip()
+            && request.resource.data.status in ['approved', 'rejected']
+            && request.resource.data.handledBy == request.auth.uid
+            && request.resource.data.keys().hasOnly(['uid', 'email', 'name', 'status', 'createdAt', 'updatedAt', 'handledAt', 'handledBy'])
+          ) || (
+            girisli()
+            && request.auth.token.email_verified == true
+            && userId == request.auth.uid
+            && resource.data.status in ['approved', 'rejected']
+            && request.resource.data.status == 'pending'
+            && request.resource.data.uid == request.auth.uid
+            && request.resource.data.email == request.auth.token.email
+            && request.resource.data.keys().hasOnly(['uid', 'email', 'name', 'status', 'createdAt', 'updatedAt'])
+          );
+        allow delete: if false;
+      }
+
+      match /{koleksiyon}/{belgeId} {
+        allow read: if (sabitAdmin() || uye())
+            && koleksiyon in ['kayitlar', 'ayar', 'aktif', 'cihaz'];
+        allow create, update: if (sabitAdmin() || uye())
+            && koleksiyon in ['kayitlar', 'ayar', 'aktif', 'cihaz']
+            && gecerliVeri()
+            && (kayitYazabilir() || koleksiyon in ['aktif', 'cihaz']);
+        allow delete: if sabitAdmin() || (uye() && (koleksiyon in ['aktif', 'cihaz'] || (koleksiyon == 'ayar' && belgeId == 'kasa' && sahip())));
+      }
+    }
+  }
+}

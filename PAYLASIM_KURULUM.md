@@ -1,5 +1,7 @@
 # Ödeme Defteri – Ortak Canlı Defter Kurulumu (Sıfırdan, Adım Adım)
 
+> **Güvenlik modeli güncellendi:** Bu belgenin eski anonim bağlantı adımları yeni sürüm için geçerli değildir. Mevcut kullanıcılar için [Google hesabı ve üyelik geçiş rehberini](SECURITY_MIGRATION.md) izleyin. Eski Firestore kuralını yeniden yayımlamayın.
+
 Bu rehber hiç bilgisi olmayan biri için yazıldı. Her şeyi **tarayıcıdan** yapacaksınız. Program kurmanız gerekmiyor.
 Süre: yaklaşık 15 dakika.
 
@@ -14,7 +16,7 @@ Süre: yaklaşık 15 dakika.
 ## Bu sistem nasıl çalışır?
 
 - Defterin **tek bir ortak kopyası** Firebase'de (Google'ın bulutu) durur.
-- Defter **bağlantısına sahip herkes** kayıt **ekleyebilir, düzenleyebilir, tahsilat girebilir, silebilir.**
+- Yeni sürümde kayıtları yalnızca Google hesabı deftere eklenmiş üyeler görüntüler ve düzenler.
 - Biri bir şey yaptığında **birkaç saniye içinde herkesin ekranında** görünür (telefon, bilgisayar, tablet fark etmez).
 - Aynı anda farklı kişiler farklı kayıtlar girse bile birbirini bozmaz. Aynı kayda aynı anda tahsilat girseler bile tutarlar **toplanır**, üst üste yazılmaz.
 - İnternet kesilirse uygulama çalışmaya devam eder; işlemler cihazda bekler, internet gelince **otomatik gönderilir.**
@@ -23,22 +25,13 @@ Süre: yaklaşık 15 dakika.
 **Cihaza özel (herkesin kendine ait) olanlar:** tema, karanlık mod, PIN kilidi, hatırlatma ayarları.
 **Ortak olanlar:** tüm kayıtlar, firma adı/telefon/adres/vergi no, logo.
 
-> ⚠️ **Güvenlik:** Bağlantı, defterin şifresi gibidir. Bağlantıyı bilen herkes her şeyi görür ve değiştirir. Bağlantıyı **sadece güvendiğiniz kişilere** verin. Silinen kayıtlar buluttan gerçekten silinmez (Silinenler kutusuna gider), yine de düzenli **JSON yedek** almanız önerilir (Ayarlar → JSON indir).
+> ⚠️ **Güvenlik:** Defter bağlantısı yalnızca defteri tanımlar; Google hesabı ayrıca sahip tarafından üyeliğe eklenmelidir. Üyelik kaldırılınca yeni bulut erişimi kesilir, ancak önceden indirilmiş çevrimdışı kopya cihazda kalabilir. Düzenli JSON yedeği alın.
 
 ---
 
-## ADIM 1 – Anonim girişi açın (yeni, çok önemli)
+## ADIM 1 – Google girişini etkinleştirin
 
-Bu sistem kimseden e-posta ya da şifre istemez. Bağlantıyı açan herkes doğrudan deftere girer.
-
-1. https://console.firebase.google.com adresine gidin, Google hesabınızla girin.
-2. **tahsilat-defteri** projesine tıklayın.
-3. Sol menüden **Build (Derleme)** → **Authentication** seçin.
-   (Daha önce hiç açmadıysanız **Get started / Başlayın** butonuna basın.)
-4. **Sign-in method (Oturum açma yöntemi)** sekmesinde **Anonymous (Anonim)** satırına tıklayın.
-5. **Enable (Etkinleştir)** düğmesini açın ve **Save (Kaydet)** deyin.
-
-> Bu sistemde **e-posta, şifre ya da kullanıcı hesabı yoktur.** "Anonim" giriş, Firebase'in arka planda kendiliğinden yaptığı isimsiz bağlantıdır; çalışanlarınız bunu görmez. Daha önce "E-posta/Şifre" yöntemini açtıysanız kapalı kalması da, açık kalması da fark etmez, kullanılmıyor.
+Authentication → Sign-in method bölümünde **Google** sağlayıcısını etkinleştirin. Mevcut kullanıcıların Google hesabını önceki anonim Firebase oturumuna bağlayabilmesi için geçiş tamamlanana kadar **Anonymous** sağlayıcısını da açık tutun. Ayrıntılı ve güvenli sıra için [geçiş rehberini](SECURITY_MIGRATION.md) kullanın.
 
 ## ADIM 2 – Veritabanını (Firestore) oluşturun
 
@@ -50,38 +43,13 @@ Bu sistem kimseden e-posta ya da şifre istemez. Bağlantıyı açan herkes doğ
 4. Güvenlik modu sorarsa **Production mode (Üretim modu)** seçin.
 5. **Create** deyin ve birkaç saniye bekleyin.
 
-## ADIM 3 – Yeni güvenlik kurallarını yapıştırın (çok önemli)
+## ADIM 3 – Firestore güvenlik kurallarını hazırlayın
 
-> Önceki rehberdeki kuralları **silip bunlarla değiştirmeniz şart.** Eski kurallar yeni sistemi engeller.
+Mevcut kullanıcıları olan projede önce **firestore.rules.migration** dosyasındaki geçici kuralları yayımlayın. Bu aşama uygulamanın Google sahip/üyelik metaverisini oluşturmasına izin verirken eski erişim modelini kısa süre korur.
 
-1. Firestore Database sayfasında üstteki **Rules (Kurallar)** sekmesine tıklayın.
-2. Kutunun içindeki **her şeyi silin.**
-3. Aşağıdaki kodun **tamamını** yapıştırın:
+Tüm mevcut defter sahipleri Google hesabıyla giriş yaptıktan ve çalışanları üye olarak ekledikten sonra **firestore.rules** dosyasındaki son kuralları yayımlayın. Son kurallar, üyelik kaydı olmayan hesapların defter verilerine erişimini keser.
 
-```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-
-    function girisli() {
-      return request.auth != null;
-    }
-    function gecerliVeri() {
-      return request.resource.data.d is string
-          && request.resource.data.d.size() < 600000;
-    }
-
-    // Her defter, bağlantısındaki gizli kodla ayrılır.
-    // Kodu bilmeyen biri defteri bulamaz, defterleri listeleyemez.
-    match /defterler/{defterId}/{koleksiyon}/{belgeId} {
-      allow read, delete: if girisli() && koleksiyon in ['kayitlar', 'ayar', 'aktif', 'cihaz'];
-      allow create, update: if girisli() && koleksiyon in ['kayitlar', 'ayar', 'aktif', 'cihaz'] && gecerliVeri();
-    }
-  }
-}
-```
-
-4. **Publish (Yayınla)** butonuna basın.
+> ⚠️ Üyeleri eklemeden son kuralları yayımlamayın; çalışanların eşitlemesi durur. İki aşamalı yayın sırası için [SECURITY_MIGRATION.md](SECURITY_MIGRATION.md) rehberini izleyin.
 
 ## ADIM 4 – Giriş için site adresinize izin verin
 
@@ -90,7 +58,7 @@ service cloud.firestore {
 
 ## ADIM 5 – Dosyaları GitHub'a yükleyin
 
-Bu rehberle birlikte **4 dosya** geldi: `index.html`, `sw.js`, `firebase-config.js`, `PAYLASIM_KURULUM.md`.
+Bu sürümde `index.html`, `sw.js`, `firebase-config.js`, `firestore.rules`, `firestore.rules.migration` ve `SECURITY_MIGRATION.md` dosyaları da kullanılır.
 
 > 🔑 **`sw.js` çok önemli.** Telefon ve tarayıcılar siteyi hızlı açmak için eski sürümü saklar. Yeni `sw.js` bunu düzeltir: artık her açılışta en güncel sürüm alınır, internet yoksa saklanan sürüm kullanılır.
 
@@ -149,7 +117,7 @@ Adres çubuğuna şunu yazıp açın (sonundaki `?yeni=1` önemli):
    Bu cihazda daha önce girdiğiniz kayıtlar varsa ekranda "X kayıt aktarılacak" yazar ve **hepsi otomatik buluta taşınır.**
 4. Birkaç saniye içinde başlıkta **● CANLI** yazısı çıkar.
 
-## ADIM 7 – Bağlantıyı herkese gönderin
+## ADIM 7 – Bağlantıyı gönderin ve üyeyi onaylayın
 
 Defter ilk oluşunca bağlantı penceresi **kendiliğinden açılır.** Sonradan bağlantıya ulaşmanın iki yolu var:
 
@@ -158,7 +126,7 @@ Defter ilk oluşunca bağlantı penceresi **kendiliğinden açılır.** Sonradan
 
 Oradan **Bağlantıyı kopyala** ya da **WhatsApp** butonuna basın.
 3. Bağlantı şuna benzer: `https://dunyaambalaj.github.io/tahsilat-defteri/#d=AbCdEf...`
-4. Çalışanlarınıza gönderin. Onlar bağlantıya tıklayınca defter açılır. **Başka bir şey yapmaları gerekmez.**
+4. Çalışanınıza bağlantıyı gönderin. Çalışan Google hesabıyla giriş yapıp ekranda görünen kullanıcı kodunu size iletsin; ardından Ayarlar → Defter erişimi bölümünden kullanıcı kodunu üyeliğe ekleyin.
 
 > 📱 **Telefonda uygulama gibi kullanmak için:** bağlantıyı açtıktan sonra tarayıcı menüsünden **"Ana ekrana ekle"** deyin.
 > iPhone'da ana ekrandaki uygulama açılınca defter bağlantısını tanımazsa karşılama ekranındaki kutuya bağlantıyı yapıştırıp **Bağlantıyla katıl** deyin.

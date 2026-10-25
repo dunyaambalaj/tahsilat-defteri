@@ -4,9 +4,10 @@ Bu klasör, Ödeme Defteri uygulamasını GitHub Pages üzerinden internet adres
 
 ## Önemli bilgi
 
-- Uygulamanın **kodu** GitHub'da durur ve bir internet adresinden açılır.
-- Sizin **kayıtlarınız** GitHub'a gitmez. Her cihazın tarayıcısında ayrı tutulur. Adresi açan başka biri boş bir defter görür.
-- Uygulamayı bir kez internetle açtıktan sonra internet olmadan da çalışır.
+- Uygulamanın kodu GitHub Pages üzerinden yayınlanır.
+- Defter kayıtları Firebase Firestore'da tutulur; GitHub'a gönderilmez.
+- Uygulama çevrimdışı çalışabilir ve internet gelince eşitler.
+- Yeni sürüm Google hesabıyla giriş ve defter sahibi tarafından üyelik onayı gerektirir. Mevcut kullanıcılar için kuralları sırayla yayımlayın; [güvenli geçiş rehberini](SECURITY_MIGRATION.md) izleyin.
 
 ## Dosyalar
 
@@ -15,6 +16,9 @@ Bu klasör, Ödeme Defteri uygulamasını GitHub Pages üzerinden internet adres
 | index.html | Uygulamanın kendisi |
 | manifest.json | Ana ekrana eklenen uygulamanın ayarları |
 | sw.js | Çevrimdışı çalışma ve önbellek |
+| firestore.rules | Üyelik denetimli Firestore kuralları |
+| firestore.rules.migration | Eski kullanıcılar için geçiş kuralları |
+| SECURITY_MIGRATION.md | Hesap ve üyelik modeline geçiş rehberi |
 | icon.svg | Uygulama simgesi |
 | .nojekyll | GitHub Pages dosyaları olduğu gibi yayınlasın diye (isteğe bağlı) |
 | README.md | Bu kılavuz |
