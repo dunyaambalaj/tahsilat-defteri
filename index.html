@@ -1080,6 +1080,21 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     .type-opt[data-tema], html[data-look="cam"] .type-opt[data-tema] { display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 0; }
     .type-opt[data-tema] .theme-dot { width: 100%; height: 26px; border-radius: 9px; margin-bottom: 6px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.4); }
     .type-opt[data-tema] span:last-child { text-align: center; }
+
+    /* ===== v13: kartlarda tutar ve butonlar her kartta aynı hizada ===== */
+    .card { display: flex; flex-direction: column; }
+    .cards { align-items: stretch; }
+    .card-mid { flex: 1 1 auto; margin-top: 6px; }
+    .card-amt { display: flex; flex-direction: column; align-items: flex-end; text-align: right; margin-top: 8px; }
+    .card .card-amt .meta { padding-left: 0; }
+    .card-foot { margin-top: 10px; }
+    .card-foot .acts { margin-top: 0; }
+    .card .acts .btn { min-height: 44px; }
+    .card-au { font-size: 11px; opacity: .88; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 1.3em; }
+    .ledger-row.pending { border-style: dashed; }
+    html[data-look="klasik"] .fab { display: none !important; }
+    .name-row:not(.no-stamp) { padding-right: 104px; }
+    html[data-look="cam"] .name-row:not(.no-stamp) { padding-right: 92px; }
   </style>
 </head>
 <body>
@@ -1101,7 +1116,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     try { const v = localStorage.getItem(ID_KEY); return ID_RE.test(v || "") ? v : null; } catch (e) { return null; }
   })();
   const cacheKey = () => DEFTER_ID ? KEY + ":" + DEFTER_ID : KEY;
-  const BUILD = "12";
+  const BUILD = "13";
   const FB_VERSIONS = ["13.0.0", "12.8.0", "12.2.1"]; /* sırayla denenir */
   /* Firebase web ayarları herkese açık bilgidir. firebase-config.js okunamazsa bu yedek kullanılır. */
   const FB_DEFAULT = {
@@ -1563,36 +1578,42 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     const showActs = isOpen(k);
     const stamp = st !== "bekliyor" ? `<span class="stamp ${st}">${statusLabel(st)}</span>` : "";
     const rem = remaining(k);
+    const pct = st === "tahsil" ? 100 : Math.min(100, Math.round((k.tahsilTutar || 0) / (k.tutar || 1) * 100));
     const amtLine = st === "kismi"
-      ? `<div class="amt sub">${fmtTRY(k.tahsilTutar)} / ${fmtTRY(k.tutar)}</div><div class="meta">Kalan ${fmtTRY(rem)}</div><div class="pbar"><i style="width:${Math.min(100, Math.round((k.tahsilTutar || 0) / (k.tutar || 1) * 100))}%"></i></div>`
-      : `<div class="amt">${fmtTRY(late ? rem : k.tutar)}</div>`;
+      ? `<div class="amt sub">${fmtTRY(k.tahsilTutar)} / ${fmtTRY(k.tutar)}</div><div class="meta">Kalan ${fmtTRY(rem)}</div>`
+      : st === "tahsil" ? `<div class="amt">${fmtTRY(k.tutar)}</div><div class="meta">Tamamı tahsil edildi</div>`
+      : `<div class="amt">${fmtTRY(late ? rem : k.tutar)}</div><div class="meta">Henüz tahsilat yok</div>`;
+    const au = `<div class="meta card-au">${(k.olusturan || k.sonKim) ? `${k.olusturan ? "Ekleyen: " + esc(k.olusturan) : ""}${k.sonKim && k.sonKim !== k.olusturan ? ` · Son işlem: ${esc(k.sonKim)}` : ""}` : "&nbsp;"}</div>`;
     return `
       <article class="card ${late?"late":""} ${isErt(k)?"ert":""}" data-open="${k.id}">
         <div class="spine ${st}"></div>
         ${stamp}
-        <div class="name-row ${st==="bekliyor"?"no-stamp":""}">${esc(k.musteri)}${late?`<span class="late-tag">GECİKTİ</span>`:""}${ertTag(k)}${scoreChip(k)}${edTag(k)}</div>
-        <div class="meta" style="margin-top:3px">
-          <span class="type-pill">${esc(typeAd(k.tur, k))}</span>
-          ${k.belgeNo ? ` · No: ${esc(k.belgeNo)}` : ""}
-          ${k.turKayit === "soz" ? " · Ödeme sözü" : k.turKayit === "vade" ? " · Vadeli" : ""}
-        </div>
-        <div style="display:flex;justify-content:space-between;gap:8px;margin-top:6px;align-items:flex-end;flex-wrap:wrap">
-          <div class="meta" style="min-width:0;flex:1 1 45%">
-            Söz/vade: <b>${fmtDate(k.vade)}</b> · Kayıt: ${fmtDate(k.kayitTarihi)}
-            ${k.tahsilTarihi ? ` · Tahsil: ${fmtDate(k.tahsilTarihi)}` : ""}
-            ${(k.ertelemeSayisi||0) > 0 ? ` · ${k.ertelemeSayisi} kez ertelendi` : ""}${k.orijinalVade && k.orijinalVade !== k.vade ? ` · ilk vade ${fmtDate(k.orijinalVade)}` : ""}
-            ${k.not ? `<br/>“${esc(k.not)}”` : ""}
+        <div class="card-top">
+          <div class="name-row ${st==="bekliyor"?"no-stamp":""}">${esc(k.musteri)}${late?`<span class="late-tag">GECİKTİ</span>`:""}${ertTag(k)}${scoreChip(k)}${edTag(k)}</div>
+          <div class="meta" style="margin-top:3px">
+            <span class="type-pill">${esc(typeAd(k.tur, k))}</span>
+            ${k.belgeNo ? ` · No: ${esc(k.belgeNo)}` : ""}
+            ${k.turKayit === "soz" ? " · Ödeme sözü" : k.turKayit === "vade" ? " · Vadeli" : ""}
           </div>
-          <div style="text-align:right;flex:0 0 auto">${amtLine}</div>
         </div>
-        ${showActs ? `<div class="acts">
-          <button class="btn btn-tahsil" data-act="tahsil" data-id="${k.id}">Tahsil</button>
-          <button class="btn btn-erte" data-act="ertele" data-id="${k.id}">Ertele</button>
-          <a class="btn btn-wa btn-icon" href="${waLink(k)}" target="_blank" rel="noopener" data-wa="1" data-wak="${k.id}" title="WhatsApp mesajı (şablon seç)">${icon("msg")}</a>
-        </div>` : ""}
-        ${(k.olusturan || k.sonKim) ? `<div class="meta" style="font-size:11px;opacity:.75;margin-top:6px">${k.olusturan ? "Ekleyen: " + esc(k.olusturan) : ""}${k.sonKim && k.sonKim !== k.olusturan ? ` · Son işlem: ${esc(k.sonKim)}` : ""}</div>` : ""}
+        <div class="meta card-mid">
+          Söz/vade: <b>${fmtDate(k.vade)}</b> · Kayıt: ${fmtDate(k.kayitTarihi)}
+          ${k.tahsilTarihi ? ` · Tahsil: ${fmtDate(k.tahsilTarihi)}` : ""}
+          ${(k.ertelemeSayisi||0) > 0 ? ` · ${k.ertelemeSayisi} kez ertelendi` : ""}${k.orijinalVade && k.orijinalVade !== k.vade ? ` · ilk vade ${fmtDate(k.orijinalVade)}` : ""}
+          ${k.not ? `<br/>“${esc(k.not)}”` : ""}
+        </div>
+        <div class="card-amt">${amtLine}<div class="pbar"><i style="width:${pct}%"></i></div></div>
+        <div class="card-foot">
+          ${showActs ? `<div class="acts">
+            <button class="btn btn-tahsil" data-act="tahsil" data-id="${k.id}">Tahsil</button>
+            <button class="btn btn-erte" data-act="ertele" data-id="${k.id}">Ertele</button>
+            <a class="btn btn-wa btn-icon" href="${waLink(k)}" target="_blank" rel="noopener" data-wa="1" data-wak="${k.id}" title="WhatsApp mesajı (şablon seç)">${icon("msg")}</a>
+          </div>` : ""}
+          ${au}
+        </div>
       </article>`;
   }
+
   const cardsGrid = list => `<div class="cards">${list.map(paymentCard).join("")}</div>`;
 
   /* ---------- ÖZET ---------- */
@@ -1601,7 +1622,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     const all = kayitlar();
     const todayAll = ofDate(t);
     const todayOpen = todayAll.filter(k => isOpen(k) && !isErt(k));
-    const ertAll = ertList(t);
+    const ertAll = ertList();
     const todayDone = todayAll.filter(k => statusOf(k) === "tahsil");
     const sToday = sums(todayAll);
     const overdue = overdueList().filter(k => !isErt(k));
@@ -1637,8 +1658,9 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
 
       ${ertAll.length ? `
         <div class="sec-title ert">↻ Ertelenen tahsilatlar <span class="cnt">${ertAll.length}</span></div>
-        <div class="ert-note">Toplam ${fmtTRY(round2(ertAll.reduce((a, k) => a + remaining(k), 0)))} · vade gününde alınamayıp ertelenenler</div>
-        ${cardsGrid(ertAll)}` : ""}
+        <div class="ert-note">Toplam ${fmtTRY(round2(ertAll.reduce((a, k) => a + remaining(k), 0)))} · bugün ve öncesi vadeli ${ertAll.filter(k => k.vade <= t).length} · ileri vadeli ${ertAll.filter(k => k.vade > t).length}</div>
+        ${cardsGrid(ozetErtAll ? ertAll : ertAll.slice(0, 6))}
+        ${ertAll.length > 6 ? `<button class="btn btn-ghost" id="ertToggle" style="width:100%;margin-top:10px">${ozetErtAll ? "Daha az göster" : `Tümünü göster (${ertAll.length})`}</button>` : ""}` : ""}
 
       ${overdue.length ? `
         <div class="sec-title" style="color:var(--red)">Gecikenler <span class="cnt">${overdue.length}</span></div>
@@ -2059,6 +2081,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     document.getElementById("btnShareTop")?.addEventListener("click", () => openShare(selectedDate, ofDate(selectedDate), fmtLong(selectedDate)));
     document.getElementById("fab")?.addEventListener("click", () => openForm());
     document.getElementById("navPlus")?.addEventListener("click", () => openForm());
+    document.getElementById("ertToggle")?.addEventListener("click", () => { ozetErtAll = !ozetErtAll; render(); });
     document.getElementById("goalOpen")?.addEventListener("click", openGoalSheet);
     document.getElementById("actAll")?.addEventListener("click", openActivity);
     const pgEl = document.querySelector(".page"), tbEl = document.querySelector(".topbar");
@@ -4348,11 +4371,12 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     if (!hasSubtle()) return { s, h: await sha256(s + ":" + pw) };
     return { s, i: PBK_ITER, h: toHex(await pbkdf2Bits(pw, s + "|dogrula")) };
   }
-  async function verifyPin(p) {
-    const v = db.silmePin; if (!v) return false;
+  async function verifyWith(v, p) {
+    if (!v) return false;
     if (v.i && hasSubtle()) return toHex(await pbkdf2Bits(p, v.s + "|dogrula")) === v.h;
     return (await sha256(v.s + ":" + p)) === v.h;
   }
+  async function verifyPin(p) { return verifyWith(db.silmePin, p); }
   const adminActive = () => !!db.silmePin && Date.now() < adminUntil;
 
   /* ---- Şifreli kasa: diğer defterlerin listesi/bağlantıları yönetici şifresiyle şifrelenir (AES-GCM) ---- */
@@ -4373,16 +4397,33 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       return JSON.parse(new TextDecoder().decode(pt));
     } catch (e) { return null; }
   }
+  /* Yönetici dizini: şifreden türetilen gizli adreste şifreli defter listesi. Şifreyi bilen her cihaz,
+     bağlantı yapıştırmadan tüm defterleri görür (mevcut kurallarla çalışır; yeni koleksiyon gerekmez). */
+  async function dirIdFor(pw) { return "d" + toHex(await pbkdf2Bits(pw, "dizin-v1")).slice(0, 40); }
   async function loadGroup() {
     const me = { id: DEFTER_ID, ad: db.magaza };
-    let list = [], bozuk = false;
-    if (vaultRaw && adminPw && hasSubtle()) {
-      let blob = null; try { blob = JSON.parse(vaultRaw); } catch (e) {}
-      const o = blob && await vaultOpen(adminPw, blob);
-      if (o && Array.isArray(o.defterler)) list = o.defterler; else if (blob) bozuk = true;
+    let list = [], bozuk = false, hasDir = false;
+    const merge = arr => (arr || []).forEach(x => {
+      if (!x || !x.id) return;
+      const y = list.find(z => z.id === x.id);
+      if (y) { if (x.ad) y.ad = x.ad; } else list.push({ id: x.id, ad: x.ad });
+    });
+    if (adminPw && hasSubtle()) {
+      if (vaultRaw) {
+        let blob = null; try { blob = JSON.parse(vaultRaw); } catch (e) {}
+        const o = blob && await vaultOpen(adminPw, blob);
+        if (o && Array.isArray(o.defterler)) merge(o.defterler); else bozuk = true;
+      }
+      try {
+        const dd = await fbm.getDocFromServer(dRef(await dirIdFor(adminPw), "ayar", "kasa"));
+        if (dd.exists()) {
+          const o2 = await vaultOpen(adminPw, JSON.parse(dd.data().d));
+          if (o2 && Array.isArray(o2.defterler)) { merge(o2.defterler); hasDir = true; bozuk = false; }
+        }
+      } catch (e) {}
     }
     if (!list.some(x => x.id === DEFTER_ID)) list.unshift(me); else list = list.map(x => x.id === DEFTER_ID ? { ...x, ad: db.magaza } : x);
-    return { list, bozuk };
+    return { list, bozuk, hasDir };
   }
   const dRef = (id, c, d) => fbm.doc(fbDb, "defterler", id, c, d);
   async function readGenel(id) {
@@ -4393,11 +4434,12 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   const writeGenel = (id, o) => fbm.setDoc(dRef(id, "ayar", "genel"), { d: JSON.stringify(o), u: fbm.serverTimestamp() });
   const GENEL_BOS = ad => ({ magaza: ad, firma: { tel: "", vergi: "", adres: "" }, silmePin: null, hedef: 0, mesai: null, sablonlar: null, otoErt: true });
   async function setLedgerPin(id, verifier) { const o = (await readGenel(id)) || GENEL_BOS("Defter"); o.silmePin = verifier; await writeGenel(id, o); }
-  /* Grup listesini şifreleyip gruptaki HER defterin kasasına yazar; istenirse yönetici şifresini tüm defterlere uygular */
+  /* Grup listesini şifreleyip yönetici dizinine ve gruptaki HER defterin kasasına yazar; istenirse şifreyi tüm defterlere uygular */
   async function writeGroup(list, pw, opts) {
     opts = opts || {};
     const raw = JSON.stringify(await vaultSeal(pw, { defterler: list, t: Date.now() }));
     const fails = [];
+    try { await fbm.setDoc(dRef(await dirIdFor(pw), "ayar", "kasa"), { d: raw, u: fbm.serverTimestamp() }); } catch (e) { fails.push("dizin"); }
     for (const L of list) {
       try {
         await fbm.setDoc(dRef(L.id, "ayar", "kasa"), { d: raw, u: fbm.serverTimestamp() });
@@ -4477,16 +4519,19 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     else { const o = (await readGenel(id)) || GENEL_BOS(ad); o.magaza = ad; await writeGenel(id, o); }
     return writeGroup(list.map(x => x.id === id ? { ...x, ad } : x), adminPw);
   }
-  /* Yönetici şifresini değiştir: grup listesi yeni şifreyle yeniden şifrelenir, tüm defterlere uygulanır */
+  /* Yönetici şifresini değiştir: liste yeni şifreyle yeniden şifrelenir, dizin yeni adrese taşınır, tüm defterlere uygulanır */
   async function setAdminPassword(newPw) {
+    const eskiPw = adminPw;
     let grup = null;
-    if (DEFTER_ID && cloudOn && hasSubtle() && vaultRaw && adminPw) { const g = await loadGroup(); if (!g.bozuk) grup = g.list; }
+    if (DEFTER_ID && cloudOn && hasSubtle() && eskiPw && db.silmePin) { const g = await loadGroup(); if (!g.bozuk) grup = g.list; }
     db.silmePin = await makeVerifier(newPw);
     adminPw = newPw; adminUntil = Date.now() + 10 * 60000;
     save();
-    if (grup && grup.length > 1) return writeGroup(grup, newPw, { propagatePin: true });
-    if (DEFTER_ID && cloudOn && hasSubtle() && grup) return writeGroup(grup, newPw);
-    return [];
+    if (!(DEFTER_ID && cloudOn && hasSubtle())) return [];
+    const list = grup || [{ id: DEFTER_ID, ad: db.magaza }];
+    const fails = await writeGroup(list, newPw, { propagatePin: list.length > 1 });
+    if (eskiPw) { try { const od = await dirIdFor(eskiPw), nd = await dirIdFor(newPw); if (od !== nd) await fbm.deleteDoc(dRef(od, "ayar", "kasa")); } catch (e) {} }
+    return fails;
   }
 
   /* ---- Yönetici paneli ---- */
@@ -4554,10 +4599,41 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   }
   const money0 = n => fmtK(n);
   const agoIso = iso => iso ? ago(new Date(iso).getTime()) : "—";
+  /* ---- Defterleri otomatik bulma: bağlantı yapıştırmak gerekmez ---- */
+  const skipList = () => { try { return JSON.parse(localStorage.getItem("kirtasiye_defter_yoksay") || "[]"); } catch (e) { return []; } };
+  function localLedgerCandidates() {
+    const out = [];
+    try {
+      JSON.parse(localStorage.getItem(REG_KEY) || "[]").forEach(x => { if (x && x.id) out.push({ id: x.id, ad: x.ad }); });
+      Object.keys(localStorage).forEach(k => {
+        if (!k.startsWith(KEY + ":")) return;
+        const id = k.slice(KEY.length + 1); if (!ID_RE.test(id)) return;
+        let ad = null; try { ad = (JSON.parse(localStorage.getItem(k)) || {}).magaza; } catch (e) {}
+        out.push({ id, ad });
+      });
+    } catch (e) {}
+    return out;
+  }
+  function registerCurrentLedger() {
+    if (!DEFTER_ID) return;
+    try {
+      const reg = JSON.parse(localStorage.getItem(REG_KEY) || "[]"), i = reg.findIndex(x => x.id === DEFTER_ID);
+      if (i < 0) reg.push({ id: DEFTER_ID, ad: db.magaza }); else reg[i].ad = db.magaza;
+      localStorage.setItem(REG_KEY, JSON.stringify(reg));
+    } catch (e) {}
+  }
+  async function ledgerCheck(id) {
+    let g = null, n = 0;
+    try { g = await readGenel(id); } catch (e) {}
+    try { n = (await fbm.getDocsFromServer(fbm.collection(fbDb, "defterler", id, "kayitlar"))).size; } catch (e) {}
+    const exists = !!g || n > 0, v = g && g.silmePin;
+    return { id, exists, ad: g && g.magaza, verifier: v || null, state: !exists ? "yok" : !v ? "serbest" : (db.silmePin && v.h === db.silmePin.h) ? "ayni" : "farkli" };
+  }
   async function renderLedgers(host) {
     if (!DEFTER_ID || !cloudReady()) { host.innerHTML = `<div class="meta">Çoklu defter yönetimi için bu cihazın bir ortak defterle bağlı olması gerekir.</div>`; return; }
     if (!hasSubtle()) { host.innerHTML = `<div class="meta">Bu tarayıcı şifreli kasayı desteklemiyor (güvenli bağlantı / güncel tarayıcı gerekir).</div>`; return; }
-    host.innerHTML = `<div class="meta">Defterler yükleniyor…</div>`;
+    host.innerHTML = `<div class="meta">Defterler aranıyor…</div>`;
+    registerCurrentLedger();
     const g = await loadGroup();
     if (g.bozuk) {
       host.innerHTML = `<div class="meta" style="color:var(--red)">Defter kasası bu şifreyle çözülemedi (başka bir şifreyle oluşturulmuş olabilir).</div>
@@ -4565,12 +4641,26 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       document.getElementById("gReset").onclick = async () => { if (!confirm("Defter listesi sıfırlansın mı? Defterlerin kendisi silinmez; yalnızca liste.")) return; await writeGroup([{ id: DEFTER_ID, ad: db.magaza }], adminPw); renderLedgers(host); };
       return;
     }
-    const sums = await Promise.all(g.list.map(L => L.id === DEFTER_ID ? Promise.resolve(localSummary()) : ledgerSummary(L.id)));
+    /* bu cihazda açılmış ama gruba girmemiş defterleri bul, koşullara göre otomatik yönetime al */
+    const inGroup = new Set(g.list.map(x => x.id)), skip = skipList(), cand = new Map();
+    localLedgerCandidates().forEach(x => { if (x.id !== DEFTER_ID && !inGroup.has(x.id) && !skip.includes(x.id) && !cand.has(x.id)) cand.set(x.id, x); });
+    const checks = await Promise.all([...cand.values()].map(async c => ({ c, r: await ledgerCheck(c.id).catch(() => ({ exists: false })) })));
+    const adopted = [], pending = [];
+    for (const { c, r } of checks) {
+      if (!r.exists) continue;
+      if (r.state === "serbest" || r.state === "ayni") {
+        try { if (r.state === "serbest") await setLedgerPin(c.id, db.silmePin); adopted.push({ id: c.id, ad: r.ad || c.ad || "Defter" }); } catch (e) {}
+      } else if (r.state === "farkli") pending.push({ id: c.id, ad: r.ad || c.ad || "Defter", verifier: r.verifier });
+    }
+    let list = g.list.slice();
+    if (adopted.length) { list = list.concat(adopted); await writeGroup(list, adminPw); toast(`${adopted.length} defter otomatik bulundu ve yönetime alındı`, null, 3800); }
+    else if (!g.hasDir) await writeGroup(list, adminPw); /* yönetici dizini ilk kez oluşur */
+    const sums = await Promise.all(list.map(L => L.id === DEFTER_ID ? Promise.resolve(localSummary()) : ledgerSummary(L.id)));
     const tBak = round2(sums.reduce((a, s) => a + (s.bak || 0), 0)), tBug = round2(sums.reduce((a, s) => a + (s.bugun || 0), 0));
     host.innerHTML = `
-      ${g.list.length > 1 ? `<div class="meta" style="margin:0 2px 6px">Tüm defterlerin toplamı</div><div class="kpis" style="margin:0 0 10px"><div class="kpi pl"><div class="k"><i></i>Açık bakiye</div><div class="v">${money0(tBak)}</div></div><div class="kpi th"><div class="k"><i></i>Bugün tahsil</div><div class="v">${money0(tBug)}</div></div><div class="kpi er"><div class="k"><i></i>Defter</div><div class="v">${g.list.length}</div></div></div>` : ""}
+      ${list.length > 1 ? `<div class="meta" style="margin:0 2px 6px">Tüm defterlerin toplamı</div><div class="kpis" style="margin:0 0 10px"><div class="kpi pl"><div class="k"><i></i>Açık bakiye</div><div class="v">${money0(tBak)}</div></div><div class="kpi th"><div class="k"><i></i>Bugün tahsil</div><div class="v">${money0(tBug)}</div></div><div class="kpi er"><div class="k"><i></i>Defter</div><div class="v">${list.length}</div></div></div>` : ""}
       <div class="ledger-list">
-        ${g.list.map((L, i) => { const s = sums[i], cur = L.id === DEFTER_ID; return `
+        ${list.map((L, i) => { const s = sums[i], cur = L.id === DEFTER_ID; return `
           <div class="ledger-row ${cur ? "cur" : ""}">
             <div class="ledger-top"><b>${esc(s.ad || L.ad)}</b>${cur ? `<span class="dev-me">Bu defter</span>` : ""}</div>
             <div class="meta">${s.err ? "Okunamadı: " + esc(s.err) : `${s.n} kayıt · açık <b>${money0(s.bak)}</b> · bugün tahsil <b>${money0(s.bugun)}</b> · ertelenen ${s.ert} · son işlem ${agoIso(s.son)}`}</div>
@@ -4580,33 +4670,49 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
               ${cur ? "" : `<button class="btn btn-ghost" data-ldel="${esc(L.id)}" style="color:var(--red)">Listeden çıkar</button>`}
             </div>
           </div>`; }).join("")}
+        ${pending.map(P => `
+          <div class="ledger-row pending">
+            <div class="ledger-top"><b>${esc(P.ad)}</b><span class="dev-me" style="background:color-mix(in srgb,var(--erte) 20%,transparent);color:var(--erte)">Farklı şifre</span></div>
+            <div class="meta">Bu cihazda açılmış bir defter, ancak yönetici şifresi sizinkinden farklı. Kendi şifresini girerek bağlayabilirsiniz.</div>
+            <div class="tpl-acts"><button class="btn btn-gold" data-lbind="${esc(P.id)}">Şifresini gir ve bağla</button><button class="btn btn-ghost" data-lskip="${esc(P.id)}">Yoksay</button></div>
+          </div>`).join("")}
       </div>
       <div class="tpl-acts" style="margin-top:8px">
         <button class="btn btn-leather" id="lNew">＋ Yeni defter</button>
-        <button class="btn btn-ghost" id="lAdd">🔗 Mevcut defteri ekle</button>
+        <button class="btn btn-ghost" id="lAdd">🔗 Bağlantıyla ekle</button>
       </div>
-      <p class="meta" style="margin-top:8px">Defter listesi yönetici şifrenizle <b>şifrelenerek</b> saklanır; çalışanlar diğer defterlerin bağlantısını göremez. Tüm defterlerde aynı yönetici şifresi geçerlidir.</p>`;
+      <p class="meta" style="margin-top:8px">Yönetici şifrenizle kayıtlı <b>tüm defterler otomatik listelenir</b>; bağlantı yapıştırmanız gerekmez. Liste şifrenizle <b>şifrelenerek</b> saklanır, çalışanlar diğer defterlerin bağlantısını göremez. Tüm defterlerde aynı yönetici şifresi geçerlidir.</p>`;
     host.querySelectorAll("[data-lopen]").forEach(b => b.onclick = () => openLedger(b.dataset.lopen));
     host.querySelectorAll("[data-lren]").forEach(b => b.onclick = async () => {
-      const L = g.list.find(x => x.id === b.dataset.lren); const ad = prompt("Defter adı:", L.ad); if (!ad || !ad.trim()) return;
+      const L = list.find(x => x.id === b.dataset.lren); const ad = prompt("Defter adı:", L.ad); if (!ad || !ad.trim()) return;
       try { await renameLedger(L.id, ad.trim()); toast("Ad değiştirildi"); renderAdminPanel(); } catch (e) { toast("Değiştirilemedi: " + fbErr(e)); }
     });
     host.querySelectorAll("[data-ldel]").forEach(b => b.onclick = async () => {
-      const L = g.list.find(x => x.id === b.dataset.ldel);
+      const L = list.find(x => x.id === b.dataset.ldel);
       if (!confirm(`“${L.ad}” listeden çıkarılsın mı? Defterin kendisi silinmez; yalnızca bu listeden kalkar.`)) return;
-      try { await removeFromGroup(L.id); toast("Listeden çıkarıldı"); renderLedgers(host); } catch (e) { toast("Çıkarılamadı: " + fbErr(e)); }
+      try { await removeFromGroup(L.id); const sk = skipList(); sk.push(L.id); try { localStorage.setItem("kirtasiye_defter_yoksay", JSON.stringify(sk)); } catch (e) {} toast("Listeden çıkarıldı"); renderLedgers(host); } catch (e) { toast("Çıkarılamadı: " + fbErr(e)); }
     });
+    host.querySelectorAll("[data-lbind]").forEach(b => b.onclick = async () => {
+      const P = pending.find(x => x.id === b.dataset.lbind);
+      const p = await askPin("“" + P.ad + "” şifresi", "Bu defterin yönetici şifresini girin");
+      if (p === null) return;
+      if (!(await verifyWith(P.verifier, p))) return toast("Şifre yanlış");
+      try { await setLedgerPin(P.id, db.silmePin); const gg = await loadGroup(); gg.list.push({ id: P.id, ad: P.ad }); await writeGroup(gg.list, adminPw); toast("Bağlandı: " + P.ad); renderLedgers(host); }
+      catch (e) { toast("Bağlanamadı: " + fbErr(e)); }
+    });
+    host.querySelectorAll("[data-lskip]").forEach(b => b.onclick = () => { const sk = skipList(); sk.push(b.dataset.lskip); try { localStorage.setItem("kirtasiye_defter_yoksay", JSON.stringify(sk)); } catch (e) {} renderLedgers(host); });
     document.getElementById("lNew").onclick = async () => {
       const ad = prompt("Yeni defterin adı (örn. Şube 2):"); if (!ad || !ad.trim()) return;
       try { const r = await addNewLedger(ad.trim()); toast(r.fails.length ? "Oluşturuldu; kasa güncellenemedi: " + r.fails.join(", ") : "Defter oluşturuldu"); if (confirm(`“${ad.trim()}” defterine şimdi geçilsin mi?`)) openLedger(r.id); else renderLedgers(host); }
       catch (e) { toast("Oluşturulamadı: " + (e.message || fbErr(e))); }
     };
     document.getElementById("lAdd").onclick = async () => {
-      const link = prompt("Eklenecek defterin bağlantısını yapıştırın.\nNot: o defterin yönetici şifresi, sizinkiyle aynı yapılacaktır."); if (!link) return;
+      const link = prompt("Başka bir cihazdaki defterin bağlantısını yapıştırın.\nNot: o defterin yönetici şifresi, sizinkiyle aynı yapılır."); if (!link) return;
       try { const r = await addExistingLedger(link); toast("Eklendi: " + r.ad); renderLedgers(host); }
       catch (e) { toast("Eklenemedi: " + (e.message || fbErr(e))); }
     };
   }
+  let ozetErtAll = false;
   function renderAdminPanel() {
     adminTouch();
     const owner = (() => { try { return localStorage.getItem("kirtasiye_sahip_" + DEFTER_ID) === "1"; } catch (e) { return false; } })();
@@ -4708,7 +4814,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   function lastSeen() {
     try { let v = localStorage.getItem(SEEN_KEY); if (!v) { v = new Date().toISOString(); localStorage.setItem(SEEN_KEY, v); } return v; } catch (e) { return ""; }
   }
-  const markSeen = () => { try { localStorage.setItem(SEEN_KEY, new Date().toISOString()); } catch (e) {} };
+  const markSeen = () => { try { const now = new Date().toISOString(), ev = activityEvents(), top = ev.length ? String(ev[0].t) : ""; localStorage.setItem(SEEN_KEY, top > now ? top : now); } catch (e) {} }; /* cihaz saatleri farklı olsa da "okundu" kalır */
   const evMine = e => { const me = ME(); return !!me && e.kim === me; };
   function unreadCount() {
     const ls = lastSeen(); let n = 0;
@@ -4812,6 +4918,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     if (DEFTER_ID) {
       /* Adres çubuğunda kod kalsın: "Ana ekrana ekle" yapılınca defter bağlantısı korunur */
       if (!location.hash.includes(DEFTER_ID)) history.replaceState(null, "", location.pathname + location.search + "#d=" + DEFTER_ID);
+      registerCurrentLedger();
       startCloud();
       let tries = 0;
       const askName = setInterval(() => {
