@@ -1095,6 +1095,17 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     html[data-look="klasik"] .fab { display: none !important; }
     .name-row:not(.no-stamp) { padding-right: 104px; }
     html[data-look="cam"] .name-row:not(.no-stamp) { padding-right: 92px; }
+
+    /* ===== v14: tahsilat hareketleri · rapor · geri ===== */
+    .pay-row.iptal .t1 { text-decoration: line-through; opacity: .55; }
+    .pay-row .t2 { white-space: normal; }
+    .pay-row.iptal .t2 { color: var(--red); }
+    .pay-acts { display: flex; gap: 6px; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end; }
+    .pay-acts .dev-del { padding: 8px 12px; min-height: 40px; }
+    .kart-tag { background: color-mix(in srgb, var(--bekle) 16%, transparent); color: var(--bekle); }
+    .rp-seg button { font-size: 12.5px; padding: 9px 4px; }
+    .rp-chips { display: flex; flex-wrap: wrap; gap: 6px; overflow: visible; }
+    #sheetBack { margin-right: 6px; }
   </style>
 </head>
 <body>
@@ -1116,7 +1127,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     try { const v = localStorage.getItem(ID_KEY); return ID_RE.test(v || "") ? v : null; } catch (e) { return null; }
   })();
   const cacheKey = () => DEFTER_ID ? KEY + ":" + DEFTER_ID : KEY;
-  const BUILD = "13";
+  const BUILD = "14";
   const FB_VERSIONS = ["13.0.0", "12.8.0", "12.2.1"]; /* sırayla denenir */
   /* Firebase web ayarları herkese açık bilgidir. firebase-config.js okunamazsa bu yedek kullanılır. */
   const FB_DEFAULT = {
@@ -1140,7 +1151,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   const AY = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
   const GUN = ["Pazar","Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi"];
   const GUN3 = ["Paz","Pzt","Sal","Çar","Per","Cum","Cmt"];
-  const ACT_AD = { olusturuldu: "Oluşturuldu", duzenlendi: "Düzenlendi", tahsil: "Tahsil edildi", kismi: "Kısmi tahsilat", ertelendi: "Ertelendi", silindi: "Silindi", geri: "Geri getirildi" };
+  const ACT_AD = { olusturuldu: "Oluşturuldu", duzenlendi: "Düzenlendi", tahsil: "Tahsil edildi", kismi: "Kısmi tahsilat", ertelendi: "Ertelendi", silindi: "Silindi", geri: "Geri getirildi", tahsilduzenle: "Tahsilat düzenlendi", tahsiliptal: "Tahsilat iptal edildi" };
   const TK_AD = { soz: "Ödeme sözü", vade: "Vadeli alacak", plan: "Planlı tahsilat" };
 
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -1589,7 +1600,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         <div class="spine ${st}"></div>
         ${stamp}
         <div class="card-top">
-          <div class="name-row ${st==="bekliyor"?"no-stamp":""}">${esc(k.musteri)}${late?`<span class="late-tag">GECİKTİ</span>`:""}${ertTag(k)}${scoreChip(k)}${edTag(k)}</div>
+          <div class="name-row ${st==="bekliyor"?"no-stamp":""}">${esc(k.musteri)}${late?`<span class="late-tag">GECİKTİ</span>`:""}${ertTag(k)}${kartTag(k)}${scoreChip(k)}${edTag(k)}</div>
           <div class="meta" style="margin-top:3px">
             <span class="type-pill">${esc(typeAd(k.tur, k))}</span>
             ${k.belgeNo ? ` · No: ${esc(k.belgeNo)}` : ""}
@@ -1759,14 +1770,14 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     (src || kayitlar()).forEach(k => {
       let sum = 0;
       (k.gecmis || []).forEach(g => {
-        if ((g.a === "tahsil" || g.a === "kismi") && typeof g.tutar === "number") {
-          ev.push({ k, iso: g.tarih || String(g.t).slice(0, 10), tutar: g.tutar, kim: g.k || "" });
+        if ((g.a === "tahsil" || g.a === "kismi") && typeof g.tutar === "number" && !g.iptal) {
+          ev.push({ k, iso: g.tarih || String(g.t).slice(0, 10), tutar: g.tutar, kim: g.k || "", tur: g.tur || k.tur });
           sum += g.tutar;
         }
       });
       const tot = statusOf(k) === "tahsil" ? Math.max(k.tutar || 0, k.tahsilTutar || 0) : (k.tahsilTutar || 0);
       const rest = round2(tot - sum);
-      if (rest > 0.009) ev.push({ k, iso: k.tahsilTarihi || k.kayitTarihi || k.vade, tutar: rest, kim: "" });
+      if (rest > 0.009) ev.push({ k, iso: k.tahsilTarihi || k.kayitTarihi || k.vade, tutar: rest, kim: "", tur: k.tur });
     });
     return ev.filter(e => e.iso);
   }
@@ -2062,8 +2073,9 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     bind();
     placeInd(document.querySelector(".nav"), lastNavBtn, navBtn(view)); lastNavBtn = navBtn(view);
     placeInd(document.querySelector(".tb-nav"), prevVi, vi);
-    const segEl = document.querySelector(".page .seg");
-    if (segEl) { const si = +segEl.dataset.idx, key = segEl.dataset.key || ""; placeInd(segEl, key === lastSegKey ? lastSegIdx : -1, si); lastSegIdx = si; lastSegKey = key; } else { lastSegIdx = -1; lastSegKey = ""; }
+    const segEls = [...document.querySelectorAll(".page .seg")];
+    if (segEls.length) segEls.forEach((sg, i) => { const si = +sg.dataset.idx, key = sg.dataset.key || ""; if (i === 0) { placeInd(sg, key === lastSegKey ? lastSegIdx : -1, si); lastSegIdx = si; lastSegKey = key; } else placeInd(sg, si, si); });
+    else { lastSegIdx = -1; lastSegKey = ""; }
     if (cls) countUp();
   }
 
@@ -2224,6 +2236,8 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         </div>
         <label class="fld">Çek / senet / dekont no</label>
         <input class="inp" id="fBelge" value="${esc(k.belgeNo||"")}" placeholder="İsteğe bağlı" />
+        <label class="fld" style="display:flex;align-items:center;gap:10px;margin-top:14px;text-transform:none;letter-spacing:0"><input type="checkbox" id="fKart" ${k.kartBekliyor ? "checked" : ""} style="width:22px;height:22px;flex:0 0 22px"> 💳 Kart / mail order formu alındı (çekim bekleniyor)</label>
+        <div class="meta" style="margin:2px 2px 0">İşaretliyse çekim yapılamazsa kayıt ertesi iş gününe devredilir; müşteri puanı etkilenmez ve tahsil edene kadar listede kalır.</div>
         <label class="fld">Not</label>
         <textarea class="inp" id="fNot" rows="2" placeholder="Açıklama">${esc(k.not||"")}</textarea>
         <button class="btn btn-leather" id="fSave" style="width:100%;margin-top:16px;padding:14px">${isEdit ? "Kaydet" : "Deftere işle"}</button>
@@ -2261,6 +2275,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       const base = db.kayitlar.find(x => x.id === k.id) || k; /* canlı: en güncel hali */
       const rec = {
         ...base,
+        kartBekliyor: !!(document.getElementById("fKart") || {}).checked,
         musteri, tutar,
         telefon: document.getElementById("fTel").value.trim(),
         tur: form.tur || k.tur,
@@ -2306,6 +2321,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
           ${k.not ? `Not: ${esc(k.not)}` : ""}
         </div>
         ${authorLine(k)}
+        ${paymentsHtml(k)}
         ${(k.ertelemeGecmisi||[]).length ? `<label class="fld">Erteleme geçmişi</label><ul class="hist">${k.ertelemeGecmisi.map(e => `<li>${fmtDate(e.eski)} → ${fmtDate(e.yeni)}${e.neden ? ` · ${esc(e.neden)}` : ""}${e.k ? ` · ${esc(e.k)}` : ""}</li>`).join("")}</ul>` : ""}
         ${(k.gecmis||[]).length ? `<label class="fld">Hareket geçmişi</label><ul class="hist">${(k.gecmis||[]).slice().reverse().map(h => `<li>${esc(ACT_AD[h.a] || h.a)} · ${esc(h.d)}<br/><span>${new Date(h.t).toLocaleString("tr-TR")}${h.k ? " · " + esc(h.k) : ""}</span></li>`).join("")}</ul>` : ""}
         ${st!=="tahsil" && st!=="iptal" ? `<div class="acts" style="margin-top:14px">
@@ -2417,6 +2433,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         <input class="inp" id="eTarih" type="date" value="${addDays(k.vade, 7)}" />
         <label class="fld">Erteleme nedeni</label>
         <input class="inp" id="eNeden" placeholder="Örn. çek ciro, nakit bekleniyor" />
+        <label class="fld" style="display:flex;align-items:center;gap:10px;margin-top:12px;text-transform:none;letter-spacing:0"><input type="checkbox" id="eIsl" ${k.kartBekliyor ? "checked" : ""} style="width:22px;height:22px;flex:0 0 22px"> İşletme kaynaklı (müşteri puanını etkilemez)</label>
         <button class="btn btn-erte" id="eSave" style="width:100%;margin-top:16px;padding:14px">Yeni tarihe ertele</button>
         <button class="btn btn-ghost" id="sheetClose" style="width:100%;margin-top:8px">Vazgeç</button>
       </div>`);
@@ -2431,9 +2448,11 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       }
       if (!db.kayitlar.find(x => x.id === k.id)) { closeSheet(); return toast("Kayıt artık yok"); }
       const neden = document.getElementById("eNeden").value.trim();
+      const isl = !!(document.getElementById("eIsl") || {}).checked;
       const btn = document.getElementById("eSave");
       btn.disabled = true; btn.textContent = "İşleniyor…";
       const ok = await mutateRecord(k.id, "Erteleme", rec => {
+        if (isl) { carryIsl(rec, yeni, neden || "İşletme kaynaklı", false); return true; }
         const eski = rec.vade;
         rec.ertelemeGecmisi = rec.ertelemeGecmisi || [];
         rec.ertelemeGecmisi.push({ eski, yeni, neden, t: new Date().toISOString() });
@@ -2477,7 +2496,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         <button class="btn btn-leather" id="cAdd" style="width:100%;margin-top:8px">Bu müşteriye kayıt ekle</button>
       </div>`, true);
     document.getElementById("sheetClose").onclick = closeSheet;
-    document.getElementById("cShare").onclick = () => openShare(todayISO(), list, `EKSTRE · ${ad}`);
+    document.getElementById("cShare").onclick = () => openStatement(ad);
     document.getElementById("cAdd").onclick = () => { closeSheet(); openForm(null, { musteri: ad }); };
     document.querySelectorAll("[data-act]").forEach(b => b.onclick = e => {
       e.stopPropagation();
@@ -2940,11 +2959,11 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     return c;
   }
 
-  function openShare(iso, list, title) {
+  function openShare(iso, list, title, drawFn) {
     withLogo(logoImg => {
       try {
-        const s = sums(list);
-        const canvas = drawShareImage(title, list, logoImg);
+        const s = sums(list || []);
+        const canvas = drawFn ? drawFn(logoImg) : drawShareImage(title, list, logoImg);
         const url = canvas.toDataURL("image/png");
         openSheet(`
           <div class="sheet-card full">
@@ -3055,7 +3074,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   }
   const shareLink = () => `${location.origin}${location.pathname}#d=${DEFTER_ID}`;
-  const sharedSettingsJson = () => JSON.stringify({ magaza: db.magaza, firma: { tel: db.firma.tel, vergi: db.firma.vergi, adres: db.firma.adres }, silmePin: db.silmePin || null, hedef: Number(db.hedef) || 0, mesai: db.mesai || null, sablonlar: db.sablonlar || null, otoErt: db.otoErt === false ? false : true });
+  const sharedSettingsJson = () => JSON.stringify({ magaza: db.magaza, firma: { tel: db.firma.tel, vergi: db.firma.vergi, adres: db.firma.adres }, silmePin: db.silmePin || null, ust: db.ust || [], hedef: Number(db.hedef) || 0, mesai: db.mesai || null, sablonlar: db.sablonlar || null, otoErt: db.otoErt === false ? false : true });
 
   async function loadSdk() {
     let last;
@@ -3182,6 +3201,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
           const f = o.firma || {};
           db.firma = { ...db.firma, tel: f.tel || "", vergi: f.vergi || "", adres: f.adres || "" };
           db.silmePin = o.silmePin || null;
+          db.ust = Array.isArray(o.ust) ? o.ust : [];
           db.hedef = Number(o.hedef) || 0;
           db.mesai = o.mesai || null;
           db.sablonlar = Array.isArray(o.sablonlar) ? o.sablonlar : null;
@@ -3498,30 +3518,6 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   }
 
   /* ---- Silinenler kutusu ---- */
-  function openTrash() {
-    const list = db.kayitlar.filter(k => k.silindi).sort((a, b) => String(b.sonT || "").localeCompare(String(a.sonT || "")));
-    openSheet(`
-      <div class="sheet-card full">
-        <div class="grab"></div>
-        <div style="display:flex;align-items:center">
-          <h2 style="flex:1;font-size:18px">Silinenler (${list.length})</h2>
-          <button class="btn btn-ghost" id="sheetClose">Kapat</button>
-        </div>
-        ${list.length > 1 ? `<button class="btn btn-gold" id="trAll" style="width:100%;margin:10px 0">Tümünü geri getir (${list.length})</button>` : ""}
-        ${list.length ? list.map(k => `
-          <div class="panel" style="padding:10px;margin:8px 0;display:flex;gap:8px;align-items:center">
-            <div style="flex:1;min-width:0">
-              <b style="overflow-wrap:anywhere">${esc(k.musteri)}</b> · ${fmtTRY(k.tutar)}
-              <div class="meta">Vade ${fmtDate(k.vade)}${k.sonKim ? ` · Silen: ${esc(k.sonKim)}` : ""}${k.sonT ? ` · ${new Date(k.sonT).toLocaleString("tr-TR")}` : ""}</div>
-            </div>
-            <button class="btn btn-leather" data-restore="${k.id}">Geri getir</button>
-          </div>`).join("") : `<p class="meta" style="margin-top:14px">Silinen kayıt yok.</p>`}
-      </div>`, true);
-    document.getElementById("sheetClose").onclick = closeSheet;
-    document.querySelectorAll("[data-restore]").forEach(b => b.onclick = () => restoreRecs([b.dataset.restore]));
-    const all = document.getElementById("trAll");
-    if (all) all.onclick = () => { if (confirm(list.length + " kayıt geri getirilsin mi?")) restoreRecs(list.map(k => k.id)); };
-  }
   function restoreRecs(ids) {
     pushUndo("Geri getirme");
     ids.forEach(id => { const r = db.kayitlar.find(x => x.id === id); if (r) { r.silindi = false; (r.gecmis = r.gecmis || []).push({ t: new Date().toISOString(), a: "geri", d: "Silinenlerden geri getirildi" }); } });
@@ -3709,6 +3705,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       for (const id of ids) {
         const ok = await mutateRecord(id, "Otomatik erteleme", rec => {
           if (!due(rec)) return false; /* başka cihaz zaten ertelemiş */
+          if (rec.kartBekliyor) { carryIsl(rec, hedefGun, "Kart çekimi bekleniyor (işletme kaynaklı)", true); return true; }
           const eski = rec.vade, now = new Date().toISOString();
           const neden = !isWorkday(eski) ? "Otomatik: mesai günü değil" : (hedefGun !== t ? "Otomatik: vade gününde alınmadı, bugün mesai günü değil" : "Otomatik: vade gününde tahsil edilmedi");
           rec.ertelemeGecmisi = rec.ertelemeGecmisi || [];
@@ -3800,7 +3797,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   let renderTick = 0, scoreTick = -1, scoreCache = new Map(), actTick = -1, actCache = [];
   const dayDiff = (a, b) => Math.round((parseISO(b) - parseISO(a)) / 86400000);
   function lastCollectIso(k) {
-    const ev = (k.gecmis || []).filter(g => g.a === "tahsil" || g.a === "kismi").map(g => g.tarih || String(g.t).slice(0, 10)).sort();
+    const ev = (k.gecmis || []).filter(g => (g.a === "tahsil" || g.a === "kismi") && !g.iptal).map(g => g.tarih || String(g.t).slice(0, 10)).sort();
     return ev.length ? ev[ev.length - 1] : (k.tahsilTarihi || null);
   }
   function computeScores() {
@@ -3818,10 +3815,10 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         ert += k.ertelemeSayisi || 0;
         const ref = k.orijinalVade || k.vade; if (!ref) return;
         if (statusOf(k) === "tahsil") {
-          const d = Math.max(0, dayDiff(ref, lastCollectIso(k) || k.vade));
+          const d = Math.max(0, dayDiff(ref, lastCollectIso(k) || k.vade) - (k.islGun || 0));
           paid++; delaySum += d; if (d <= 1) onTime++;
         } else if (isOpen(k) && ref < t) {
-          const d = dayDiff(ref, t); waitN++; delaySum += d; if (d >= 30) longOpen++;
+          const d = Math.max(0, dayDiff(ref, t) - (k.islGun || 0)); waitN++; delaySum += d; if (d >= 30) longOpen++;
         }
       });
       const denom = paid + waitN, avg = denom ? delaySum / denom : 0, er = ert / list.length;
@@ -3873,11 +3870,12 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
 
   /* ---- 2) Aktivite akışı ---- */
   const dayOf = t => toISO(new Date(t));
-  const ACT_ICON = { olusturuldu: ["✚", "pl"], duzenlendi: ["✎", "pl"], tahsil: ["✓", "th"], kismi: ["◐", "th"], ertelendi: ["↻", "er"], silindi: ["✕", "ge"], geri: ["↺", "pl"] };
+  const ACT_ICON = { olusturuldu: ["✚", "pl"], duzenlendi: ["✎", "pl"], tahsil: ["✓", "th"], kismi: ["◐", "th"], ertelendi: ["↻", "er"], silindi: ["✕", "ge"], geri: ["↺", "pl"], tahsilduzenle: ["✎", "th"], tahsiliptal: ["✕", "ge"] };
   function activityEvents() {
     if (actTick === renderTick) return actCache;
     const ev = [];
     db.kayitlar.forEach(k => {
+      if (k.kalici) return;
       (k.gecmis || []).forEach(g => { if (g.t) ev.push({ t: g.t, a: g.a, d: g.d, kim: g.k || "", auto: !!g.auto, k }); });
       if (k.silindi && k.sonT && !(k.gecmis || []).some(g => g.a === "silindi")) ev.push({ t: k.sonT, a: "silindi", d: "", kim: k.sonKim || "", k });
     });
@@ -3895,6 +3893,8 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       case "ertelendi": return `${e.auto ? "Otomatik erteledi" : "Erteledi"} · ${String(e.d || "").replace(" (otomatik)", "")}`;
       case "silindi": return `Tahsilatı sildi · ${fmtTRY(k.tutar)}`;
       case "geri": return "Silinen kaydı geri getirdi";
+      case "tahsilduzenle": return `Tahsilatı düzenledi · ${e.d || ""}`;
+      case "tahsiliptal": return `Tahsilatı iptal etti · ${e.d || ""}`;
       default: return ACT_AD[e.a] || e.a;
     }
   }
@@ -4376,8 +4376,14 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     if (v.i && hasSubtle()) return toHex(await pbkdf2Bits(p, v.s + "|dogrula")) === v.h;
     return (await sha256(v.s + ":" + p)) === v.h;
   }
-  async function verifyPin(p) { return verifyWith(db.silmePin, p); }
-  const adminActive = () => !!db.silmePin && Date.now() < adminUntil;
+  /* Defterin kendi yönetici şifresi (silmePin) VEYA baş yönetici şifresi (ust) kabul edilir */
+  async function verifyPin(p) {
+    if (await verifyWith(db.silmePin, p)) return true;
+    for (const v of (db.ust || [])) if (await verifyWith(v, p)) return true;
+    return false;
+  }
+  const hasAdminPw = () => !!(db.silmePin || (db.ust && db.ust.length));
+  const adminActive = () => hasAdminPw() && Date.now() < adminUntil;
 
   /* ---- Şifreli kasa: diğer defterlerin listesi/bağlantıları yönetici şifresiyle şifrelenir (AES-GCM) ---- */
   async function vaultKeyFor(pw, salt) {
@@ -4432,7 +4438,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     try { return JSON.parse(s.data().d); } catch (e) { return null; }
   }
   const writeGenel = (id, o) => fbm.setDoc(dRef(id, "ayar", "genel"), { d: JSON.stringify(o), u: fbm.serverTimestamp() });
-  const GENEL_BOS = ad => ({ magaza: ad, firma: { tel: "", vergi: "", adres: "" }, silmePin: null, hedef: 0, mesai: null, sablonlar: null, otoErt: true });
+  const GENEL_BOS = ad => ({ magaza: ad, firma: { tel: "", vergi: "", adres: "" }, silmePin: null, ust: [], hedef: 0, mesai: null, sablonlar: null, otoErt: true });
   async function setLedgerPin(id, verifier) { const o = (await readGenel(id)) || GENEL_BOS("Defter"); o.silmePin = verifier; await writeGenel(id, o); }
   /* Grup listesini şifreleyip yönetici dizinine ve gruptaki HER defterin kasasına yazar; istenirse şifreyi tüm defterlere uygular */
   async function writeGroup(list, pw, opts) {
@@ -4479,11 +4485,22 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     location.hash = "d=" + id;
     location.reload();
   }
+  /* Baş yönetici: diğer defterin KENDİ şifresine dokunmadan, o defterin ayarına baş yönetici doğrulayıcısı (ust) eklenir */
+  async function authorizeMaster(id) {
+    const o = (await readGenel(id)) || GENEL_BOS("Defter");
+    o.ust = Array.isArray(o.ust) ? o.ust : [];
+    for (const v of o.ust) if (await verifyWith(v, adminPw)) return false;
+    o.ust.push(await makeVerifier(adminPw));
+    await writeGenel(id, o);
+    return true;
+  }
   async function addNewLedger(ad) {
     const { list, bozuk } = await loadGroup();
     if (bozuk) throw new Error("kasa çözülemedi");
     const id = newToken();
-    const o = GENEL_BOS(ad); o.silmePin = db.silmePin;
+    const o = GENEL_BOS(ad);
+    o.silmePin = (db.silmePin && await verifyWith(db.silmePin, adminPw)) ? db.silmePin : await makeVerifier(adminPw);
+    o.ust = [await makeVerifier(adminPw)];
     await writeGenel(id, o);
     list.push({ id, ad });
     const fails = await writeGroup(list, adminPw);
@@ -4501,8 +4518,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     const snap = await fbm.getDocsFromServer(fbm.collection(fbDb, "defterler", id, "kayitlar"));
     if (!g && snap.size === 0 && !confirm("Bu bağlantıda kayıt ya da ayar bulunamadı (boş ya da yanlış olabilir). Yine de eklensin mi?")) throw new Error("vazgeçildi");
     const ad = (g && g.magaza) || "Defter";
-    const o = g || GENEL_BOS(ad); o.silmePin = db.silmePin;
-    await writeGenel(id, o);
+    await authorizeMaster(id);
     list.push({ id, ad });
     const fails = await writeGroup(list, adminPw);
     return { id, ad, fails };
@@ -4519,31 +4535,51 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     else { const o = (await readGenel(id)) || GENEL_BOS(ad); o.magaza = ad; await writeGenel(id, o); }
     return writeGroup(list.map(x => x.id === id ? { ...x, ad } : x), adminPw);
   }
-  /* Yönetici şifresini değiştir: liste yeni şifreyle yeniden şifrelenir, dizin yeni adrese taşınır, tüm defterlere uygulanır */
+  /* Baş yönetici şifresini değiştir: liste yeni şifreyle yeniden şifrelenir, dizin yeni adrese taşınır;
+     diğer defterlerin KENDİ şifreleri korunur, yalnızca baş yönetici doğrulayıcıları yenilenir */
   async function setAdminPassword(newPw) {
-    const eskiPw = adminPw;
+    const eski = adminPw, kasaVar = !!vaultRaw;
     let grup = null;
-    if (DEFTER_ID && cloudOn && hasSubtle() && eskiPw && db.silmePin) { const g = await loadGroup(); if (!g.bozuk) grup = g.list; }
-    db.silmePin = await makeVerifier(newPw);
+    if (DEFTER_ID && cloudOn && hasSubtle() && eski && hasAdminPw()) { const g = await loadGroup(); if (!g.bozuk) grup = g.list; }
+    const newV = await makeVerifier(newPw);
+    const matches = async v => !!(v && eski && await verifyWith(v, eski));
+    const filt = async arr => { const k = []; for (const v of (arr || [])) if (!(await matches(v))) k.push(v); return k; };
+    let upd = false;
+    if (!db.silmePin || await matches(db.silmePin)) { db.silmePin = newV; upd = true; }
+    db.ust = await filt(db.ust);
+    if (grup && !upd) db.ust.push(newV);
     adminPw = newPw; adminUntil = Date.now() + 10 * 60000;
     save();
     if (!(DEFTER_ID && cloudOn && hasSubtle())) return [];
+    if (kasaVar && !grup) return []; /* defterin yerel yöneticisi: baş yönetici kasasına dokunulmaz */
     const list = grup || [{ id: DEFTER_ID, ad: db.magaza }];
-    const fails = await writeGroup(list, newPw, { propagatePin: list.length > 1 });
-    if (eskiPw) { try { const od = await dirIdFor(eskiPw), nd = await dirIdFor(newPw); if (od !== nd) await fbm.deleteDoc(dRef(od, "ayar", "kasa")); } catch (e) {} }
-    return fails;
+    const fails = [];
+    for (const L of list) {
+      if (L.id === DEFTER_ID) continue;
+      try {
+        const o = (await readGenel(L.id)) || GENEL_BOS(L.ad || "Defter");
+        let u2 = false;
+        if (o.silmePin && await matches(o.silmePin)) { o.silmePin = newV; u2 = true; }
+        o.ust = await filt(o.ust);
+        if (!u2) o.ust.push(newV);
+        await writeGenel(L.id, o);
+      } catch (e) { fails.push(L.ad || L.id); }
+    }
+    const f2 = await writeGroup(list, newPw);
+    if (eski) { try { const od = await dirIdFor(eski), nd = await dirIdFor(newPw); if (od !== nd) await fbm.deleteDoc(dRef(od, "ayar", "kasa")); } catch (e) {} }
+    return fails.concat(f2);
   }
 
   /* ---- Yönetici paneli ---- */
   const adminTouch = () => { if (db.silmePin) adminUntil = Date.now() + 10 * 60000; };
   async function openAdminPanel() {
-    if (!db.silmePin) return openAdminSetup();
+    if (!hasAdminPw()) return openAdminSetup();
     if (!adminActive() || !adminPw) {
       const p = await askPin("Yönetici girişi", "Yönetici şifresini girin");
       if (p === null) return;
       if (!(await verifyPin(p))) return toast("Şifre yanlış");
       adminPw = p;
-      if (!db.silmePin.i && hasSubtle()) { db.silmePin = await makeVerifier(p); save(); } /* eski doğrulayıcıyı güçlendir */
+      if (db.silmePin && !db.silmePin.i && hasSubtle() && await verifyWith(db.silmePin, p)) { db.silmePin = await makeVerifier(p); save(); } /* eski doğrulayıcıyı güçlendir */
     }
     adminTouch();
     renderAdminPanel();
@@ -4599,7 +4635,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   }
   const money0 = n => fmtK(n);
   const agoIso = iso => iso ? ago(new Date(iso).getTime()) : "—";
-  /* ---- Defterleri otomatik bulma: bağlantı yapıştırmak gerekmez ---- */
+  /* ---- Defterleri otomatik bulma: bağlantı yapıştırmak da şifre sormak da gerekmez ---- */
   const skipList = () => { try { return JSON.parse(localStorage.getItem("kirtasiye_defter_yoksay") || "[]"); } catch (e) { return []; } };
   function localLedgerCandidates() {
     const out = [];
@@ -4626,8 +4662,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     let g = null, n = 0;
     try { g = await readGenel(id); } catch (e) {}
     try { n = (await fbm.getDocsFromServer(fbm.collection(fbDb, "defterler", id, "kayitlar"))).size; } catch (e) {}
-    const exists = !!g || n > 0, v = g && g.silmePin;
-    return { id, exists, ad: g && g.magaza, verifier: v || null, state: !exists ? "yok" : !v ? "serbest" : (db.silmePin && v.h === db.silmePin.h) ? "ayni" : "farkli" };
+    return { id, exists: !!g || n > 0, ad: g && g.magaza };
   }
   async function renderLedgers(host) {
     if (!DEFTER_ID || !cloudReady()) { host.innerHTML = `<div class="meta">Çoklu defter yönetimi için bu cihazın bir ortak defterle bağlı olması gerekir.</div>`; return; }
@@ -4635,27 +4670,30 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     host.innerHTML = `<div class="meta">Defterler aranıyor…</div>`;
     registerCurrentLedger();
     const g = await loadGroup();
+    if (!host.isConnected) return;
     if (g.bozuk) {
-      host.innerHTML = `<div class="meta" style="color:var(--red)">Defter kasası bu şifreyle çözülemedi (başka bir şifreyle oluşturulmuş olabilir).</div>
-        <button class="btn btn-ghost" id="gReset" style="width:100%;margin-top:8px">Kasayı sıfırla (yalnızca bu defter kalır)</button>`;
-      document.getElementById("gReset").onclick = async () => { if (!confirm("Defter listesi sıfırlansın mı? Defterlerin kendisi silinmez; yalnızca liste.")) return; await writeGroup([{ id: DEFTER_ID, ad: db.magaza }], adminPw); renderLedgers(host); };
+      const owner = (() => { try { return localStorage.getItem("kirtasiye_sahip_" + DEFTER_ID) === "1"; } catch (e) { return false; } })();
+      host.innerHTML = `<div class="meta">Çoklu defter yönetimi yalnızca <b>baş yönetici şifresiyle</b> açılır. Bu defterin yönetici şifresiyle girdiniz; yalnızca bu defteri yönetebilirsiniz.</div>
+        ${owner ? `<button class="btn btn-ghost" id="gReset" style="width:100%;margin-top:8px">Kasayı sıfırla (yalnızca bu defter kalır)</button>` : ""}`;
+      const r = document.getElementById("gReset");
+      if (r) r.onclick = async () => { if (!confirm("Defter listesi sıfırlansın mı? Defterlerin kendisi silinmez; yalnızca liste.")) return; await writeGroup([{ id: DEFTER_ID, ad: db.magaza }], adminPw); renderLedgers(host); };
       return;
     }
-    /* bu cihazda açılmış ama gruba girmemiş defterleri bul, koşullara göre otomatik yönetime al */
+    /* bu cihazda açılmış ama gruba girmemiş defterleri bul; kendi şifrelerine DOKUNMADAN baş yönetici olarak yönetime al */
     const inGroup = new Set(g.list.map(x => x.id)), skip = skipList(), cand = new Map();
     localLedgerCandidates().forEach(x => { if (x.id !== DEFTER_ID && !inGroup.has(x.id) && !skip.includes(x.id) && !cand.has(x.id)) cand.set(x.id, x); });
     const checks = await Promise.all([...cand.values()].map(async c => ({ c, r: await ledgerCheck(c.id).catch(() => ({ exists: false })) })));
-    const adopted = [], pending = [];
+    if (!host.isConnected) return;
+    const adopted = [];
     for (const { c, r } of checks) {
       if (!r.exists) continue;
-      if (r.state === "serbest" || r.state === "ayni") {
-        try { if (r.state === "serbest") await setLedgerPin(c.id, db.silmePin); adopted.push({ id: c.id, ad: r.ad || c.ad || "Defter" }); } catch (e) {}
-      } else if (r.state === "farkli") pending.push({ id: c.id, ad: r.ad || c.ad || "Defter", verifier: r.verifier });
+      try { await authorizeMaster(c.id); adopted.push({ id: c.id, ad: r.ad || c.ad || "Defter" }); } catch (e) {}
     }
     let list = g.list.slice();
     if (adopted.length) { list = list.concat(adopted); await writeGroup(list, adminPw); toast(`${adopted.length} defter otomatik bulundu ve yönetime alındı`, null, 3800); }
     else if (!g.hasDir) await writeGroup(list, adminPw); /* yönetici dizini ilk kez oluşur */
     const sums = await Promise.all(list.map(L => L.id === DEFTER_ID ? Promise.resolve(localSummary()) : ledgerSummary(L.id)));
+    if (!host.isConnected) return;
     const tBak = round2(sums.reduce((a, s) => a + (s.bak || 0), 0)), tBug = round2(sums.reduce((a, s) => a + (s.bugun || 0), 0));
     host.innerHTML = `
       ${list.length > 1 ? `<div class="meta" style="margin:0 2px 6px">Tüm defterlerin toplamı</div><div class="kpis" style="margin:0 0 10px"><div class="kpi pl"><div class="k"><i></i>Açık bakiye</div><div class="v">${money0(tBak)}</div></div><div class="kpi th"><div class="k"><i></i>Bugün tahsil</div><div class="v">${money0(tBug)}</div></div><div class="kpi er"><div class="k"><i></i>Defter</div><div class="v">${list.length}</div></div></div>` : ""}
@@ -4670,18 +4708,12 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
               ${cur ? "" : `<button class="btn btn-ghost" data-ldel="${esc(L.id)}" style="color:var(--red)">Listeden çıkar</button>`}
             </div>
           </div>`; }).join("")}
-        ${pending.map(P => `
-          <div class="ledger-row pending">
-            <div class="ledger-top"><b>${esc(P.ad)}</b><span class="dev-me" style="background:color-mix(in srgb,var(--erte) 20%,transparent);color:var(--erte)">Farklı şifre</span></div>
-            <div class="meta">Bu cihazda açılmış bir defter, ancak yönetici şifresi sizinkinden farklı. Kendi şifresini girerek bağlayabilirsiniz.</div>
-            <div class="tpl-acts"><button class="btn btn-gold" data-lbind="${esc(P.id)}">Şifresini gir ve bağla</button><button class="btn btn-ghost" data-lskip="${esc(P.id)}">Yoksay</button></div>
-          </div>`).join("")}
       </div>
       <div class="tpl-acts" style="margin-top:8px">
         <button class="btn btn-leather" id="lNew">＋ Yeni defter</button>
         <button class="btn btn-ghost" id="lAdd">🔗 Bağlantıyla ekle</button>
       </div>
-      <p class="meta" style="margin-top:8px">Yönetici şifrenizle kayıtlı <b>tüm defterler otomatik listelenir</b>; bağlantı yapıştırmanız gerekmez. Liste şifrenizle <b>şifrelenerek</b> saklanır, çalışanlar diğer defterlerin bağlantısını göremez. Tüm defterlerde aynı yönetici şifresi geçerlidir.</p>`;
+      <p class="meta" style="margin-top:8px"><b>Baş yönetici</b> şifrenizle kayıtlı tüm defterler otomatik listelenir; <b>her defterin kendi yönetici şifresi değişmez</b>, siz kendi şifrenizle hepsine girersiniz. Liste şifrenizle <b>şifrelenerek</b> saklanır; çalışanlar diğer defterlerin bağlantısını göremez.</p>`;
     host.querySelectorAll("[data-lopen]").forEach(b => b.onclick = () => openLedger(b.dataset.lopen));
     host.querySelectorAll("[data-lren]").forEach(b => b.onclick = async () => {
       const L = list.find(x => x.id === b.dataset.lren); const ad = prompt("Defter adı:", L.ad); if (!ad || !ad.trim()) return;
@@ -4692,22 +4724,13 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       if (!confirm(`“${L.ad}” listeden çıkarılsın mı? Defterin kendisi silinmez; yalnızca bu listeden kalkar.`)) return;
       try { await removeFromGroup(L.id); const sk = skipList(); sk.push(L.id); try { localStorage.setItem("kirtasiye_defter_yoksay", JSON.stringify(sk)); } catch (e) {} toast("Listeden çıkarıldı"); renderLedgers(host); } catch (e) { toast("Çıkarılamadı: " + fbErr(e)); }
     });
-    host.querySelectorAll("[data-lbind]").forEach(b => b.onclick = async () => {
-      const P = pending.find(x => x.id === b.dataset.lbind);
-      const p = await askPin("“" + P.ad + "” şifresi", "Bu defterin yönetici şifresini girin");
-      if (p === null) return;
-      if (!(await verifyWith(P.verifier, p))) return toast("Şifre yanlış");
-      try { await setLedgerPin(P.id, db.silmePin); const gg = await loadGroup(); gg.list.push({ id: P.id, ad: P.ad }); await writeGroup(gg.list, adminPw); toast("Bağlandı: " + P.ad); renderLedgers(host); }
-      catch (e) { toast("Bağlanamadı: " + fbErr(e)); }
-    });
-    host.querySelectorAll("[data-lskip]").forEach(b => b.onclick = () => { const sk = skipList(); sk.push(b.dataset.lskip); try { localStorage.setItem("kirtasiye_defter_yoksay", JSON.stringify(sk)); } catch (e) {} renderLedgers(host); });
     document.getElementById("lNew").onclick = async () => {
       const ad = prompt("Yeni defterin adı (örn. Şube 2):"); if (!ad || !ad.trim()) return;
       try { const r = await addNewLedger(ad.trim()); toast(r.fails.length ? "Oluşturuldu; kasa güncellenemedi: " + r.fails.join(", ") : "Defter oluşturuldu"); if (confirm(`“${ad.trim()}” defterine şimdi geçilsin mi?`)) openLedger(r.id); else renderLedgers(host); }
       catch (e) { toast("Oluşturulamadı: " + (e.message || fbErr(e))); }
     };
     document.getElementById("lAdd").onclick = async () => {
-      const link = prompt("Başka bir cihazdaki defterin bağlantısını yapıştırın.\nNot: o defterin yönetici şifresi, sizinkiyle aynı yapılır."); if (!link) return;
+      const link = prompt("Başka bir cihazdaki defterin bağlantısını yapıştırın.\nDefterin kendi yönetici şifresi değişmez."); if (!link) return;
       try { const r = await addExistingLedger(link); toast("Eklendi: " + r.ad); renderLedgers(host); }
       catch (e) { toast("Eklenemedi: " + (e.message || fbErr(e))); }
     };
@@ -4759,7 +4782,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         ${owner ? `<button class="btn btn-ghost" id="aPwReset" style="width:100%;margin-top:8px;color:var(--red)">Şifreyi sıfırla (bu cihaz defteri oluşturdu)</button>` : ""}
 
         <label class="fld">Silinenler ve yedek</label>
-        <button class="btn btn-ghost" id="sTrash" style="width:100%">🗑 Silinenler kutusu (${db.kayitlar.filter(k => k.silindi).length})</button>
+        <button class="btn btn-ghost" id="sTrash" style="width:100%">🗑 Silinenler kutusu (${db.kayitlar.filter(k => k.silindi && !k.kalici).length})</button>
         <div class="g2" style="margin-top:8px">
           <button class="btn btn-gold" id="sExp">${icon("fileDown")} JSON indir</button>
           <button class="btn btn-ghost" id="sImp">${icon("fileUp")} JSON yükle</button>
@@ -4807,7 +4830,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   }
 
   /* ---- Bildirim merkezi: eklenen, tahsil edilen, silinen, düzenlenen, ertelenen, geri getirilen — hepsi ---- */
-  const ACT_KIND = { olusturuldu: "ekle", tahsil: "tahsil", kismi: "tahsil", silindi: "sil", duzenlendi: "duzenle", ertelendi: "ertele", geri: "geri" };
+  const ACT_KIND = { olusturuldu: "ekle", tahsil: "tahsil", kismi: "tahsil", silindi: "sil", duzenlendi: "duzenle", ertelendi: "ertele", geri: "geri", tahsilduzenle: "duzenle", tahsiliptal: "sil" };
   const KIND_AD = { ekle: "Eklenen", tahsil: "Tahsil edilen", sil: "Silinen", duzenle: "Düzenlenen", ertele: "Ertelenen", geri: "Geri getirilen" };
   const SEEN_KEY = "kirtasiye_bildirim_son";
   const btPref = k => !(db.ayar.bt && db.ayar.bt[k] === false);
@@ -4822,6 +4845,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     return n;
   }
   function noteList(old, rec) {
+    if (rec.kalici && !(old && old.kalici)) return btPref("sil") ? [`${rec.sonKim || "Biri"} kaydı kalıcı olarak sildi: ${rec.musteri}`] : [];
     const oldN = old ? (old.gecmis || []).length : 0, added = (rec.gecmis || []).slice(oldN), out = [], nm = rec.musteri;
     added.forEach(g => {
       const kim = g.k || rec.sonKim || "Biri", kind = ACT_KIND[g.a]; if (!kind) return;
@@ -4834,6 +4858,8 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         case "duzenlendi": m = `${kim} kaydı düzenledi: ${nm}`; break;
         case "silindi": m = `${kim} tahsilatı sildi: ${nm} · ${fmtTRY(rec.tutar)}`; break;
         case "geri": m = `${kim} silinen kaydı geri getirdi: ${nm}`; break;
+        case "tahsilduzenle": m = `${kim} tahsilatı düzenledi: ${nm} · ${g.d || ""}`; break;
+        case "tahsiliptal": m = `${kim} tahsilatı iptal etti: ${nm} · ${g.d || ""}`; break;
       }
       if (m && btPref(kind)) out.push(m);
     });
@@ -4884,7 +4910,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       <button data-view="rapor" class="${active === "rapor" ? "on" : ""}" role="tab">Rapor</button></div>`;
   }
   function renderMusteri() { return segMR("musteri") + renderMusteriRaw(); }
-  function renderRapor() { return segMR("rapor") + renderRaporRaw(); }
+  function renderRapor() { return segMR("rapor") + raporBuilderHtml() + `<div class="sec-title">Genel özet</div>` + renderRaporRaw(); }
   const hueOf = ad => { let h = 0; String(ad || "").split("").forEach(c => { h = (h * 31 + c.charCodeAt(0)) % 360; }); return h; };
 
   /* Özet sayıları açılışta 0'dan yukarı sayar (son metin her zaman aynıdır) */
@@ -4905,6 +4931,329 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
       });
     } catch (e) {}
   }
+
+  /* ================= TAHSİLAT HAREKETLERİ · KALICI SİLME · CARİ EKSTRE · RAPOR · KART ÇEKİMİ · GERİ ================= */
+
+  /* ---- Kısmi tahsilatlar: görüntüle · düzenle · iptal et ---- */
+  const isPayEntry = g => (g.a === "tahsil" || g.a === "kismi") && typeof g.tutar === "number";
+  function payRows(k) {
+    const act = [];
+    (k.gecmis || []).forEach((g, idx) => { if (isPayEntry(g)) act.push({ idx, iso: g.tarih || String(g.t).slice(0, 10), tutar: g.tutar, kim: g.k || "", tur: g.tur || k.tur, iptal: !!g.iptal, duz: !!g.duz }); });
+    const sumAct = round2(act.filter(x => !x.iptal).reduce((a, x) => a + x.tutar, 0));
+    const tot = statusOf(k) === "tahsil" ? Math.max(k.tutar || 0, k.tahsilTutar || 0) : (k.tahsilTutar || 0);
+    const rest = round2(tot - sumAct);
+    const rows = act.slice();
+    if (rest > 0.009) rows.push({ idx: -1, legacy: true, iso: k.tahsilTarihi || k.kayitTarihi || k.vade, tutar: rest, kim: "", tur: k.tur, iptal: false, duz: false });
+    return rows.sort((a, b) => String(a.iso).localeCompare(String(b.iso)) || a.idx - b.idx);
+  }
+  function materializeLegacy(rec) { /* eski (tek toplam) tahsilatı düzenlenebilir bir harekete çevirir */
+    const sumAct = round2((rec.gecmis || []).filter(g => isPayEntry(g) && !g.iptal).reduce((a, g) => a + g.tutar, 0));
+    const tot = statusOf(rec) === "tahsil" ? Math.max(rec.tutar || 0, rec.tahsilTutar || 0) : (rec.tahsilTutar || 0);
+    const rest = round2(tot - sumAct);
+    rec.gecmis = rec.gecmis || [];
+    if (rest > 0.009) rec.gecmis.push({ t: new Date().toISOString(), a: "kismi", d: "Önceki tahsilat (aktarıldı)", tutar: rest, tarih: rec.tahsilTarihi || rec.kayitTarihi || rec.vade, k: "", tur: rec.tur });
+    return rec.gecmis.length - 1;
+  }
+  function recalcPay(rec) {
+    const act = (rec.gecmis || []).filter(g => isPayEntry(g) && !g.iptal);
+    const total = round2(act.reduce((a, g) => a + g.tutar, 0));
+    rec.tahsilTutar = Math.min(total, rec.tutar || total);
+    if ((rec.tutar || 0) > 0 && rec.tahsilTutar >= rec.tutar - 0.009) { rec.tahsilTutar = rec.tutar; rec.durum = "tahsil"; } else rec.durum = "bekliyor";
+    const last = act.map(g => g.tarih || String(g.t).slice(0, 10)).sort().slice(-1)[0];
+    rec.tahsilTarihi = last || "";
+  }
+  function paymentsHtml(k) {
+    const rows = payRows(k);
+    const kart = (k.kartBekliyor && isOpen(k)) ? `<button class="btn btn-erte" data-kartfail="${k.id}" style="width:100%;margin-top:8px">💳 Çekim yapılamadı → sonraki iş gününe al (puanı etkilemez)</button>` : "";
+    if (!rows.length) return kart;
+    const sum = round2(rows.filter(r => !r.iptal).reduce((a, r) => a + r.tutar, 0));
+    return `<label class="fld">Tahsilat hareketleri</label>
+      <div class="group pay-group">${rows.map(r => `
+        <div class="row pay-row ${r.iptal ? "iptal" : ""}">
+          <div class="ic th">✓</div>
+          <div class="mid"><div class="t1">${fmtTRY(r.tutar)}</div><div class="t2">${fmtDate(r.iso)} · ${esc(typeAd(r.tur, k))}${r.kim ? " · " + esc(r.kim) : ""}${r.duz ? " · düzenlendi" : ""}${r.iptal ? " · İPTAL" : ""}${r.legacy ? " · önceki tahsilat" : ""}</div></div>
+          ${r.iptal ? "" : `<div class="pay-acts"><button class="dev-del" data-payedit="${r.idx}" data-id="${k.id}" aria-label="Düzenle">✎ Düzenle</button><button class="dev-del" data-paydel="${r.idx}" data-id="${k.id}" aria-label="İptal et" style="color:var(--red)">✕ İptal</button></div>`}
+        </div>`).join("")}</div>
+      <div class="meta" style="margin:6px 2px">Toplam tahsil: <b>${fmtTRY(sum)}</b> · Kalan: <b>${fmtTRY(remaining(k))}</b></div>${kart}`;
+  }
+  function openPayEdit(id, idx) {
+    const k = db.kayitlar.find(x => x.id === id); if (!k) return;
+    const row = payRows(k).find(r => r.idx === idx); if (!row) return;
+    openSheet(`
+      <div class="sheet-card">
+        <div class="grab"></div>
+        <div style="display:flex;align-items:center"><h2 style="flex:1;font-size:18px">Tahsilatı düzenle</h2><button class="btn btn-ghost" id="sheetClose">Vazgeç</button></div>
+        <div class="meta" style="margin:6px 0">${esc(k.musteri)} · kayıt tutarı ${fmtTRY(k.tutar)}</div>
+        <label class="fld">Tahsil edilen tutar</label><input class="inp" id="peTutar" inputmode="decimal" value="${String(row.tutar).replace(".", ",")}" />
+        <label class="fld">Tahsil tarihi</label><input class="inp" id="peTarih" type="date" value="${row.iso}" />
+        <label class="fld">Ödeme türü</label><select class="inp" id="peTur">${TYPES.map(t => `<option value="${t.id}" ${t.id === row.tur ? "selected" : ""}>${t.ad}</option>`).join("")}</select>
+        <button class="btn btn-gold" id="peSave" style="width:100%;margin-top:14px">Kaydet</button>
+      </div>`);
+    document.getElementById("sheetClose").onclick = () => openDetail(k);
+    document.getElementById("peSave").onclick = async () => {
+      const nt = parseMoney(document.getElementById("peTutar").value), nd = document.getElementById("peTarih").value, ntur = document.getElementById("peTur").value;
+      if (!(nt > 0)) return toast("Geçerli bir tutar girin");
+      if (!nd) return toast("Tarih seçin");
+      const diger = round2(payRows(k).filter(r => !r.iptal && r.idx !== idx).reduce((a, r) => a + r.tutar, 0));
+      if (diger + nt > (k.tutar || 0) + 0.009) return toast("Toplam tahsilat kayıt tutarını (" + fmtTRY(k.tutar) + ") aşamaz");
+      const ok = await mutateRecord(id, "Tahsilat düzenleme", rec => {
+        const i = idx === -1 ? materializeLegacy(rec) : idx, g = (rec.gecmis || [])[i];
+        if (!g || g.iptal) return false;
+        const eskiT = g.tutar, eskiD = g.tarih || String(g.t).slice(0, 10);
+        g.tutar = nt; g.tarih = nd; g.tur = ntur; g.d = `${fmtTRY(nt)} · ${typeAd(ntur, rec)}`; g.duz = true;
+        rec.gecmis.push({ t: new Date().toISOString(), a: "tahsilduzenle", d: `${fmtDate(eskiD)} ${fmtTRY(eskiT)} → ${fmtDate(nd)} ${fmtTRY(nt)}` });
+        recalcPay(rec);
+        return true;
+      });
+      if (!ok) return;
+      toast("Tahsilat güncellendi"); render(); openDetail(db.kayitlar.find(x => x.id === id));
+    };
+  }
+  async function cancelPayment(id, idx) {
+    const k = db.kayitlar.find(x => x.id === id); if (!k) return;
+    const row = payRows(k).find(r => r.idx === idx); if (!row) return;
+    if (!confirm(`${fmtTRY(row.tutar)} tutarındaki (${fmtDate(row.iso)}) tahsilat iptal edilsin mi? Kayıt tutarı tekrar bekleyen bakiyeye eklenir.`)) return;
+    const ok = await mutateRecord(id, "Tahsilat iptali", rec => {
+      const i = idx === -1 ? materializeLegacy(rec) : idx, g = (rec.gecmis || [])[i];
+      if (!g || g.iptal) return false;
+      g.iptal = true; g.iptalK = ME() || ""; g.iptalT = new Date().toISOString();
+      rec.gecmis.push({ t: g.iptalT, a: "tahsiliptal", d: `${fmtTRY(g.tutar)} (${fmtDate(g.tarih || String(g.t).slice(0, 10))}) tahsilatı iptal edildi` });
+      recalcPay(rec);
+      return true;
+    });
+    if (!ok) return;
+    toast("Tahsilat iptal edildi"); render(); openDetail(db.kayitlar.find(x => x.id === id));
+  }
+  document.addEventListener("click", async e => {
+    const ed = e.target.closest && e.target.closest("[data-payedit]"), dl = e.target.closest && e.target.closest("[data-paydel]"), kf = e.target.closest && e.target.closest("[data-kartfail]");
+    if (ed) { e.stopPropagation(); if (await guardDelete()) openPayEdit(ed.dataset.id, +ed.dataset.payedit); }
+    else if (dl) { e.stopPropagation(); if (await guardDelete()) cancelPayment(dl.dataset.id, +dl.dataset.paydel); }
+    else if (kf) {
+      e.stopPropagation();
+      const id = kf.dataset.kartfail; let hedef = null;
+      const ok = await mutateRecord(id, "Çekim ertelendi", rec => { hedef = nextWorkday(rec.vade > todayISO() ? rec.vade : todayISO()); carryIsl(rec, hedef, "Çekim yapılamadı (işletme kaynaklı)", false); return true; });
+      if (ok) { toast("Sonraki iş gününe alındı: " + fmtDate(hedef) + " · puanı etkilemez"); render(); closeSheet(); }
+    }
+  });
+
+  /* ---- İşletme kaynaklı erteleme (kart çekimi vb.): müşteri puanını etkilemez, tahsil edilene kadar listede kalır ---- */
+  function carryIsl(rec, yeni, neden, auto) {
+    const eski = rec.vade, now = new Date().toISOString();
+    rec.ertelemeGecmisi = rec.ertelemeGecmisi || [];
+    rec.ertelemeGecmisi.push({ eski, yeni, neden, t: now, auto: !!auto, isl: true });
+    rec.orijinalVade = rec.orijinalVade || eski;
+    rec.islGun = (rec.islGun || 0) + Math.max(0, dayDiff(eski, yeni));
+    rec.vade = yeni; rec.durum = "bekliyor";
+    rec.gecmis = rec.gecmis || [];
+    rec.gecmis.push({ t: now, a: "ertelendi", d: `${fmtDate(eski)} → ${fmtDate(yeni)} (işletme kaynaklı)`, auto: !!auto, isl: true });
+  }
+
+  /* ---- Çöp kutusu: geri getir + kalıcı sil ---- */
+  function openTrash() {
+    const list = db.kayitlar.filter(k => k.silindi && !k.kalici).sort((a, b) => String(b.sonT || "").localeCompare(String(a.sonT || "")));
+    openSheet(`
+      <div class="sheet-card full">
+        <div class="grab"></div>
+        <div style="display:flex;align-items:center">
+          <h2 style="flex:1;font-size:18px">Silinenler (${list.length})</h2>
+          <button class="btn btn-ghost" id="sheetClose">Kapat</button>
+        </div>
+        ${list.length > 1 ? `<div class="tpl-acts" style="margin:10px 0"><button class="btn btn-gold" id="trAll">Tümünü geri getir (${list.length})</button><button class="btn btn-ghost" id="trPurgeAll" style="color:var(--red)">Çöpü boşalt</button></div>` : ""}
+        ${list.length ? list.map(k => `
+          <div class="panel" style="padding:10px;margin:8px 0">
+            <div style="min-width:0"><b style="overflow-wrap:anywhere">${esc(k.musteri)}</b> · ${fmtTRY(k.tutar)}
+              <div class="meta">Vade ${fmtDate(k.vade)}${k.sonKim ? ` · Silen: ${esc(k.sonKim)}` : ""}${k.sonT ? ` · ${new Date(k.sonT).toLocaleString("tr-TR")}` : ""}</div></div>
+            <div class="tpl-acts" style="margin-top:8px"><button class="btn btn-leather" data-restore="${k.id}">Geri getir</button><button class="btn btn-ghost" data-purge="${k.id}" style="color:var(--red)">Kalıcı sil</button></div>
+          </div>`).join("") : `<p class="meta" style="margin-top:14px">Silinen kayıt yok.</p>`}
+      </div>`, true);
+    document.getElementById("sheetClose").onclick = closeSheet;
+    document.querySelectorAll("[data-restore]").forEach(b => b.onclick = () => restoreRecs([b.dataset.restore]));
+    document.querySelectorAll("[data-purge]").forEach(b => b.onclick = () => purgeRecs([b.dataset.purge]));
+    const all = document.getElementById("trAll");
+    if (all) all.onclick = () => { if (confirm(list.length + " kayıt geri getirilsin mi?")) restoreRecs(list.map(k => k.id)); };
+    const pa = document.getElementById("trPurgeAll");
+    if (pa) pa.onclick = () => purgeRecs(list.map(k => k.id));
+  }
+  async function purgeRecs(ids) {
+    if (!(await guardDelete())) return;
+    if (!confirm(`${ids.length} kayıt KALICI olarak silinsin mi?\nMüşteri bilgileri ve geçmişi silinir, bu işlem geri alınamaz.`)) return;
+    const now = new Date().toISOString(), me = ME() || "Bilinmiyor";
+    ids.forEach(id => {
+      const i = db.kayitlar.findIndex(x => x.id === id); if (i < 0) return;
+      const r = db.kayitlar[i];
+      db.kayitlar[i] = { id, musteri: r.musteri, tutar: r.tutar, tahsilTutar: 0, durum: "bekliyor", silindi: true, kalici: true, olusturan: r.olusturan, sonKim: me, sonT: now, gecmis: [], ertelemeGecmisi: [], ertelemeSayisi: 0 };
+    });
+    save(); render(); openTrash(); toast(ids.length + " kayıt kalıcı olarak silindi");
+  }
+
+  /* ---- Görsel tablo (cari ekstre ve raporlar için PNG) ---- */
+  function drawTableImage(o, logoImg) {
+    const W = 1080, padX = 56, rowH = 62, head = 250, thH = 74, sumH = (o.ozet && o.ozet.length) ? 200 : 0, foot = 60;
+    const rows = o.satirlar, H = head + thH + Math.max(1, rows.length) * rowH + sumH + foot;
+    const c = document.createElement("canvas"); c.width = W; c.height = H;
+    const ctx = c.getContext("2d");
+    ctx.fillStyle = "#f3ead8"; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#142923"; ctx.fillRect(0, 0, W, 210);
+    ctx.fillStyle = "#c9a227"; ctx.fillRect(0, 210, W, 6);
+    let tx = padX;
+    if (logoImg) { try { ctx.save(); rr(ctx, padX, 52, 96, 96, 18); ctx.fillStyle = "#fff8ec"; ctx.fill(); ctx.clip(); ctx.drawImage(logoImg, padX, 52, 96, 96); ctx.restore(); tx = padX + 120; } catch (e) { tx = padX; } }
+    ctx.font = "700 20px sans-serif"; ctx.fillStyle = "#c9a227"; ctx.fillText("ÖDEME DEFTERİ", tx, 62);
+    ctx.fillStyle = "#fff8ec"; ctx.font = "800 38px sans-serif"; ctx.fillText(db.magaza.slice(0, 30), tx, 106);
+    ctx.font = "600 17px sans-serif"; ctx.fillStyle = "#b9c9c0"; if (db.firma.tel) ctx.fillText(("Tel: " + db.firma.tel).slice(0, 46), tx, 134);
+    ctx.font = "700 27px sans-serif"; ctx.fillStyle = "#ead889"; ctx.fillText(String(o.baslik).slice(0, 52), padX, 172);
+    ctx.font = "600 21px sans-serif"; ctx.fillStyle = "#b9c9c0"; ctx.fillText(String(o.alt || "").slice(0, 70), padX, 200);
+    const tw = W - 2 * padX, tot = o.kolonlar.reduce((a, k) => a + k.w, 0);
+    let x0 = padX; const xs = o.kolonlar.map(k => { const x = x0, w = tw * k.w / tot; x0 += w; return { x, w, sag: k.sag, ad: k.ad }; });
+    const fit = (t, mw) => { t = String(t == null ? "" : t); if (ctx.measureText(t).width <= mw) return t; while (t.length > 1 && ctx.measureText(t + "…").width > mw) t = t.slice(0, -1); return t + "…"; };
+    ctx.font = "800 21px sans-serif"; ctx.fillStyle = "#6b5a2a";
+    xs.forEach(k => { ctx.textAlign = k.sag ? "right" : "left"; ctx.fillText(k.ad, k.sag ? k.x + k.w - 12 : k.x + 12, head + 20); }); ctx.textAlign = "left";
+    ctx.fillStyle = "#c9a227"; ctx.fillRect(padX, head + 34, tw, 3);
+    let y = head + thH;
+    if (!rows.length) { ctx.font = "600 24px sans-serif"; ctx.fillStyle = "#6b6252"; ctx.fillText("Bu ölçütlere uyan kayıt yok.", padX + 12, y + 40); y += rowH; }
+    rows.forEach((r, i) => {
+      if (i % 2 === 0) { ctx.fillStyle = "#fff8ec"; rr(ctx, padX, y, tw, rowH - 6, 12); ctx.fill(); }
+      r.forEach((cell, j) => {
+        const k = xs[j], t = typeof cell === "object" && cell ? cell.t : cell, col = (cell && cell.c) || "#1a1612", bold = cell && cell.b, t2 = cell && cell.t2;
+        ctx.font = (bold ? "800 " : "600 ") + "22px sans-serif"; ctx.fillStyle = col; ctx.textAlign = k.sag ? "right" : "left";
+        const px = k.sag ? k.x + k.w - 12 : k.x + 12;
+        ctx.fillText(fit(t, k.w - 24), px, t2 ? y + 28 : y + 38);
+        if (t2) { ctx.font = "600 16px sans-serif"; ctx.fillStyle = "#7a6f5a"; ctx.fillText(fit(t2, k.w - 24), px, y + 49); }
+      }); ctx.textAlign = "left";
+      y += rowH;
+    });
+    if (o.ozet && o.ozet.length) {
+      y += 14; ctx.fillStyle = "#142923"; rr(ctx, padX, y, tw, 150, 18); ctx.fill();
+      const cw = tw / o.ozet.length;
+      o.ozet.forEach((z, i) => {
+        ctx.font = "600 19px sans-serif"; ctx.fillStyle = "#ead889"; ctx.fillText(z[0], padX + 28 + i * cw, y + 52);
+        ctx.font = "800 30px sans-serif"; ctx.fillStyle = z[2] || "#fff8ec"; ctx.fillText(fit(z[1], cw - 36), padX + 28 + i * cw, y + 104);
+      });
+    }
+    ctx.font = "600 17px sans-serif"; ctx.fillStyle = "#6b6252"; ctx.fillText("Ortak defter · " + new Date().toLocaleString("tr-TR"), padX, H - 24);
+    return c;
+  }
+  function cariRows(ad) {
+    const rows = [];
+    kayitlar().filter(k => (k.musteri || "").trim() === ad).forEach(k => {
+      rows.push({ iso: k.kayitTarihi || k.vade, ord: 0, acik: `Borç · vade ${fmtDate(k.vade)}`, acik2: `${typeAd(k.tur, k)}${k.belgeNo ? " · No " + k.belgeNo : ""}`, borc: k.tutar || 0 });
+      collectEvents([k]).forEach(e => rows.push({ iso: e.iso, ord: 1, acik: "Tahsilat", acik2: `${typeAd(e.tur || k.tur, k)}${e.kim ? " · " + e.kim : ""}`, tah: e.tutar }));
+    });
+    rows.sort((a, b) => String(a.iso).localeCompare(String(b.iso)) || a.ord - b.ord);
+    let bal = 0; rows.forEach(r => { bal = round2(bal + (r.borc || 0) - (r.tah || 0)); r.bakiye = bal; });
+    return rows;
+  }
+  function openStatement(ad) {
+    const rows = cariRows(ad), borc = round2(rows.reduce((a, r) => a + (r.borc || 0), 0)), tah = round2(rows.reduce((a, r) => a + (r.tah || 0), 0));
+    openShare(todayISO(), [], "Cari hesap ekstresi", logo => drawTableImage({
+      baslik: "CARİ HESAP EKSTRESİ · " + ad, alt: `${fmtDate(rows.length ? rows[0].iso : todayISO())} – ${fmtDate(todayISO())} · ${rows.length} hareket`,
+      kolonlar: [{ ad: "Tarih", w: 14 }, { ad: "Açıklama", w: 36 }, { ad: "Borç", w: 16, sag: 1 }, { ad: "Tahsilat", w: 16, sag: 1 }, { ad: "Bakiye", w: 18, sag: 1 }],
+      satirlar: rows.map(r => [fmtDate(r.iso), { t: r.acik, t2: r.acik2 }, r.borc ? fmtTRY(r.borc) : "", r.tah ? { t: "+" + fmtTRY(r.tah), c: "#1f7a4d", b: 1 } : "", { t: fmtTRY(r.bakiye), b: 1, c: r.bakiye > 0 ? "#8b2e2e" : "#1f7a4d" }]),
+      ozet: [["Toplam borç", fmtTRY(borc)], ["Toplam tahsilat", fmtTRY(tah), "#7fe0a0"], ["Güncel bakiye", fmtTRY(round2(borc - tah)), borc - tah > 0 ? "#ffb4a8" : "#7fe0a0"]]
+    }, logo));
+  }
+
+  /* ---- Rapor oluşturucu: tahsil edilen / tahsil bekleyen / ertelenen, tarih aralığı ve filtreler ---- */
+  let rp = { tur: "tahsil", preset: "ay", from: "", to: "", musteri: "", odeme: "" };
+  function rpRange() {
+    const t = todayISO(), d = parseISO(t);
+    switch (rp.preset) {
+      case "bugun": return [t, t];
+      case "hafta": { const w = weekDates(t); return [w[0], w[6]]; }
+      case "ay": return [`${t.slice(0, 7)}-01`, `${t.slice(0, 7)}-${z2(new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate())}`];
+      case "gecenay": { const p = new Date(d.getFullYear(), d.getMonth() - 1, 1), y = p.getFullYear(), m = z2(p.getMonth() + 1); return [`${y}-${m}-01`, `${y}-${m}-${z2(new Date(y, p.getMonth() + 1, 0).getDate())}`]; }
+      case "tum": return ["0000-01-01", "9999-12-31"];
+      default: return [rp.from || "0000-01-01", rp.to || "9999-12-31"];
+    }
+  }
+  function reportData() {
+    const [from, to] = rpRange(), inR = iso => !!iso && iso >= from && iso <= to;
+    const mOk = k => !rp.musteri || (k.musteri || "").trim() === rp.musteri, tOk = tur => !rp.odeme || tur === rp.odeme;
+    const tahsil = (rp.tur === "tahsil" || rp.tur === "tumu") ? collectEvents().filter(e => inR(e.iso) && mOk(e.k) && tOk(e.tur || e.k.tur)).map(e => ({ iso: e.iso, ad: e.k.musteri, tur: e.tur || e.k.tur, tutar: e.tutar, durum: "Tahsil edildi", kim: e.kim, k: e.k })) : [];
+    const bek = (rp.tur === "bekleyen" || rp.tur === "tumu") ? kayitlar().filter(k => isOpen(k) && inR(k.vade) && mOk(k) && tOk(k.tur)).map(k => ({ iso: k.vade, ad: k.musteri, tur: k.tur, tutar: remaining(k), durum: isErt(k) ? "Ertelenen" : isLate(k) ? "Geciken" : k.kartBekliyor ? "Çekim bekliyor" : "Bekliyor", k })) : [];
+    const ert = rp.tur === "ertelenen" ? kayitlar().filter(k => isErt(k) && inR(k.vade) && mOk(k) && tOk(k.tur)).map(k => ({ iso: k.vade, ad: k.musteri, tur: k.tur, tutar: remaining(k), durum: `Ertelenen (${k.ertelemeSayisi}. erteleme)`, k })) : [];
+    return { tahsil, bek: bek.concat(ert), from, to };
+  }
+  const RP_TUR = [["tahsil", "Tahsil edilen"], ["bekleyen", "Tahsil bekleyen"], ["ertelenen", "Ertelenen"], ["tumu", "Tümü"]];
+  const RP_PRE = [["bugun", "Bugün"], ["hafta", "Bu hafta"], ["ay", "Bu ay"], ["gecenay", "Geçen ay"], ["tum", "Tüm zamanlar"], ["ozel", "Özel"]];
+  function rpGroups(rows, desc) {
+    const m = new Map(); rows.forEach(r => { if (!m.has(r.iso)) m.set(r.iso, []); m.get(r.iso).push(r); });
+    return [...m.entries()].sort((a, b) => desc ? b[0].localeCompare(a[0]) : a[0].localeCompare(b[0]));
+  }
+  function raporBuilderHtml() {
+    const d = reportData(), [from, to] = rpRange();
+    const custs = [...new Set(kayitlar().map(k => (k.musteri || "").trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, "tr"));
+    const sumT = round2(d.tahsil.reduce((a, r) => a + r.tutar, 0)), sumB = round2(d.bek.reduce((a, r) => a + r.tutar, 0));
+    const block = (baslik, rows, desc, renk) => !rows.length ? "" : `<div class="sub-h ${renk}"><span>${baslik} · ${rows.length}</span><b>${fmtTRY(round2(rows.reduce((a, r) => a + r.tutar, 0)))}</b></div>
+      ${rpGroups(rows, desc).map(([iso, rs]) => `<div class="day-h"><b>${fmtLong(iso)}</b><span>${fmtTRY(round2(rs.reduce((a, r) => a + r.tutar, 0)))}</span></div>
+        <div class="group">${rs.map(r => `<div class="row" data-open="${r.k.id}"><div class="ic ${renk === "er" ? "er" : renk === "th" ? "th" : "pl"}">${renk === "th" ? "✓" : "₺"}</div><div class="mid"><div class="t1">${esc(r.ad)}</div><div class="t2">${esc(typeAd(r.tur, r.k))} · ${esc(r.durum)}${r.kim ? " · " + esc(r.kim) : ""}</div></div><div class="v ${renk === "th" ? "th" : ""}">${renk === "th" ? "+" : ""}${fmtTRY(r.tutar)}</div></div>`).join("")}</div>`).join("")}`;
+    return `
+      <div class="seg rp-seg" data-key="rpt" data-idx="${RP_TUR.findIndex(x => x[0] === rp.tur)}" style="margin-bottom:10px"><i class="gi"></i>${RP_TUR.map(([id, ad]) => `<button data-rptur="${id}" class="${rp.tur === id ? "on" : ""}">${ad}</button>`).join("")}</div>
+      <div class="chips rp-chips" style="margin:6px 0">${RP_PRE.map(([id, ad]) => `<button class="chip ${rp.preset === id ? "on" : ""}" data-rppre="${id}">${ad}</button>`).join("")}</div>
+      <div class="row2"><div><label class="fld">Başlangıç</label><input class="inp" type="date" data-rpdate="from" value="${from === "0000-01-01" ? "" : from}" /></div><div><label class="fld">Bitiş</label><input class="inp" type="date" data-rpdate="to" value="${to === "9999-12-31" ? "" : to}" /></div></div>
+      <div class="row2"><div><label class="fld">Müşteri</label><select class="inp" data-rpsel="musteri"><option value="">Tüm müşteriler</option>${custs.map(c => `<option value="${esc(c)}" ${rp.musteri === c ? "selected" : ""}>${esc(c)}</option>`).join("")}</select></div>
+        <div><label class="fld">Ödeme türü</label><select class="inp" data-rpsel="odeme"><option value="">Tüm türler</option>${TYPES.map(t => `<option value="${t.id}" ${rp.odeme === t.id ? "selected" : ""}>${t.ad}</option>`).join("")}</select></div></div>
+      <div class="kpis" style="margin-top:12px">
+        <div class="kpi th"><div class="k"><i></i>Tahsil edilen</div><div class="v">${fmtK(sumT)}</div></div>
+        <div class="kpi pl"><div class="k"><i></i>Tahsil bekleyen</div><div class="v">${fmtK(sumB)}</div></div>
+        <div class="kpi er"><div class="k"><i></i>Kayıt</div><div class="v">${d.tahsil.length + d.bek.length}</div></div></div>
+      <div class="tpl-acts" style="margin:4px 0 6px"><button class="btn btn-gold" id="rpCsv">CSV indir</button><button class="btn btn-leather" id="rpImg">Görsel paylaş</button></div>
+      ${block("Tahsil edilenler", d.tahsil, true, "th")}${block("Tahsil bekleyenler", d.bek, false, "pl")}
+      ${(!d.tahsil.length && !d.bek.length) ? `<div class="empty">Bu ölçütlere uyan kayıt yok.</div>` : ""}`;
+  }
+  function renderKeep() { const pg = document.querySelector(".page"), top = pg ? pg.scrollTop : 0; render(); const p2 = document.querySelector(".page"); if (p2) p2.scrollTop = top; }
+  function rpRowsFlat() { const d = reportData(); return d.tahsil.concat(d.bek).sort((a, b) => a.iso.localeCompare(b.iso)); }
+  function rpCsv() {
+    const rows = rpRowsFlat(), q = v => `"${String(v == null ? "" : v).replace(/"/g, '""')}"`;
+    const lines = [["Tarih", "Müşteri", "Ödeme türü", "Tutar", "Durum", "İşlemi yapan"].map(q).join(";")].concat(rows.map(r => [fmtDate(r.iso), r.ad, typeAd(r.tur, r.k), String(r.tutar).replace(".", ","), r.durum, r.kim || ""].map(q).join(";")));
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["\ufeff" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" }));
+    a.download = `rapor-${rp.tur}-${todayISO()}.csv`; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    toast(rows.length + " satır indirildi");
+  }
+  function rpImg() {
+    const d = reportData(), rows = rpRowsFlat(), [from, to] = rpRange(), tumu = rp.tur === "tumu";
+    const ad = RP_TUR.find(x => x[0] === rp.tur)[1], lim = rows.slice(0, 80);
+    const aralik = from === "0000-01-01" ? "Tüm zamanlar" : `${fmtDate(from)} – ${fmtDate(to)}`;
+    openShare(todayISO(), [], "Rapor", logo => drawTableImage({
+      baslik: ad.toUpperCase() + " RAPORU", alt: `${aralik}${rp.musteri ? " · " + rp.musteri : ""}${rp.odeme ? " · " + typeAd(rp.odeme, {}) : ""} · ${rows.length} kayıt${rows.length > lim.length ? " (ilk 80)" : ""}`,
+      kolonlar: tumu ? [{ ad: "Tarih", w: 15 }, { ad: "Müşteri", w: 31 }, { ad: "Tür", w: 18 }, { ad: "Durum", w: 18 }, { ad: "Tutar", w: 18, sag: 1 }] : [{ ad: "Tarih", w: 16 }, { ad: "Müşteri", w: 38 }, { ad: "Ödeme türü", w: 24 }, { ad: "Tutar", w: 22, sag: 1 }],
+      satirlar: lim.map(r => tumu ? [fmtDate(r.iso), r.ad, typeAd(r.tur, r.k), r.durum, { t: fmtTRY(r.tutar), b: 1, c: r.durum === "Tahsil edildi" ? "#1f7a4d" : "#1a1612" }] : [fmtDate(r.iso), r.ad, typeAd(r.tur, r.k), { t: fmtTRY(r.tutar), b: 1, c: rp.tur === "tahsil" ? "#1f7a4d" : "#1a1612" }]),
+      ozet: [["Tahsil edilen", fmtTRY(round2(d.tahsil.reduce((a, r) => a + r.tutar, 0))), "#7fe0a0"], ["Tahsil bekleyen", fmtTRY(round2(d.bek.reduce((a, r) => a + r.tutar, 0)))], ["Kayıt sayısı", String(rows.length)]]
+    }, logo));
+  }
+  document.addEventListener("click", e => {
+    const t = e.target.closest && e.target.closest("[data-rptur]"); if (t) { rp.tur = t.dataset.rptur; renderKeep(); return; }
+    const p = e.target.closest && e.target.closest("[data-rppre]"); if (p) { rp.preset = p.dataset.rppre; if (rp.preset !== "ozel") { rp.from = ""; rp.to = ""; } renderKeep(); return; }
+    if (e.target.closest && e.target.closest("#rpCsv")) return rpCsv();
+    if (e.target.closest && e.target.closest("#rpImg")) return rpImg();
+  });
+  document.addEventListener("change", e => {
+    const el = e.target; if (!el || !el.dataset) return;
+    if (el.dataset.rpsel === "musteri") { rp.musteri = el.value; renderKeep(); }
+    else if (el.dataset.rpsel === "odeme") { rp.odeme = el.value; renderKeep(); }
+    else if (el.dataset.rpdate) { if (rp.preset !== "ozel") { const [f, t2] = rpRange(); rp.from = f === "0000-01-01" ? "" : f; rp.to = t2 === "9999-12-31" ? "" : t2; } rp[el.dataset.rpdate] = el.value; rp.preset = "ozel"; renderKeep(); }
+  });
+
+  /* ---- Pencerelerde "‹ Geri" düğmesi ---- */
+  let pendingNav = null, currentNav = null;
+  function applyNav() {
+    const nav = pendingNav; pendingNav = null;
+    let back = null;
+    if (nav) { currentNav = nav; back = nav.parent; } else if (currentNav) back = currentNav.root;
+    if (!back) return;
+    const card = document.querySelector("#sheet .sheet-card"); if (!card || document.getElementById("sheetBack")) return;
+    const b = document.createElement("button"); b.className = "btn btn-ghost"; b.id = "sheetBack"; b.textContent = "‹ Geri"; b.onclick = () => back();
+    const close = card.querySelector("#sheetClose");
+    if (close) close.parentNode.insertBefore(b, close); else card.prepend(b);
+  }
+  {
+    const _s = openSettings, _a = renderAdminPanel, _n = openNotifCenter, _os = openSheet, _cs = closeSheet;
+    openSettings = function () { pendingNav = { root: openSettings, parent: null }; return _s.apply(this, arguments); };
+    renderAdminPanel = function () { pendingNav = { root: renderAdminPanel, parent: openSettings }; return _a.apply(this, arguments); };
+    openNotifCenter = function () { pendingNav = { root: openNotifCenter, parent: null }; return _n.apply(this, arguments); };
+    openSheet = function () { const r = _os.apply(this, arguments); applyNav(); return r; };
+    closeSheet = function () { currentNav = null; pendingNav = null; return _cs.apply(this, arguments); };
+  }
+  const kartTag = k => (k.kartBekliyor && isOpen(k)) ? `<span class="ert-tag kart-tag">💳 Çekim bekliyor</span>` : "";
 
   /* ---------- BAŞLAT ---------- */
   applyTheme();
