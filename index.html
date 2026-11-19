@@ -1106,6 +1106,163 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     .rp-seg button { font-size: 12.5px; padding: 9px 4px; }
     .rp-chips { display: flex; flex-wrap: wrap; gap: 6px; overflow: visible; }
     #sheetBack { margin-right: 6px; }
+
+    /* ===== v15: CAM PERFORMANSI — kasmanın nedeni: hareketli ışık küreleri + 47 bulanık öğe ===== */
+    html[data-look="cam"] body::before { animation: none; }
+    html[data-look="cam"] .hero, html[data-look="cam"] .panel, html[data-look="cam"] .card, html[data-look="cam"] .group, html[data-look="cam"] .m-wrap,
+    html[data-look="cam"] .mini-day, html[data-look="cam"] .sum, html[data-look="cam"] .kpi, html[data-look="cam"] .goal, html[data-look="cam"] .chip,
+    html[data-look="cam"] .btn-ghost, html[data-look="cam"] .hbtn, html[data-look="cam"] .seg, html[data-look="cam"] .pad button,
+    html[data-look="cam"] .round-btn, html[data-look="cam"] .dev-list { -webkit-backdrop-filter: none; backdrop-filter: none; }
+    /* Hafif mod: kalan bulanıklıklar da kapanır, geçişler kısalır */
+    html[data-perf="hafif"][data-look="cam"] .topbar, html[data-perf="hafif"][data-look="cam"] .nav, html[data-perf="hafif"][data-look="cam"] .sheet,
+    html[data-perf="hafif"][data-look="cam"] .sheet-card, html[data-perf="hafif"][data-look="cam"] .toast, html[data-perf="hafif"][data-look="cam"] .lockwrap,
+    html[data-perf="hafif"][data-look="cam"] .fab { -webkit-backdrop-filter: none; backdrop-filter: none; }
+    html[data-perf="hafif"][data-look="cam"] .topbar { background: color-mix(in srgb, var(--leather) 94%, #000); }
+    html[data-perf="hafif"][data-look="cam"] .nav { background: color-mix(in srgb, var(--leather) 93%, transparent); }
+    html[data-perf="hafif"][data-look="cam"] .sheet { background: rgba(10, 18, 15, .5); }
+    html[data-perf="hafif"][data-look="cam"] .sheet-card { background: var(--sheet); animation: up .2s ease both; }
+    html[data-perf="hafif"][data-look="cam"] .toast { background: color-mix(in srgb, var(--leather) 96%, transparent); }
+    html[data-perf="hafif"][data-look="cam"] .vt-fwd .page-inner, html[data-perf="hafif"][data-look="cam"] .vt-back .page-inner, html[data-perf="hafif"][data-look="cam"] .vt-fade .page-inner { animation: vtFade .16s ease both; }
+    html[data-perf="hafif"][data-look="cam"] .kpi, html[data-perf="hafif"][data-look="cam"] .fab, html[data-perf="hafif"][data-look="cam"] .pbar i { animation: none !important; }
+    @media (prefers-reduced-motion: reduce) { html[data-look="cam"] body::before, html[data-look="cam"] .fab { animation: none; } }
+
+    /* ===== v15: YENİ GÖRÜNÜM STİLLERİ (renk değil; biçim, tipografi ve yerleşim değişir) ===== */
+    html:not([data-look="cam"]) .fab { display: none !important; }
+    .look-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .look-opt { text-align: left; padding: 9px; border-radius: 14px; border: 1px solid var(--line); background: var(--sheet); color: var(--ink); display: flex; flex-direction: column; gap: 4px; cursor: pointer; min-width: 0; }
+    .look-opt.on { border: 2px solid var(--leather); padding: 8px; }
+    .look-opt b { font-size: 13px; } .look-opt small { color: var(--mute); font-size: 11px; line-height: 1.25; }
+    .look-prev { height: 44px; border-radius: 10px; display: block; position: relative; overflow: hidden; }
+    .lp-cam { background: radial-gradient(60% 90% at 15% 10%, #e9d27a, transparent 70%), linear-gradient(135deg, #1f5a49, #c9a227); }
+    .lp-cam::after { content: ""; position: absolute; inset: 9px 12px; border-radius: 9px; background: rgba(255,255,255,.38); box-shadow: inset 0 1px 0 rgba(255,255,255,.7); }
+    .lp-klasik { background: #f3ead8 repeating-linear-gradient(0deg, transparent 0 8px, rgba(196,168,120,.55) 8px 9px); border-left: 6px solid #d9b36a; }
+    .lp-duz { background: #fff; border: 1px solid #d8d8d0; }
+    .lp-duz::after { content: ""; position: absolute; left: 10px; right: 10px; top: 10px; height: 6px; background: #1b3a32; border-radius: 3px; box-shadow: 0 12px 0 -1px #cfcfc6, 0 22px 0 -1px #e4e4dc; }
+    .lp-yumusak { background: #e7e0d2; box-shadow: inset 4px 4px 8px #c3bba9, inset -4px -4px 8px #fff; }
+    .lp-yumusak::after { content: ""; position: absolute; left: 12px; right: 12px; top: 12px; bottom: 12px; border-radius: 12px; background: #e7e0d2; box-shadow: 3px 3px 6px #c3bba9, -3px -3px 6px #fff; }
+    .lp-kompakt { background: #f6f3ea repeating-linear-gradient(0deg, #2b3a34 0 2px, transparent 2px 7px); }
+    .lp-kontur { background: #f6c945; border: 2px solid #111; box-shadow: 3px 3px 0 #111; }
+    .lp-kontur::after { content: ""; position: absolute; left: 10px; right: 10px; top: 11px; height: 14px; background: #fff; border: 2px solid #111; border-radius: 4px; }
+
+    /* ---------- DÜZ: sade, ince çizgili, gölgesiz ---------- */
+    html[data-look="duz"] body { font-family: "Avenir Next", "Segoe UI Variable Text", "Segoe UI", "Helvetica Neue", system-ui, sans-serif; }
+    html[data-look="duz"] .page { background: var(--paper); }
+    html[data-look="duz"] header.leather { background: var(--sheet); color: var(--ink); border-bottom: 1px solid var(--line); box-shadow: none; }
+    html[data-look="duz"] header.leather .brandrow div[style*="letter-spacing"] { color: var(--mute) !important; }
+    html[data-look="duz"] #syncDot, html[data-look="yumusak"] #syncDot, html[data-look="kontur"] #syncDot { filter: brightness(.6) saturate(1.4); }
+    html[data-look="duz"] .brand-mark { background: var(--leather); color: var(--sheet); border: 0; border-radius: 9px; }
+    html[data-look="duz"] .hbtn { background: transparent; border: 0; color: var(--ink); }
+    html[data-look="duz"] .hbtn:active { background: var(--pill); }
+    html[data-look="duz"] .lt, html[data-look="yumusak"] .lt { padding: 6px 4px 12px; }
+    html[data-look="duz"] .lt h1, html[data-look="yumusak"] .lt h1 { margin: 0; font-size: 30px; font-weight: 750; letter-spacing: -.025em; font-family: inherit; color: var(--ink); }
+    html[data-look="duz"] .lt p, html[data-look="yumusak"] .lt p { margin: 3px 0 0; color: var(--mute); font-size: 13px; }
+    html[data-look="duz"] .card, html[data-look="duz"] .panel, html[data-look="duz"] .group, html[data-look="duz"] .kpi, html[data-look="duz"] .sum,
+    html[data-look="duz"] .hero, html[data-look="duz"] .m-wrap, html[data-look="duz"] .mini-day { background: var(--sheet); border: 1px solid var(--line); border-radius: 10px; box-shadow: none; }
+    html[data-look="duz"] .btn { border-radius: 10px; }
+    html[data-look="duz"] .btn-gold, html[data-look="duz"] .btn-leather { background: var(--leather); color: #fff; }
+    html[data-look="duz"] .btn-ghost { background: transparent; border: 1px solid var(--line); }
+    html[data-look="duz"] .stamp { font-family: inherit; font-weight: 700; letter-spacing: .02em; transform: none; border-width: 1.5px; border-radius: 6px; right: 12px; top: 12px; }
+    html[data-look="duz"] .sec-title { font-family: inherit; font-weight: 700; font-size: 16px; }
+    html[data-look="duz"] .nav { background: var(--sheet); border-top: 1px solid var(--line); padding-top: 0; }
+    html[data-look="duz"] .nav button { border-top: 3px solid transparent; padding-top: 7px; border-radius: 0; }
+    html[data-look="duz"] .nav button.on { border-top-color: var(--leather); }
+    html[data-look="duz"] .nav .nav-plus { box-shadow: none; background: var(--leather); color: #fff; width: 48px; height: 48px; border-radius: 12px; margin-top: 4px; border-top: 0; font-size: 30px; }
+    html[data-look="duz"] .sheet-card { border-radius: 14px 14px 0 0; }
+
+    /* ---------- YUMUŞAK: kabartmalı yüzeyler, yuvarlak köşeler ---------- */
+    html[data-look="yumusak"] { --sh-d: rgba(110, 92, 58, .24); --sh-l: rgba(255, 255, 255, .9); }
+    html[data-look="yumusak"][data-mode="dark"] { --sh-d: rgba(0, 0, 0, .55); --sh-l: rgba(255, 255, 255, .05); }
+    html[data-look="yumusak"] body { font-family: ui-rounded, "SF Pro Rounded", "Nunito", "Varela Round", "Segoe UI", system-ui, sans-serif; }
+    html[data-look="yumusak"] .page { background: var(--paper); }
+    html[data-look="yumusak"] header.leather { background: var(--paper); color: var(--ink); box-shadow: 0 10px 20px -12px var(--sh-d); }
+    html[data-look="yumusak"] header.leather .brandrow div[style*="letter-spacing"] { color: var(--mute) !important; }
+    html[data-look="yumusak"] .brand-mark, html[data-look="yumusak"] .hbtn { background: var(--paper); color: var(--ink); border: 0; border-radius: 14px; box-shadow: 4px 4px 9px var(--sh-d), -3px -3px 8px var(--sh-l); }
+    html[data-look="yumusak"] .hbtn:active { box-shadow: inset 3px 3px 7px var(--sh-d), inset -2px -2px 6px var(--sh-l); }
+    html[data-look="yumusak"] .card, html[data-look="yumusak"] .panel, html[data-look="yumusak"] .group, html[data-look="yumusak"] .kpi, html[data-look="yumusak"] .sum,
+    html[data-look="yumusak"] .hero, html[data-look="yumusak"] .m-wrap, html[data-look="yumusak"] .mini-day { background: var(--paper); border: 0; border-radius: 24px; box-shadow: 9px 9px 20px var(--sh-d), -7px -7px 16px var(--sh-l); }
+    html[data-look="yumusak"] .group .row { border-top-color: color-mix(in srgb, var(--sh-d) 55%, transparent); }
+    html[data-look="yumusak"] .btn { border-radius: 999px; box-shadow: 5px 5px 11px var(--sh-d), -4px -4px 9px var(--sh-l); }
+    html[data-look="yumusak"] .btn:active { box-shadow: inset 4px 4px 9px rgba(0,0,0,.25); }
+    html[data-look="yumusak"] .btn-ghost { background: var(--paper); color: var(--ink); }
+    html[data-look="yumusak"] .inp { background: var(--paper); border: 0; border-radius: 16px; box-shadow: inset 4px 4px 9px var(--sh-d), inset -3px -3px 8px var(--sh-l); }
+    html[data-look="yumusak"] .chip { background: var(--paper); border: 0; box-shadow: 3px 3px 7px var(--sh-d), -2px -2px 6px var(--sh-l); }
+    html[data-look="yumusak"] .chip.on { background: var(--leather); box-shadow: inset 2px 2px 6px rgba(0,0,0,.35); }
+    html[data-look="yumusak"] .seg { background: var(--paper); box-shadow: inset 4px 4px 9px var(--sh-d), inset -3px -3px 8px var(--sh-l); border-radius: 18px; }
+    html[data-look="yumusak"] .seg button.on { background: var(--paper); border-radius: 15px; box-shadow: 3px 3px 7px var(--sh-d), -2px -2px 6px var(--sh-l); }
+    html[data-look="yumusak"] .stamp { font-family: inherit; transform: none; border: 0; border-radius: 999px; background: color-mix(in srgb, currentColor 14%, transparent); padding: 3px 10px; right: 14px; top: 14px; }
+    html[data-look="yumusak"] .sec-title { font-family: inherit; font-weight: 800; }
+    html[data-look="yumusak"] .nav { left: 14px; right: 14px; bottom: calc(10px + var(--safe-bot)); border: 0; border-radius: 30px; background: var(--paper); padding: 8px 6px; box-shadow: 10px 10px 24px var(--sh-d), -8px -8px 18px var(--sh-l); }
+    @media (min-width: 760px) { html[data-look="yumusak"] .nav { left: 50%; right: auto; width: min(560px, calc(100% - 28px)); transform: translateX(-50%); } }
+    html[data-look="yumusak"] .nav .nav-plus { background: linear-gradient(145deg, color-mix(in srgb, var(--gold) 70%, #fff), var(--gold)); color: #2a2008; box-shadow: 6px 6px 14px var(--sh-d), -4px -4px 10px var(--sh-l); margin-top: -26px; }
+    html[data-look="yumusak"] .sheet-card { background: var(--paper); border-radius: 30px 30px 0 0; box-shadow: 0 -10px 30px var(--sh-d); }
+
+    /* ---------- KOMPAKT: sıkı kayıt defteri, ekranda çok kayıt ---------- */
+    html[data-look="kompakt"] body { font-size: 13px; font-family: "Bahnschrift", "Roboto Condensed", "Arial Narrow", "Segoe UI", system-ui, sans-serif; }
+    html[data-look="kompakt"] .page { background: var(--paper); padding: 6px 8px calc(62px + var(--safe-bot)); }
+    html[data-look="kompakt"] .hwrap { padding: 3px 10px 5px; }
+    html[data-look="kompakt"] .brand-mark { width: 28px; height: 28px; border-radius: 7px; }
+    html[data-look="kompakt"] .hbtn { width: 32px; height: 32px; border-radius: 8px; }
+    html[data-look="kompakt"] .card { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "top amt" "mid amt" "foot foot"; column-gap: 10px; row-gap: 1px; padding: 8px 10px 8px 12px; border-radius: 8px; box-shadow: none; }
+    html[data-look="kompakt"] .card-top { grid-area: top; }
+    html[data-look="kompakt"] .card-mid { grid-area: mid; margin: 0; font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: none; }
+    html[data-look="kompakt"] .card-amt { grid-area: amt; margin: 0; align-self: center; }
+    html[data-look="kompakt"] .card-amt .pbar { display: none; }
+    html[data-look="kompakt"] .card .amt { font-size: 15px; } html[data-look="kompakt"] .card-amt .meta { font-size: 11px; }
+    html[data-look="kompakt"] .card-foot { grid-area: foot; margin-top: 6px; }
+    html[data-look="kompakt"] .card-au { display: none; }
+    html[data-look="kompakt"] .card .acts .btn { min-height: 38px; padding: 5px 8px; font-size: 12.5px; border-radius: 8px; }
+    html[data-look="kompakt"] .name-row { font-size: 14px; padding-right: 66px; }
+    html[data-look="kompakt"] .name-row.no-stamp { padding-right: 0; }
+    html[data-look="kompakt"] .stamp { font-size: 9.5px; padding: 0 5px; right: 10px; top: 8px; border-width: 1.5px; }
+    html[data-look="kompakt"] .hero, html[data-look="kompakt"] .panel, html[data-look="kompakt"] .group, html[data-look="kompakt"] .kpi, html[data-look="kompakt"] .sum { border-radius: 8px; box-shadow: none; }
+    html[data-look="kompakt"] .hero { padding: 8px 10px; } html[data-look="kompakt"] .hero-big { font-size: 15px; }
+    html[data-look="kompakt"] .sec-title { font-size: 14px; margin: 12px 0 6px; font-family: inherit; }
+    html[data-look="kompakt"] .row { padding: 7px 10px; gap: 9px; }
+    html[data-look="kompakt"] .sheet-card { border-radius: 14px 14px 0 0; }
+    html[data-look="kompakt"] .btn { border-radius: 8px; padding: 7px 10px; } html[data-look="kompakt"] .inp { border-radius: 8px; padding: 9px 10px; }
+    html[data-look="kompakt"] .nav { padding: 2px 2px calc(4px + var(--safe-bot)); }
+    html[data-look="kompakt"] .nav button { font-size: 9px; padding: 3px 0; }
+    html[data-look="kompakt"] .nav .nav-plus { width: 42px; height: 42px; margin-top: -14px; font-size: 26px; box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 0 0 4px var(--paper); }
+
+    /* ---------- KONTÜR: kalın çizgi, sert gölge ---------- */
+    html[data-look="kontur"] body { font-family: "Helvetica Neue", "Arial", system-ui, sans-serif; }
+    html[data-look="kontur"] .page { background: var(--paper) radial-gradient(color-mix(in srgb, var(--ink) 16%, transparent) 1px, transparent 1.3px) 0 0 / 18px 18px; }
+    html[data-look="kontur"] header.leather { background: var(--gold); color: #1a1612; border-bottom: 3px solid var(--ink); }
+    html[data-look="kontur"] header.leather .brandrow div[style*="letter-spacing"] { color: #1a1612 !important; }
+    html[data-look="kontur"] .brand-mark, html[data-look="kontur"] .hbtn { background: var(--sheet); color: var(--ink); border: 2px solid var(--ink); border-radius: 6px; box-shadow: 2px 2px 0 var(--ink); }
+    html[data-look="kontur"] .card, html[data-look="kontur"] .panel, html[data-look="kontur"] .group, html[data-look="kontur"] .kpi, html[data-look="kontur"] .sum,
+    html[data-look="kontur"] .hero, html[data-look="kontur"] .m-wrap, html[data-look="kontur"] .mini-day { background: var(--sheet); border: 2px solid var(--ink); border-radius: 8px; box-shadow: 4px 4px 0 var(--ink); }
+    html[data-look="kontur"] .btn { border: 2px solid var(--ink); border-radius: 6px; box-shadow: 2px 2px 0 var(--ink); font-weight: 800; }
+    html[data-look="kontur"] .btn:active { transform: translate(2px, 2px); box-shadow: none; }
+    html[data-look="kontur"] .btn-gold { background: var(--gold); color: #1a1612; } html[data-look="kontur"] .btn-leather { background: var(--leather); color: #fff; }
+    html[data-look="kontur"] .btn-ghost { background: var(--sheet); color: var(--ink); }
+    html[data-look="kontur"] .chip { border: 2px solid var(--ink); border-radius: 6px; background: var(--sheet); color: var(--ink); font-weight: 700; }
+    html[data-look="kontur"] .chip.on { background: var(--gold); color: #1a1612; border-color: var(--ink); }
+    html[data-look="kontur"] .seg { background: var(--sheet); border: 2px solid var(--ink); border-radius: 8px; }
+    html[data-look="kontur"] .seg button.on { background: var(--gold); color: #1a1612; border-radius: 5px; }
+    html[data-look="kontur"] .inp { border: 2px solid var(--ink); border-radius: 6px; }
+    html[data-look="kontur"] .stamp { font-family: inherit; font-weight: 900; border-width: 3px; border-radius: 4px; transform: rotate(-4deg); background: var(--sheet); }
+    html[data-look="kontur"] .sec-title { font-family: inherit; font-weight: 900; font-size: 18px; letter-spacing: -.01em; }
+    html[data-look="kontur"] .amt, html[data-look="kontur"] .sum .v, html[data-look="kontur"] .name-row { font-weight: 900; }
+    html[data-look="kontur"] .nav { background: var(--sheet); border-top: 3px solid var(--ink); }
+    html[data-look="kontur"] .nav button { color: var(--ink); border: 2px solid transparent; border-radius: 6px; margin: 0 2px; }
+    html[data-look="kontur"] .nav button.on { background: var(--gold); color: #1a1612; border-color: var(--ink); }
+    html[data-look="kontur"] .nav .nav-plus { background: var(--leather); color: #fff; border: 3px solid var(--ink); border-radius: 8px; box-shadow: 3px 3px 0 var(--ink); margin-top: -22px; }
+    html[data-look="kontur"] .sheet-card { border: 3px solid var(--ink); border-bottom: 0; border-radius: 14px 14px 0 0; }
+    html[data-look="kontur"] .toast { border: 2px solid var(--ink); border-radius: 6px; box-shadow: 3px 3px 0 var(--ink); }
+    html[data-look="kontur"] .pbar { border: 2px solid var(--ink); background: var(--sheet); height: 10px; border-radius: 4px; }
+    html[data-look="kontur"] .pbar i { border-radius: 0; }
+
+    /* mail order düğmesi (kartta) */
+    .btn-kart.on { background: color-mix(in srgb, var(--bekle) 22%, var(--sheet)); box-shadow: inset 0 0 0 2px var(--bekle); }
+
+    /* karanlık mod: seçili menü ve birincil düğmeler koyu zeminde görünür kalsın (kontrast düzeltmesi) */
+    [data-mode="dark"] .nav button.on { color: var(--gold); }
+    html:not([data-look="cam"]) header.leather .brandrow div[style*="letter-spacing"] { white-space: nowrap; letter-spacing: .1em !important; font-size: 9.5px !important; }
+    html[data-look="duz"][data-mode="dark"] .nav button.on { border-top-color: var(--gold); }
+    html[data-look="duz"][data-mode="dark"] .brand-mark, html[data-look="duz"][data-mode="dark"] .btn-gold, html[data-look="duz"][data-mode="dark"] .btn-leather,
+    html[data-look="duz"][data-mode="dark"] .nav .nav-plus { background: var(--gold); color: #1a1612; }
+    html[data-look="yumusak"][data-mode="dark"] .chip.on { background: var(--gold); color: #1a1612; }
   </style>
 </head>
 <body>
@@ -1127,7 +1284,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     try { const v = localStorage.getItem(ID_KEY); return ID_RE.test(v || "") ? v : null; } catch (e) { return null; }
   })();
   const cacheKey = () => DEFTER_ID ? KEY + ":" + DEFTER_ID : KEY;
-  const BUILD = "14";
+  const BUILD = "15";
   const FB_VERSIONS = ["13.0.0", "12.8.0", "12.2.1"]; /* sırayla denenir */
   /* Firebase web ayarları herkese açık bilgidir. firebase-config.js okunamazsa bu yedek kullanılır. */
   const FB_DEFAULT = {
@@ -1245,7 +1402,8 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   function applyTheme() {
     document.documentElement.setAttribute("data-theme", db.tema || "deri");
     document.documentElement.setAttribute("data-mode", db.karanlik ? "dark" : "light");
-    document.documentElement.setAttribute("data-look", db.gorunum === "klasik" ? "klasik" : "cam");
+    document.documentElement.setAttribute("data-look", curLook());
+    document.documentElement.setAttribute("data-perf", perfMode());
   }
   /* Eski/bozuk kayıtları güvenli hale getirir */
   function normalizeRec(k) {
@@ -1574,7 +1732,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   function nav() {
     const onId = view === "rapor" ? "musteri" : view;
     const item = id => { const [, ad, ic] = VIEWS.find(x => x[0] === id); return `<button data-view="${id}" class="${onId === id ? "on" : ""}">${icon(ic)}<span>${ad}</span></button>`; };
-    return `<nav class="nav">${db.gorunum === "klasik" ? "" : `<i class="gi"></i>`}${item("ozet")}${item("defter")}<button class="nav-plus" id="navPlus" aria-label="Yeni tahsilat ekle">+</button>${item("takvim")}${item("musteri")}</nav>`;
+    return `<nav class="nav">${isCam() ? `<i class="gi"></i>` : ""}${item("ozet")}${item("defter")}<button class="nav-plus" id="navPlus" aria-label="Yeni tahsilat ekle">+</button>${item("takvim")}${item("musteri")}</nav>`;
   }
 
   function waLink(k) {
@@ -1619,6 +1777,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
             <button class="btn btn-tahsil" data-act="tahsil" data-id="${k.id}">Tahsil</button>
             <button class="btn btn-erte" data-act="ertele" data-id="${k.id}">Ertele</button>
             <a class="btn btn-wa btn-icon" href="${waLink(k)}" target="_blank" rel="noopener" data-wa="1" data-wak="${k.id}" title="WhatsApp mesajı (şablon seç)">${icon("msg")}</a>
+            <button class="btn btn-ghost btn-icon btn-kart ${k.kartBekliyor ? "on" : ""}" data-kart="${k.id}" title="Kart / mail order formu alındı" aria-label="Kart / mail order formu alındı" aria-pressed="${!!k.kartBekliyor}">💳</button>
           </div>` : ""}
           ${au}
         </div>
@@ -2045,7 +2204,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     placeInd(document.querySelector(".nav"), navBtn(view), navBtn(view)); placeInd(document.querySelector(".tb-nav"), vi, vi);
     const sg = document.querySelector(".page .seg"); if (sg) { const si = +sg.dataset.idx; placeInd(sg, si, si); }
   });
-  function header() { return db.gorunum === "klasik" ? headerKlasik() : headerCam(); }
+  function header() { return isCam() ? headerCam() : headerKlasik(); }
   const BASLIK = { ozet: "Özet", defter: "Defter", takvim: "Takvim", musteri: "Müşteriler", rapor: "Rapor" };
   let lastViewIdx = -1, lastCalMode = "";
   function render() {
@@ -2068,7 +2227,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     lastViewIdx = vi; lastCalMode = modeKey; navDir = 0;
     const subs = { ozet: "", defter: "Günlük kayıtlar", takvim: "Planlı ödemeler ve tahsilatlar", musteri: "", rapor: "" };
     document.getElementById("app").innerHTML =
-      `<div id="main" class="${cls}">${header()}<main class="page"><div class="page-inner">${db.gorunum === "klasik" ? "" : `<div class="lt"><h1>${BASLIK[view] || ""}</h1>${subs[view] ? `<p>${subs[view]}</p>` : ""}</div>`}${body}</div></main></div>${nav()}<button class="fab" id="fab" aria-label="Yeni tahsilat ekle">+</button>`;
+      `<div id="main" class="${cls}">${header()}<main class="page"><div class="page-inner">${!BIG_LOOKS.includes(curLook()) ? "" : `<div class="lt"><h1>${BASLIK[view] || ""}</h1>${subs[view] ? `<p>${subs[view]}</p>` : ""}</div>`}${body}</div></main></div>${nav()}<button class="fab" id="fab" aria-label="Yeni tahsilat ekle">+</button>`;
     if (viewChanged) { const pg = document.querySelector(".page"); if (pg) pg.scrollTop = 0; }
     bind();
     placeInd(document.querySelector(".nav"), lastNavBtn, navBtn(view)); lastNavBtn = navBtn(view);
@@ -2236,8 +2395,8 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         </div>
         <label class="fld">Çek / senet / dekont no</label>
         <input class="inp" id="fBelge" value="${esc(k.belgeNo||"")}" placeholder="İsteğe bağlı" />
-        <label class="fld" style="display:flex;align-items:center;gap:10px;margin-top:14px;text-transform:none;letter-spacing:0"><input type="checkbox" id="fKart" ${k.kartBekliyor ? "checked" : ""} style="width:22px;height:22px;flex:0 0 22px"> 💳 Kart / mail order formu alındı (çekim bekleniyor)</label>
-        <div class="meta" style="margin:2px 2px 0">İşaretliyse çekim yapılamazsa kayıt ertesi iş gününe devredilir; müşteri puanı etkilenmez ve tahsil edene kadar listede kalır.</div>
+        ${db.kayitlar.some(x => x.id === k.id) ? `<label class="fld" style="display:flex;align-items:center;gap:10px;margin-top:14px;text-transform:none;letter-spacing:0"><input type="checkbox" id="fKart" ${k.kartBekliyor ? "checked" : ""} style="width:22px;height:22px;flex:0 0 22px"> 💳 Kart / mail order formu alındı (çekim bekleniyor)</label>
+        <div class="meta" style="margin:2px 2px 0">İşaretliyse çekim yapılamazsa kayıt ertesi iş gününe devredilir; müşteri puanı etkilenmez ve tahsil edene kadar listede kalır.</div>` : ""}
         <label class="fld">Not</label>
         <textarea class="inp" id="fNot" rows="2" placeholder="Açıklama">${esc(k.not||"")}</textarea>
         <button class="btn btn-leather" id="fSave" style="width:100%;margin-top:16px;padding:14px">${isEdit ? "Kaydet" : "Deftere işle"}</button>
@@ -2603,10 +2762,7 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
         <label class="fld">Görünüm</label>
         <button class="btn ${db.karanlik ? "btn-leather" : "btn-ghost"}" id="sDark" style="width:100%">${icon(db.karanlik ? "sun" : "moon")} Karanlık mod: ${db.karanlik ? "Açık" : "Kapalı"}</button>
         <label class="fld">Görünüm stili</label>
-        <div class="look-row">
-          <button class="btn ${db.gorunum === "klasik" ? "btn-ghost" : "btn-leather"}" id="sLookCam">✦ Cam (yeni)</button>
-          <button class="btn ${db.gorunum === "klasik" ? "btn-leather" : "btn-ghost"}" id="sLookKlasik">📒 Klasik defter (eski)</button>
-        </div>
+        ${looksHtml()}
         <label class="fld">Tema</label>
         <div class="type-grid" style="grid-template-columns:repeat(auto-fill,minmax(92px,1fr))">${temaHtml}</div>
 
@@ -2650,9 +2806,9 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     document.getElementById("sAdmin").onclick = openAdminPanel;
     document.querySelectorAll("[data-bt]").forEach(b => b.onclick = () => { const k = b.dataset.bt; db.ayar.bt = db.ayar.bt || {}; db.ayar.bt[k] = !btPref(k); save(); b.classList.toggle("on", btPref(k)); render(); });
     repaintDevices();
-    const setLook = v => { db.gorunum = v; save(); applyTheme(); render(); openSettings(); toast(v === "klasik" ? "Klasik defter görünümü" : "Cam görünümü"); };
-    document.getElementById("sLookCam").onclick = () => setLook("cam");
-    document.getElementById("sLookKlasik").onclick = () => setLook("klasik");
+    const setLook = v => { db.gorunum = v; save(); applyTheme(); render(); openSettings(); toast(LOOKS.find(l => l.id === v).ad + " görünümü"); };
+    document.querySelectorAll("[data-lookset]").forEach(b => b.onclick = () => setLook(b.dataset.lookset));
+    document.querySelectorAll("[data-cam]").forEach(b => b.onclick = () => { db.ayar.cam = b.dataset.cam; save(); applyTheme(); document.querySelectorAll("[data-cam]").forEach(x => x.classList.toggle("on", x === b)); toast("Cam efekti: " + b.textContent.trim()); });
     document.getElementById("sCanli").onclick = async () => {
       if (!db.ayar.canli) {
         if (!("Notification" in window)) return toast("Bu tarayıcı bildirimi desteklemiyor");
@@ -4964,7 +5120,8 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
   }
   function paymentsHtml(k) {
     const rows = payRows(k);
-    const kart = (k.kartBekliyor && isOpen(k)) ? `<button class="btn btn-erte" data-kartfail="${k.id}" style="width:100%;margin-top:8px">💳 Çekim yapılamadı → sonraki iş gününe al (puanı etkilemez)</button>` : "";
+    const kartTog = isOpen(k) ? `<button class="btn ${k.kartBekliyor ? "btn-ghost" : "btn-leather"}" data-kart="${k.id}" style="width:100%;margin-top:8px">${k.kartBekliyor ? "💳 Kart / mail order işaretini kaldır" : "💳 Kart / mail order formu alındı (çekim bekleniyor)"}</button>` : "";
+    const kart = ((k.kartBekliyor && isOpen(k)) ? `<button class="btn btn-erte" data-kartfail="${k.id}" style="width:100%;margin-top:8px">💳 Çekim yapılamadı → sonraki iş gününe al (puanı etkilemez)</button>` : "") + kartTog;
     if (!rows.length) return kart;
     const sum = round2(rows.filter(r => !r.iptal).reduce((a, r) => a + r.tutar, 0));
     return `<label class="fld">Tahsilat hareketleri</label>
@@ -5254,6 +5411,47 @@ html[data-look="cam"] .score-facts div { background: color-mix(in srgb, var(--le
     closeSheet = function () { currentNav = null; pendingNav = null; return _cs.apply(this, arguments); };
   }
   const kartTag = k => (k.kartBekliyor && isOpen(k)) ? `<span class="ert-tag kart-tag">💳 Çekim bekliyor</span>` : "";
+
+  /* ================= GÖRÜNÜM STİLLERİ · CAM PERFORMANSI · KART/MAIL ORDER İŞARETİ ================= */
+  const LOOKS = [
+    { id: "cam", ad: "Cam", alt: "Işıklı, yarı saydam" },
+    { id: "klasik", ad: "Klasik defter", alt: "Defter sayfası" },
+    { id: "duz", ad: "Düz", alt: "Sade, ince çizgili" },
+    { id: "yumusak", ad: "Yumuşak", alt: "Kabartmalı, yuvarlak" },
+    { id: "kompakt", ad: "Kompakt", alt: "Sıkı liste, çok kayıt" },
+    { id: "kontur", ad: "Kontür", alt: "Kalın çizgi, sert gölge" }
+  ];
+  const LOOK_IDS = LOOKS.map(l => l.id), BIG_LOOKS = ["cam", "duz", "yumusak"];
+  const curLook = () => LOOK_IDS.includes(db.gorunum) ? db.gorunum : "cam";
+  const isCam = () => curLook() === "cam";
+  function perfMode() {
+    const m = (db.ayar && db.ayar.cam) || "otomatik";
+    if (m === "tam" || m === "hafif") return m;
+    const low = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) || (navigator.deviceMemory && navigator.deviceMemory <= 3) || (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+    return low ? "hafif" : "tam";
+  }
+  function looksHtml() {
+    return `<div class="look-grid">${LOOKS.map(l => `<button class="look-opt ${curLook() === l.id ? "on" : ""}" data-lookset="${l.id}" aria-pressed="${curLook() === l.id}"><span class="look-prev lp-${l.id}"></span><b>${l.ad}</b><small>${l.alt}</small></button>`).join("")}</div>
+      ${isCam() ? `<label class="fld">Cam efekti (bu cihaz)</label>
+        <div class="chips" id="perfChips">${[["otomatik", "Otomatik"], ["tam", "Tam"], ["hafif", "Hafif (akıcı)"]].map(([id, ad]) => `<button class="chip ${((db.ayar && db.ayar.cam) || "otomatik") === id ? "on" : ""}" data-cam="${id}">${ad}</button>`).join("")}</div>
+        <p class="meta" style="margin:6px 2px">Telefon yavaşlıyorsa <b>Hafif</b>'i seçin: bulanıklık ve ağır geçişler kapanır, kaydırma akıcı olur.</p>` : ""}`;
+  }
+  /* Kart / mail order formu alındı: mevcut bekleyen kayıtlarda tek dokunuşla aç-kapat */
+  document.addEventListener("click", async e => {
+    const kb = e.target.closest && e.target.closest("[data-kart]"); if (!kb) return;
+    e.stopPropagation(); e.preventDefault();
+    const id = kb.dataset.kart; let yeni = false;
+    const ok = await mutateRecord(id, "Kart işareti", rec => {
+      rec.kartBekliyor = !rec.kartBekliyor; yeni = rec.kartBekliyor;
+      rec.gecmis = rec.gecmis || [];
+      rec.gecmis.push({ t: new Date().toISOString(), a: "duzenlendi", d: yeni ? "Kart / mail order formu alındı (çekim bekleniyor)" : "Kart / mail order işareti kaldırıldı" });
+      return true;
+    });
+    if (!ok) return;
+    toast(yeni ? "💳 İşaretlendi: çekim bekleniyor · gecikirse puanı etkilemez" : "Kart / mail order işareti kaldırıldı", null, 3200);
+    render();
+    if (document.getElementById("sheet").classList.contains("show") && document.getElementById("dDel")) openDetail(db.kayitlar.find(x => x.id === id));
+  }, true);
 
   /* ---------- BAŞLAT ---------- */
   applyTheme();
