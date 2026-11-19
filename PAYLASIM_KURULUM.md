@@ -469,6 +469,68 @@ Tüm tahsilat kartları aynı düzende çizilir: **üst bilgi · ayrıntı · tu
 - "Damga" (ERTELENDİ / KISMİ) uzun müşteri adının ve etiketlerin üstüne binmez.
 - Klasik görünümde bilgisayarda yalnızca **alt menüdeki +** görünür (çift + kalktı).
 
+## SÜRÜM 14: Baş yönetici · Rapor oluşturucu · Tahsilat düzenleme · Cari ekstre · Kart çekimi · Geri düğmeleri
+
+### Güncelleme için yapılacaklar
+1. GitHub'a **`index.html`** ve **`sw.js`** dosyalarını yükleyin.
+2. Siteyi tamamen kapatıp 2 kez açın (ADIM 5b). **Firebase tarafında yeni ayar gerekmez.**
+
+### Baş yönetici: tüm defterler kendi şifrenizle, diğer defterlerin şifresine dokunmadan
+- Defterlerin **kendi yönetici şifreleri DEĞİŞMEZ.** Siz baş yönetici şifrenizle her defterin yönetici paneline de girersiniz; defterin kendi yöneticisi de kendi şifresiyle girmeye devam eder.
+- Defterler **otomatik** listelenir (bağlantı da şifre de sorulmaz). Arka planda her deftere yalnızca sizin "baş yönetici" doğrulayıcınız eklenir.
+- Defterin yerel yöneticisi panele girer ama **diğer defterleri göremez** (çoklu defter bölümü baş yöneticiye özeldir).
+- Baş yönetici şifresini değiştirirseniz diğer defterlerdeki baş yönetici kaydı da yenilenir, defterlerin kendi şifreleri aynen kalır. Defterin yerel yöneticisi kendi şifresini değiştirirse baş yönetici kasasına dokunulmaz.
+> ⚠️ Sistem sunucusuz çalıştığı için bu koruma uygulama içidir; teknik bilgisi olan biri, bağlantıyı bildiği bir deftere kendi doğrulayıcısını ekleyebilir. Bağlantıları yalnızca güvendiğiniz kişilerle paylaşın.
+
+### Raporlar
+Rapor ekranı (Müşteri sekmesi → **Rapor**) artık bir **rapor oluşturucu**:
+- **Tür:** Tahsil edilen · Tahsil bekleyen · Ertelenen · Tümü (tahsil edilen ve bekleyen **ayrı** bölümler ve toplamlar).
+- **Tarih:** Bugün · Bu hafta · Bu ay · Geçen ay · Tüm zamanlar · **Özel** (başlangıç–bitiş). Tahsil edilen raporda tahsil tarihine, bekleyen raporda vade tarihine bakılır.
+- **Filtre:** Müşteri ve ödeme türü.
+- **Çıktı:** **CSV indir** (Excel'de açılır) ve **Görsel paylaş** (PNG). Eski genel özet, sayfanın altında "Genel özet" olarak durur.
+
+### Kısmi tahsilatlar görünür ve düzenlenebilir
+Kayıt detayında **Tahsilat hareketleri** bölümü: her tahsilatın tarihi, tutarı, türü ve kimin girdiği. **✎ Düzenle** (tutar, tarih, tür) ve **✕ İptal**. İptal edilen tahsilat silinmez, üstü çizili "İPTAL" olarak kalır; geçmişe kim yaptığı yazılır; raporlara ve takvime sayılmaz. Toplam tahsilat kayıt tutarını aşamaz. Yetki şifresi tanımlıysa düzenleme/iptal için şifre istenir. Eski (tek toplamlı) tahsilatlar da listelenir, düzenlenince hareket olarak kaydedilir.
+
+### Silinenler: kalıcı sil
+Silinenler kutusunda her kayıtta **Geri getir** yanında **Kalıcı sil** vardır; ayrıca **Çöpü boşalt**. Kalıcı silmede müşteri telefonu, notu ve geçmişi temizlenir (yalnızca kaydın izi kalır); işlem geri alınamaz ve yetki şifresi ister.
+
+### Cari hesap ekstresi
+Müşteri ekstre görseli artık **cari hesap** gibi: borç satırları ve **her kısmi tahsilat çekildiği tarihle** ayrı satırda, **yürüyen bakiye** ve alt toplamlarla (toplam borç · toplam tahsilat · güncel bakiye).
+
+### Kart / mail order çekimi (işletme kaynaklı gecikme)
+- Yeni ödeme formunda **💳 Kart / mail order formu alındı (çekim bekleniyor)** kutusu. İşaretli kayıt, çekim yapılamayıp gün geçerse **otomatik ertesi iş gününe** devreder; **"ertelenen" sayılmaz, müşteri puanı etkilenmez**, "Bugün tahsil edilecekler"de **💳 Çekim bekliyor** etiketiyle durur ve **Tahsil**'e basılana kadar görünür.
+- Detayda **"Çekim yapılamadı → sonraki iş gününe al"** düğmesi.
+- **Ertele** penceresinde **"İşletme kaynaklı (müşteri puanını etkilemez)"** seçeneği. İşaretli erteleme, ertelenen sayacını artırmaz; gecikme günleri puandan düşülür.
+
+### Geri düğmeleri
+Ayarlar'dan açılan alt ekranlarda (yönetici şifresi, yönetici paneli, hedef, mesai, şablonlar, silinenler…) ve Bildirimler → Hatırlatmalar ekranında **‹ Geri** düğmesi: bir önceki ekrana döner, Kapat tüm pencereyi kapatır.
+
+## SÜRÜM 15: Mevcut kayıtlara kart/mail order işareti · Akıcı cam görünüm · 4 yeni görünüm stili
+
+### Güncelleme için yapılacaklar
+1. GitHub'a **`index.html`** ve **`sw.js`** dosyalarını yükleyin (`testler` klasörünü yüklemenize gerek yok).
+2. Siteyi tamamen kapatıp 2 kez açın (ADIM 5b). **Firebase tarafında yeni ayar gerekmez.**
+
+### 💳 Kart / mail order formu alındı: mevcut bekleyen tahsilatlarda
+- Artık **yeni ödeme sözü formunda çıkmaz**; **mevcut bekleyen kayıtlar** için kullanılır.
+- **Kartta:** Tahsil · Ertele · WhatsApp'ın yanındaki **💳 düğmesi** tek dokunuşla işaretler/kaldırır (işaretliyken renkli görünür, kartta "💳 Çekim bekliyor" etiketi çıkar).
+- **Detayda:** "💳 Kart / mail order formu alındı" düğmesi (işaretliyse "işaretini kaldır" ve "Çekim yapılamadı → sonraki iş gününe al").
+- Kayıt düzenlenirken de kutu vardır. İşaretin kim tarafından ne zaman konduğu geçmişe yazılır. İşaretli kayıtta çekim gecikirse müşteri puanı etkilenmez ve tahsil edilene kadar listede kalır (Sürüm 14).
+
+### Cam görünüm artık akıcı
+Kasmanın nedeni, arka plandaki **hareket eden ışık küreleri** ile **47 öğedeki bulanıklık efektiydi** (telefon hızında kaydırmada kareler %40 takılıyordu). Küreler sabitlendi, kartlarda ve düğmelerde bulanıklık kaldırıldı (cam görünüm aynı kaldı); ölçüm: takılan kare **%40 → %0–1**, ortalama kare süresi **39,6 → 17–21 ms**.
+- **Ayarlar → Görünüm stili → Cam efekti (bu cihaz):** **Otomatik** (zayıf cihazı algılar) · **Tam** · **Hafif (akıcı)**. Telefon hâlâ yavaşsa **Hafif**'i seçin; üst çubuk, alt menü ve pencerelerdeki son bulanıklıklar da kapanır.
+
+### 4 yeni görünüm stili (yalnızca renk değil; biçim, yazı tipi ve yerleşim değişir)
+Ayarlar → **Görünüm stili**'nde küçük önizlemelerle 6 stil: **Cam · Klasik defter ·** ve yeni:
+- **Düz:** sade, ince çizgili, gölgesiz; büyük başlık, tam genişlikte alt menü.
+- **Yumuşak:** kabartmalı (yumuşak gölge) yüzeyler, çok yuvarlak köşeler, yuvarlak yazı tipi, yüzen alt menü.
+- **Kompakt:** sıkı liste; kartlar satır gibi, ekranda yaklaşık 2 kat fazla kayıt, ince başlık.
+- **Kontür:** kalın siyah çizgi, sert gölge, sarı başlık şeridi, kalın yazı; basınca düğme "çöker".
+Hepsi 12 temayla, aydınlık/karanlık modda ve telefon/bilgisayarda çalışır. Alt menüdeki **+** her stilde ortada sabittir.
+**Erişilebilirlik düzeltmesi:** karanlık modda **seçili menü etiketi koyu zeminde görünmüyordu** (Klasik görünümde de); altın rengine alındı.
+
 ---
 
 ## Bir şey ters giderse
